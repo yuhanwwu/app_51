@@ -1,0 +1,68 @@
+name: Build and Deploy Flutter & Django
+
+on:
+  push:
+    branches:
+      - main
+      - master  # in case you're still using master
+
+jobs:
+  compile-frontend:
+    runs-on: ubuntu-latest
+    container: ghcr.io/cirruslabs/flutter:stable
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build Flutter Web
+        run: |
+          cd frontend
+          flutter pub get
+          flutter build web
+          cd ..
+          mkdir -p public
+          cp -r frontend/build/web/* public/
+          ls -l public
+
+      - name: Upload Flutter Web Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: flutter-web
+          path: public
+
+  compile-backend:
+    runs-on: ubuntu-latest
+    container: python:3.11
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Backend Dependencies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+          python3 -m compileall .
+          echo "Python backend build compiled successfully"
+
+      - name: Upload Backend Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: backend-compiled
+          path: backend/
+
+  flutter-test:
+    runs-on: ubuntu-latest
+    container: ghcr.io/cirruslabs/flutter:stable
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run Flutter Tests
+        run: |
+          cd frontend
+          flutter test
+
+  django-test:
+    runs-on: ubuntu-latest
+    container: python:3.11
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run Django Tests
+        run: |
+          cd backend
+          pip install -r requirements.txt
+          python manage.py test

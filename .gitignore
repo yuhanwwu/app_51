@@ -1,0 +1,6 @@
+
+
+#venvs 
+backend/env
+/env
+backend/.env

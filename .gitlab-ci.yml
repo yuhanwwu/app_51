@@ -1,0 +1,83 @@
+image: ghcr.io/cirruslabs/flutter:stable
+# got this from https://github.com/cirruslabs/docker-images-flutter/pkgs/container/flutter
+
+stages:
+  - compile
+  - test
+  #- docker-build
+  - deploy
+
+# ------------------------------------
+# 1. COMPILE — build Flutter web
+# ------------------------------------
+
+compile-frontend:
+  stage: compile
+  image: ghcr.io/cirruslabs/flutter:stable
+  script:
+    - cd frontend
+    - flutter pub get
+    - flutter build web
+    - cd ..
+    - mkdir -p public
+    - cp -r frontend/build/web/* public/
+    - echo "Contents of public:"
+    - ls -l public
+    - echo "Flutter web build compiled successfully."
+  artifacts:
+    paths:
+      - public
+
+compile-backend:
+  stage: compile
+  image: python:3.11
+  script:
+    - cd backend
+    - pip install -r requirements.txt
+    - python3 -m compileall .
+    - echo "Python backend build compiled successfully"
+  artifacts:
+    paths:
+      - backend/
+
+# ------------------------------------
+# 2. TEST — Run Django + Flutter tests
+# ------------------------------------
+flutter-test:
+  stage: test
+  image: ghcr.io/cirruslabs/flutter:stable
+  script:
+    - cd frontend
+    - flutter test
+
+django-test:
+  stage: test
+  image: python:3.11
+  script:
+    - cd backend
+    - pip install -r requirements.txt
+    - python manage.py test
+
+# # ------------------------------------
+# # 3. DOCKER BUILD — Build container image
+# # ------------------------------------
+# docker-build:
+#   stage: docker-build
+#   script:
+#     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+#     - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA .
+#     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+
+# ------------------------------------
+# 4. DEPLOY - Deploy to staging and production
+# ------------------------------------
+
+pages:
+  stage: deploy
+  script:
+    - echo "Deploying from public folder..."
+  artifacts:
+    paths:
+      - public
+  only:
+    - master

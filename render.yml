@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: django-backend
+    env: python
+    repo: https://github.com/your-username/your-repo-name
+    branch: main
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn backend.wsgi
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: my-postgres
+          property: connectionString
+      - key: SECRET_KEY
+        value: your-super-secret-django-key
+      - key: ALLOWED_HOSTS
+        value: your-service-name.onrender.com
+
+databases:
+  - name: my-postgres
+    plan: free

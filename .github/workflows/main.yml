@@ -20,7 +20,7 @@ jobs:
         run: |
           cd frontend
           flutter pub get
-          flutter build web
+          flutter build web --base-href=/app_51/
           cd ..
           mkdir -p public
           cp -r frontend/build/web/* public/

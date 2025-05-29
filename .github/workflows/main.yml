@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     container: ghcr.io/cirruslabs/flutter:stable
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Build Flutter Web
         run: |
@@ -22,7 +22,7 @@ jobs:
           cp -r frontend/build/web/* public/
 
       - name: Upload Web Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: flutter-web
           path: public
@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     container: ghcr.io/cirruslabs/flutter:stable
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Run Flutter Tests
         run: |
           cd frontend
@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     container: python:3.11
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install Backend Dependencies
         run: |
           cd backend
@@ -53,10 +53,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Download artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: flutter-web
           path: public

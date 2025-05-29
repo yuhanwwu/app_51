@@ -8,10 +8,8 @@ services:
     buildCommand: |
       pip install -r requirements.txt
       python manage.py collectstatic --noinput
-      python manage.py makemigrations
-      python manage.py migrate
-      python manage.py makesuperuser --noinput || true
-    startCommand: gunicorn backend.wsgi:application -k uvicorn.workers.UvicornWorker
+
+    startCommand: gunicorn backend.wsgi:application --bind 0.0.0.0:$PORT
     autoDeploy: true
     envVars:
       - key: DATABASE_URL
@@ -20,6 +18,15 @@ services:
           property: connectionString
       - key: SECRET_KEY
         generateValue: true
+      - ADMIN_EMAIL: ${{ secrets.DJANGO_SUPERUSER_EMAIL }}
+      - ADMIN_USERNAME: ${{ secrets.DJANGO_SUPERUSER_EMAIL }}
+      - ADMIN_PASSWORD: ${{ secrets.DJANGO_SUPERUSER_EMAIL }}
+    
+    releaseCommand: |
+      python manage.py makemigrations
+      python manage.py migrate
+      echo "from django.contrib.auth import get_user_model; \nUser = get_user_model(); \nUser.objects.filter(username=\"$ADMIN_USERNAME\").exists() or User.objects.create_superuser(\"$ADMIN_USERNAME\", \"$ADMIN_EMAIL\", \"$ADMIN_PASSWORD\")" | python manage.py shell
+
 
 databases:
   - name: app_51_db

@@ -5,7 +5,12 @@ services:
     region: frankfurt
     repo: https://github.com/yuhanwwu/app_51
     branch: master
-    buildCommand: pip install -r requirements.txt
+    buildCommand: |
+      pip install -r requirements.txt
+      python manage.py collectstatic --noinput
+      python manage.py makemigrations
+      python manage.py migrate
+      python manage.py makesuperuser --noinput || true
     startCommand: gunicorn backend.wsgi:application -k uvicorn.workers.UvicornWorker
     autoDeploy: true
     envVars:

@@ -1,4 +1,6 @@
-// screens/task_page.dart
+// // screens/task_page.dart
+// import 'dart:convert';
+
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -7,26 +9,32 @@ import 'package:http/http.dart' as http;
 import '../models/task.dart';
 import '../services/api_service.dart'; // fetchUserTasks
 
-Future<List<Task>> fetchUserTasks(String username) async {
-  final url = Uri.parse('http://127.0.0.1:5000/api/users/$username/');
-  final res = await http.get(url);
+// <<<<<<< render_db
+// Future<List<Task>> fetchUserTasks(String username) async {
+//   final url = Uri.parse('http://127.0.0.1:5000/api/users/$username/');
+//   final res = await http.get(url);
+// =======
+// // Future<List<Task>> fetchUserTasks(String username) async {
+// //   final url = Uri.parse('http://127.0.0.1:8000/api/users/$username/');
+// //   final res = await http.get(url);
+// >>>>>>> master
 
-  if (res.statusCode == 200) {
-    final data = jsonDecode(res.body);
-    List<Task> tasks = [];
+//   if (res.statusCode == 200) {
+//     final data = jsonDecode(res.body);
+//     List<Task> tasks = [];
 
-    for (var t in data['assigned_repeat_tasks']) {
-      tasks.add(Task.fromJson(t, isOneOff: false));
-    }
-    for (var t in data['assigned_oneoff_tasks']) {
-      tasks.add(Task.fromJson(t, isOneOff: true));
-    }
+//     for (var t in data['assigned_repeat_tasks']) {
+//       tasks.add(Task.fromJson(t, isOneOff: false));
+//     }
+//     for (var t in data['assigned_oneoff_tasks']) {
+//       tasks.add(Task.fromJson(t, isOneOff: true));
+//     }
 
-    return tasks;
-  } else {
-    throw Exception("Failed to load tasks");
-  }
-}
+//     return tasks;
+//   } else {
+//     throw Exception("Failed to load tasks");
+//   }
+// }
 
 class TaskPage extends StatelessWidget {
   final String username;
@@ -73,5 +81,26 @@ class TaskPage extends StatelessWidget {
         return CircularProgressIndicator();
       },
     );
+  }
+}
+
+Future<List<Task>> fetchUserTasks(String username) async {
+  final url = Uri.parse('https://app-51-web.onrender.com/api/users/$username/');
+  final res = await http.get(url);
+
+  if (res.statusCode == 200) {
+    final data = jsonDecode(res.body);
+    List<Task> tasks = [];
+
+    for (var t in data['assigned_repeat_tasks']) {
+      tasks.add(Task.fromJson(t, isOneOff: false));
+    }
+    for (var t in data['assigned_oneoff_tasks']) {
+      tasks.add(Task.fromJson(t, isOneOff: true));
+    }
+
+    return tasks;
+  } else {
+    throw Exception("Failed to load tasks");
   }
 }

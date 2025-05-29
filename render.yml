@@ -1,21 +1,19 @@
 services:
   - type: web
-    name: django-backend
+    name: app_51_web
     env: python
-    repo: https://github.com/your-username/your-repo-name
-    branch: main
+    region: frankfurt
+    repo: https://github.com/yuhanwwu/app_51
+    branch: master
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn backend.wsgi
+    startCommand: gunicorn backend.wsgi:application --bind 0.0.0.0:$PORT
+    autoDeploy: true
     envVars:
       - key: DATABASE_URL
         fromDatabase:
-          name: my-postgres
+          name: app_51_db
           property: connectionString
-      - key: SECRET_KEY
-        value: your-super-secret-django-key
-      - key: ALLOWED_HOSTS
-        value: your-service-name.onrender.com
 
 databases:
-  - name: my-postgres
+  - name: app_51_db
     plan: free

@@ -171,6 +171,7 @@
 import 'package:flutter/material.dart';
 import 'screens/login.dart';
 import 'models/user.dart';
+import 'screens/user_tasks.dart';
 
 void main() {
   runApp(const MyApp());
@@ -190,6 +191,15 @@ class _MyAppState extends State<MyApp> {
     setState(() {
       user = loggedInUser;
     });
+
+    // if (user != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => TaskPage(username: user!.username),
+        ),
+      );
+    //}
   }
 
   @override
@@ -197,7 +207,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       title: 'Task Manager',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: user == null ? LoginPage(onLogin: onLogin) : HomePage(user: user!),
+      home: user == null ? LoginPage(onLogin: onLogin) : TaskPage(username: user!.username),
     );
   }
 }

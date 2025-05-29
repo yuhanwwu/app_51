@@ -4,6 +4,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:frontend/screens/flat_tasks.dart';
 import 'package:http/http.dart' as http;
 import '../models/task.dart';
@@ -45,9 +46,12 @@ class TaskPage extends StatelessWidget {
     return FutureBuilder<List<Task>>(
       future: fetchUserTasks(username),
       builder: (context, snapshot) {
-        if (snapshot.hasData) {
+        if (snapshot.hasData) { 
           final tasks = snapshot.data!;
-          return Column(
+          return Scaffold(appBar: AppBar(
+            title: Text("Tasks for $username"),
+          ),
+          body: Column(
             children: [
               Expanded(
                 child: ListView(
@@ -55,7 +59,7 @@ class TaskPage extends StatelessWidget {
                     title: Text(task.description),
                     subtitle: task.isOneOff
                         ? Text("One-off" + (task.priority == true ? " (Urgent)" : ""))
-                        : Text("Repeat task – last done: ${task.lastdoneon ?? 'Never'}"),
+                        : Text("Repeat task - last done: ${task.lastdoneon ?? 'Never'}"),
                   )).toList(),
                 ),
               ),
@@ -74,7 +78,7 @@ class TaskPage extends StatelessWidget {
                 ),
               ),
             ],
-          );
+          ));
         } else if (snapshot.hasError) {
           return Text("Error: ${snapshot.error}");
         }
@@ -85,22 +89,21 @@ class TaskPage extends StatelessWidget {
 }
 
 Future<List<Task>> fetchUserTasks(String username) async {
-  final url = Uri.parse('https://app-51-web.onrender.com/api/users/$username/');
-  final res = await http.get(url);
+  final jsonString = await rootBundle.loadString('assets/data.json');
+  final data = jsonDecode(jsonString);
 
-  if (res.statusCode == 200) {
-    final data = jsonDecode(res.body);
-    List<Task> tasks = [];
+  List<Task> oneOffTasks = [];
+  List<Task> repeatTasks = [];
 
-    for (var t in data['assigned_repeat_tasks']) {
-      tasks.add(Task.fromJson(t, isOneOff: false));
+  for (var t in data['one_off_tasks']) {
+    if (t['assignedto'] == username) {
+      oneOffTasks.add(Task.fromJson(t, isOneOff: false));
     }
-    for (var t in data['assigned_oneoff_tasks']) {
-      tasks.add(Task.fromJson(t, isOneOff: true));
-    }
-
-    return tasks;
-  } else {
-    throw Exception("Failed to load tasks");
   }
-}
+    for (var t in data['repeat_tasks']) {
+      if (t['assignedto'] == username) {
+      repeatTasks.add(Task.fromJson(t, isOneOff: true));
+      }
+    }
+    return oneOffTasks + repeatTasks;
+  }

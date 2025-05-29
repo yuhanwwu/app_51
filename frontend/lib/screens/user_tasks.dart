@@ -8,7 +8,7 @@ import '../models/task.dart';
 import '../services/api_service.dart'; // fetchUserTasks
 
 Future<List<Task>> fetchUserTasks(String username) async {
-  final url = Uri.parse('http://127.0.0.1:8000/api/users/$username/');
+  final url = Uri.parse('http://127.0.0.1:5000/api/users/$username/');
   final res = await http.get(url);
 
   if (res.statusCode == 200) {

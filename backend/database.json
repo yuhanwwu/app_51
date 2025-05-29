@@ -1,0 +1,50 @@
+{
+    "users": [
+      {
+        "username": "alice",
+        "name": "Alice Anderson"
+      },
+      {
+        "username": "bob", 
+        "name": "Bob Brown"
+      },
+      {
+        "username": "charlie",
+        "name": "Charlie Chen"
+      }
+    ],
+    "repeat_tasks": [
+      {
+        "id": 1,
+        "description": "Take out the trash",
+        "assignedto": "alice",
+        "frequency": 3,
+        "lastdoneon": null,
+        "lastdoneby": null
+      },
+      {
+        "id": 2,
+        "description": "Clean bathroom",
+        "assignedto": "bob",
+        "frequency": 7,
+        "lastdoneon": null,
+        "lastdoneby": null
+      }
+    ],
+    "oneoff_tasks": [
+      {
+        "id": 1,
+        "description": "Clean kitchen thoroughly",
+        "assignedto": "charlie",
+        "priority": true,
+        "setdate": "2025-05-29T18:00:00"
+      },
+      {
+        "id": 2,
+        "description": "Fix leaky faucet",
+        "assignedto": "alice",
+        "priority": false,
+        "setdate": "2025-05-29T19:00:00"
+      }
+    ]
+  }

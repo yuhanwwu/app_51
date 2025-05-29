@@ -22,7 +22,7 @@ jobs:
           cp -r frontend/build/web/* public/
 
       - name: Upload Web Artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v1
         with:
           path: public
 

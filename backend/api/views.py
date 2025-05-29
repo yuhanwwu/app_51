@@ -2,17 +2,17 @@ from django.shortcuts import render
 
 # Create your views here.
 from rest_framework import viewsets
-from .models import Flat, User, RepeatTask, OneOffTask
-from .serializers import FlatSerializer, UserSerializer, RepeatTaskSerializer, OneOffTaskSerializer
+from .models import User, RepeatTask, OneOffTask
+from .serializers import UserSerializer, RepeatTaskSerializer, OneOffTaskSerializer
 
 
 # class NoteViewSet(viewsets.ModelViewSet):
 #     queryset = Note.objects.all()
 #     serializer_class = NoteSerializer
 
-class FlatViewSet(viewsets.ModelViewSet):
-    queryset = Flat.objects.all()
-    serializer_class = FlatSerializer
+# class FlatViewSet(viewsets.ModelViewSet):
+#     queryset = Flat.objects.all()
+#     serializer_class = FlatSerializer
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()

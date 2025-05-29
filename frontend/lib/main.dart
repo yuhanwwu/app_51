@@ -10,7 +10,21 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  // pre-populate with a hardcoded user for development
   Map<String, dynamic>? user;
+
+  final bool _debugAutoLogin = true; // set to false for real login
+
+  @override 
+  void initState() {
+    super.initState();
+    if(_debugAutoLogin) {
+      user = {
+        'username': 'testuser',
+        'name': 'Test User',
+      };
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

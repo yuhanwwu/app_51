@@ -19,6 +19,7 @@ jobs:
       - name: Build Flutter Web
         run: |
           cd frontend
+          flutter clean
           flutter pub get
           flutter build web --base-href=/app_51/
           cd ..
@@ -26,7 +27,7 @@ jobs:
           cp -r frontend/build/web/* public/
 
       - name: Upload Web Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-pages-artifact@v4
         with:
           name: flutter-web
           path: public
@@ -55,6 +56,9 @@ jobs:
   deploy-to-gh-pages:
     needs: build-flutter
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4

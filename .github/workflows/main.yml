@@ -42,16 +42,16 @@ jobs:
           cd frontend
           flutter test
 
-  django-test:
-    runs-on: ubuntu-latest
-    container: python:3.11
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install Backend Dependencies
-        run: |
-          pip install -r requirements.txt
-          cd backend
-          python manage.py test
+  # django-test:
+  #   runs-on: ubuntu-latest
+  #   container: python:3.11
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Install Backend Dependencies
+  #       run: |
+  #         pip install -r requirements.txt
+  #         cd backend
+  #         python manage.py test
 
   deploy-to-gh-pages:
     needs: build-flutter

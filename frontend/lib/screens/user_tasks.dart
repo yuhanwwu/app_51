@@ -9,9 +9,15 @@ import 'package:http/http.dart' as http;
 import '../models/task.dart';
 import '../services/api_service.dart'; // fetchUserTasks
 
+// <<<<<<< render_db
 // Future<List<Task>> fetchUserTasks(String username) async {
-//   final url = Uri.parse('http://127.0.0.1:8000/api/users/$username/');
+//   final url = Uri.parse('http://127.0.0.1:5000/api/users/$username/');
 //   final res = await http.get(url);
+// =======
+// // Future<List<Task>> fetchUserTasks(String username) async {
+// //   final url = Uri.parse('http://127.0.0.1:8000/api/users/$username/');
+// //   final res = await http.get(url);
+// >>>>>>> master
 
 //   if (res.statusCode == 200) {
 //     final data = jsonDecode(res.body);

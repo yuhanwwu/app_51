@@ -40,8 +40,10 @@ DATABASES = {
 
 DEBUG = os.getenv("DEBUG", "False") == "True"
 SECRET_KEY = os.getenv("SECRET_KEY")
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",") + ["http://127.0.0.1:8000/",
-                "http://localhost:8000/"]
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",") + [
+                "127.0.0.1",
+                "127.0.0.1/",
+                "localhost"]
 
 # Application definition
 

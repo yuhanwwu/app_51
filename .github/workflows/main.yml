@@ -4,12 +4,26 @@ on:
   push:
     branches:
       - master
+      - db_setup
 
 permissions:
   contents: write
   pages: write
 
 jobs:
+  apply-db-migrations:
+    runs-on: ubuntu-latest
+    container: python:3.11
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Backend Dependencies
+        run: |
+          pip install -r requirements.txt
+          cd backend
+          python manage.py makemigrations
+          python manage.py migrate
+
   build-flutter:
     runs-on: ubuntu-latest
     container: ghcr.io/cirruslabs/flutter:stable

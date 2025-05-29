@@ -20,7 +20,7 @@ class _MyAppState extends State<MyApp> {
         body: user == null
           ? LoginPage(onLogin: (u) => setState(() => user = u))
           : TaskPage(username: user!['username']),
-      ),
+      )
     );
   }
 }

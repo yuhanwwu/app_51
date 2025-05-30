@@ -8,9 +8,9 @@
 //   final String? lastdoneon; //repeat
 
 //   Task({
-//     required this.description, 
-//     this.priority, 
-//     this.lastdoneon, 
+//     required this.description,
+//     this.priority,
+//     this.lastdoneon,
 //     this.isOneOff = false, //default is repeated
 //   });
 
@@ -24,7 +24,6 @@
 //   }
 // }
 
-
 // //TODO maybe tasks only come up when they are freq no. days after last done?
 
 class Task {
@@ -32,12 +31,16 @@ class Task {
   final bool isOneOff;
   final bool? priority; // only for one-off tasks
   final String? lastdoneon; // only for repeat tasks
+  final int? frequency; // only for repeat tasks
+  final String assignedto; // added for user assignment
 
   Task({
     required this.description,
     this.priority,
     this.lastdoneon,
     required this.isOneOff,
+    this.frequency,
+    required this.assignedto,
   });
 
   factory Task.fromJson(Map<String, dynamic> json, {required bool isOneOff}) {
@@ -46,6 +49,8 @@ class Task {
       isOneOff: isOneOff,
       priority: isOneOff ? json['priority'] as bool? : null,
       lastdoneon: isOneOff ? null : json['lastdoneon'] as String?,
+      frequency: isOneOff ? null : json['frequency'] as int?,
+      assignedto: json['assignedto'] ?? '',
     );
   }
 }

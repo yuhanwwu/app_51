@@ -2,15 +2,18 @@
   "users": [
     {
       "username": "alice",
-      "name": "Alice Anderson"
+      "name": "Alice Anderson",
+      "flat": "Flat 1A"
     },
     {
       "username": "bob",
-      "name": "Bob Brown"
+      "name": "Bob Brown",
+      "flat": "Flat 1A"
     },
     {
       "username": "charlie",
-      "name": "Charlie Chaplin"
+      "name": "Charlie Chaplin",
+      "flat": "Flat 2B"
     }
   ],
   "repeat_tasks": [

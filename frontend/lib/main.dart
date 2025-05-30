@@ -193,12 +193,12 @@ class _MyAppState extends State<MyApp> {
     });
 
     // if (user != null) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => TaskPage(username: user!.username),
-        ),
-      );
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TaskPage(username: user!.username),
+      ),
+    );
     //}
   }
 
@@ -207,7 +207,9 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       title: 'Task Manager',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: user == null ? LoginPage(onLogin: onLogin) : TaskPage(username: user!.username),
+      home: user == null
+          ? LoginPage(onLogin: onLogin)
+          : TaskPage(username: user!.username),
     );
   }
 }
@@ -220,12 +222,8 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Welcome ${user.name}'),
-      ),
-      body: Center(
-        child: Text('You are logged in as ${user.username}'),
-      ),
+      appBar: AppBar(title: Text('Welcome ${user.name}')),
+      body: Center(child: Text('You are logged in as ${user.username}')),
     );
   }
 }

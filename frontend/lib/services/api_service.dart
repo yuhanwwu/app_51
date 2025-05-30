@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static const String baseUrl = 'https://app-51-web.onrender.com'; 
+  static const String baseUrl = 'https://app-51-web.onrender.com';
 
   // -------- USER METHODS --------
 
@@ -71,6 +71,7 @@ class ApiService {
     );
     return response.statusCode == 201;
   }
+
   // Fetch all one-off tasks
   Future<List<dynamic>> getAllOneOffTasks() async {
     final response = await http.get(Uri.parse('$baseUrl/one-off-tasks/'));
@@ -78,7 +79,7 @@ class ApiService {
       return json.decode(response.body);
     }
     return [];
-  } 
+  }
 
   // Add more methods like updateTask, deleteTask, markTaskDone, etc. as needed
 }

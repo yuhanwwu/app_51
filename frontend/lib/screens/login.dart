@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import '../models/user.dart';
 import 'user_tasks.dart';
+import '../constants/colors.dart';
 
 class LoginPage extends StatefulWidget {
   final Function(User) onLogin;
@@ -62,6 +63,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.beige,
       appBar: AppBar(title: Text('Login')),
       body: Padding(
         padding: EdgeInsets.all(20.0),
@@ -84,6 +86,8 @@ class _LoginPageState extends State<LoginPage> {
                       controller: _usernameController,
                       decoration: InputDecoration(
                         labelText: 'Username',
+                        filled: true,
+                        fillColor: AppColors.white,
                         border: OutlineInputBorder(),
                         prefixIcon: Icon(Icons.person),
                       ),
@@ -107,10 +111,12 @@ class _LoginPageState extends State<LoginPage> {
                                 }
                               },
                         style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.white,
+                          foregroundColor: AppColors.black,
                           padding: EdgeInsets.symmetric(vertical: 15),
                         ),
                         child: _isLoading
-                            ? CircularProgressIndicator(color: Colors.white)
+                            ? CircularProgressIndicator(color: AppColors.green)
                             : Text("Log in", style: TextStyle(fontSize: 16)),
                       ),
                     ),
@@ -139,6 +145,12 @@ class _LoginPageState extends State<LoginPage> {
                 _usernameController.text = 'alice';
                 login();
               },
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.black,
+                backgroundColor: AppColors.lightGreen,
+                side: BorderSide(color: AppColors.green),
+                padding: EdgeInsets.symmetric(vertical: 15),
+              ),
               child: Text("DEV: Quick Login as Alice"),
             ),
           ],

@@ -51,61 +51,71 @@ class TaskPage extends StatelessWidget {
           final tasks = snapshot.data!;
           return Scaffold(
             backgroundColor: AppColors.beige,
-            appBar: AppBar(title: Text("Tasks for $username", style: TextStyle(color: Colors.black))),
+            appBar: AppBar(
+              title: Text(
+                "Tasks for $username",
+                style: TextStyle(color: Colors.black),
+              ),
+            ),
             body: Center(
               child: FractionallySizedBox(
-              widthFactor: 0.7,
-              heightFactor: 0.7,
-              child: Container(
-                child: Column(
-              children: [
-                Expanded(
-                  child: ListView(
-                    children: tasks
-                        .map(
-                          (task) => Container(
-                            margin: const EdgeInsets.symmetric(vertical: 5.0),
-                            decoration: BoxDecoration(
-                              color: task.isOneOff ? AppColors.lightGreen : AppColors.green,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: ListTile(
-                            title: Text(task.description),
-                            subtitle: task.isOneOff
-                                ? Text(
-                                    "One-off" +
-                                        (task.priority == true
-                                            ? " (Urgent)"
-                                            : ""),
-                                  )
-                                : Text(
-                                    "Repeat task - last done: ${task.lastdoneon ?? 'Never'}",
+                widthFactor: 0.7,
+                heightFactor: 0.7,
+                child: Container(
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: ListView(
+                          children: tasks
+                              .map(
+                                (task) => Container(
+                                  margin: const EdgeInsets.symmetric(
+                                    vertical: 5.0,
                                   ),
-                          ),
-                          ),
-                        )
-                        .toList(),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => FlatTasksScreen(username: username),
+                                  decoration: BoxDecoration(
+                                    color: task.isOneOff
+                                        ? AppColors.lightGreen
+                                        : AppColors.green,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: ListTile(
+                                    title: Text(task.description),
+                                    subtitle: task.isOneOff
+                                        ? Text(
+                                            "One-off" +
+                                                (task.priority == true
+                                                    ? " (Urgent)"
+                                                    : ""),
+                                          )
+                                        : Text(
+                                            "Repeat task - last done: ${task.lastdoneon ?? 'Never'}",
+                                          ),
+                                  ),
+                                ),
+                              )
+                              .toList(),
                         ),
-                      );
-                    },
-                    child: const Text('View Flat Tasks'),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    FlatTasksScreen(username: username),
+                              ),
+                            );
+                          },
+                          child: const Text('View Flat Tasks'),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
+              ),
             ),
-            ),
-          ),
-          ),
           );
         } else if (snapshot.hasError) {
           return Text("Error: ${snapshot.error}");

@@ -5,7 +5,6 @@ import '../models/user.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart';
 
-
 class TaskBundle {
   final List<Task> oneOff;
   final List<Task> repeat;
@@ -29,18 +28,18 @@ class _FlatTasksScreenState extends State<FlatTasksScreen> {
   late Future<List<dynamic>> flatTasks = Future.value([]);
 
   @override
-    void initState() {
+  void initState() {
     super.initState();
     _loadTasks();
   }
 
   void _loadTasks() async {
-  final bundle = await fetchFlatTasks(widget.username);
-  setState(() {
-    oneOffTasks = Future.value(bundle.oneOff);
-    repeatTasks = Future.value(bundle.repeat);
-  });
-}
+    final bundle = await fetchFlatTasks(widget.username);
+    setState(() {
+      oneOffTasks = Future.value(bundle.oneOff);
+      repeatTasks = Future.value(bundle.repeat);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,71 +49,75 @@ class _FlatTasksScreenState extends State<FlatTasksScreen> {
         // alignment: Alignment.topCenter,
         // widthFactor: 0.7,
         child: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 10),
-            Text('Repeat Tasks', style: Theme.of(context).textTheme.titleLarge),
-            FutureBuilder<List<Task>>(
-              future: repeatTasks,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const CircularProgressIndicator();
-                } else if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Text('No repeat tasks');
-                }
-                return ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: snapshot.data!.length,
-                  itemBuilder: (context, index) {
-                    final task = snapshot.data![index];
-                    return ListTile(
-                      title: Text("${task.description} - ${task.assignedto}"),
-                      subtitle: Text(
-                        'Frequency: every ${task.frequency} days',
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'One-Off Tasks',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            FutureBuilder<List<Task>>(
-              future: oneOffTasks,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const CircularProgressIndicator();
-                } else if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Text('No one-off tasks');
-                }
-                return ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: snapshot.data!.length,
-                  itemBuilder: (context, index) {
-                    final task = snapshot.data![index];
-                    return ListTile(
-                      title: Text("${task.description} - ${task.assignedto}"),
-                      subtitle: Text(
-                        'Priority: ${task.priority == true ? "High" : "Normal"}',
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
-            const SizedBox(height: 20),
-          ],
+          child: Column(
+            children: [
+              const SizedBox(height: 10),
+              Text(
+                'Repeat Tasks',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              FutureBuilder<List<Task>>(
+                future: repeatTasks,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CircularProgressIndicator();
+                  } else if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Text('No repeat tasks');
+                  }
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: snapshot.data!.length,
+                    itemBuilder: (context, index) {
+                      final task = snapshot.data![index];
+                      return ListTile(
+                        title: Text("${task.description} - ${task.assignedto}"),
+                        subtitle: Text(
+                          'Frequency: every ${task.frequency} days',
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'One-Off Tasks',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              FutureBuilder<List<Task>>(
+                future: oneOffTasks,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CircularProgressIndicator();
+                  } else if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Text('No one-off tasks');
+                  }
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: snapshot.data!.length,
+                    itemBuilder: (context, index) {
+                      final task = snapshot.data![index];
+                      return ListTile(
+                        title: Text("${task.description} - ${task.assignedto}"),
+                        subtitle: Text(
+                          'Priority: ${task.priority == true ? "High" : "Normal"}',
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
-      ),),
+      ),
     );
   }
 }
@@ -129,22 +132,21 @@ Future<TaskBundle> fetchFlatTasks(String username) async {
 
   String? flat;
 
-  print("Fetching tasks for user $username");
   final entry = data['users'].firstWhere((u) => u['username'] == 'alice');
   flat = entry['flat'];
-  print("Flat found: $flat");
 
   for (var u in data['users']) {
     if (u['flat'] == flat) {
       flatUsers.add(User.fromJson(u));
     }
   }
-  print("Flat users: ${flatUsers.map((u) => u.username).join(', ')}");
 
   for (var t in data['one_off_tasks']) {
     if (t['assignedto'].isNotEmpty &&
-        flatUsers.any((user) =>
-        user.username.toLowerCase() == t['assignedto'].toString().toLowerCase()
+        flatUsers.any(
+          (user) =>
+              user.username.toLowerCase() ==
+              t['assignedto'].toString().toLowerCase(),
         )) {
       oneOff.add(Task.fromJson(t, isOneOff: true));
     }
@@ -152,18 +154,17 @@ Future<TaskBundle> fetchFlatTasks(String username) async {
 
   for (var t in data['repeat_tasks']) {
     if (t['assignedto'].isNotEmpty &&
-        flatUsers.any((user) =>
-          user.username.toLowerCase() == t['assignedto'].toString().toLowerCase()
+        flatUsers.any(
+          (user) =>
+              user.username.toLowerCase() ==
+              t['assignedto'].toString().toLowerCase(),
         )) {
       repeat.add(Task.fromJson(t, isOneOff: false));
     }
   }
 
-  print("One-off tasks: ${oneOff.length}, Repeat tasks: ${repeat.length}");
-
   return TaskBundle(oneOff: oneOff, repeat: repeat);
 }
-
 
 // Future<List<Task>> fetchFlatTasks(String flat) async {
 //   final jsonString = await rootBundle.loadString('assets/data.json');
@@ -189,6 +190,6 @@ Future<TaskBundle> fetchFlatTasks(String username) async {
 //       flatTasks.add(Task.fromJson(t, isOneOff: false));
 //     }
 //   }
-  
+
 //   return flatTasks;
 // }

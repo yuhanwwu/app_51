@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1083791752141",
+    "project_id": "app51-lalapi",
+    "storage_bucket": "app51-lalapi.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1083791752141:android:993a31bf71066ad96ce284",
+        "android_client_info": {
+          "package_name": "com.example.frontend"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA1dXxq9iyM9dzkHWWNvArsd-K5HE_DXGA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

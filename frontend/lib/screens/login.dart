@@ -4,6 +4,9 @@ import 'package:flutter/services.dart' show rootBundle;
 import '../models/user.dart';
 import 'user_tasks.dart';
 import '../constants/colors.dart';
+import 'home_page.dart';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LoginPage extends StatefulWidget {
   final Function(User) onLogin;
@@ -20,9 +23,17 @@ class _LoginPageState extends State<LoginPage> {
   bool _isLoading = false;
   String username = '';
 
-  Future<Map<String, dynamic>> loadJson() async {
-    final jsonString = await rootBundle.loadString('assets/data.json');
-    return json.decode(jsonString);
+  Future<User?> fetchUser(String inputUsername) async {
+    final docRef = FirebaseFirestore.instance
+        .collection('Users')
+        .doc(inputUsername);
+    final docSnap = await docRef.get();
+
+    if (docSnap.exists) {
+      return User.fromFirestore(docSnap);
+    } else {
+      return null;
+    }
   }
 
   Future<User?> login() async {
@@ -41,17 +52,11 @@ class _LoginPageState extends State<LoginPage> {
       return null;
     }
 
-    final data = await loadJson();
-
-    try {
-      final users = data['users'] as List<dynamic>;
-      final userMap = users.firstWhere(
-        (user) => user['username'] == inputUsername,
-      );
-      final user = User.fromJson(userMap);
+    final user = await fetchUser(inputUsername);
+    if (user != null) {
       setState(() => _isLoading = false);
       return user;
-    } catch (e) {
+    } else {
       setState(() {
         _isLoading = false;
         error = 'Username not found';
@@ -105,7 +110,7 @@ class _LoginPageState extends State<LoginPage> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) =>
-                                          TaskPage(username: user.username),
+                                          HomePage(user: user),
                                     ),
                                   );
                                 }

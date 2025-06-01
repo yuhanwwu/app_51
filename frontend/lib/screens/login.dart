@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import '../models/user.dart';
+import 'add_flat.dart';
 import 'user_tasks.dart';
 import '../constants/colors.dart';
 import 'home_page.dart';
@@ -69,7 +70,21 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.beige,
-      appBar: AppBar(title: Text('Login')),
+      appBar: AppBar(
+        title: Text('Login'), 
+        actions: [
+          IconButton(
+            icon: Icon(Icons.add_home),
+            tooltip: 'Add Flat',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AddFlatPage()),
+              );
+            },
+          ),
+        ],
+      ),
       body: Padding(
         padding: EdgeInsets.all(20.0),
         child: Column(

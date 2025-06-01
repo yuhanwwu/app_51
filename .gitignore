@@ -7,3 +7,4 @@ backend/.env
 backend/api/__pycache__/
 backend/backend/__pycache__/
 backend/__pycache__/
+frontend/.env

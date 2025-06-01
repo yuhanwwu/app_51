@@ -24,6 +24,22 @@ Future<Map<String, int>> fetchChorePlan(String username) async {
     return chores;
 }
 
+//DUMMY PAGE
+class QuestionnairePage extends StatelessWidget {
+  final String flatId;
+
+  const QuestionnairePage({required this.flatId});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Questionnaire')),
+      body: Center(
+        child: Text('Questionnaire for Flat ID: $flatId'),
+      ),
+    );
+  }
+}
 
 class VibeSelectionPage extends StatefulWidget {
 
@@ -148,3 +164,5 @@ class VibeSelectionPage extends StatefulWidget {
 }
 
 }
+
+

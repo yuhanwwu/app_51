@@ -55,7 +55,8 @@ class _TaskInputScreenState extends State<TaskInputScreen> {
       'lastDoneBy': _isOneOff ? null : null,
     };
 
-    await FirebaseFirestore.instance.collection('tasks').add(taskData);
+    await FirebaseFirestore.instance.collection('Tasks').add(taskData);
+    // print('Task successfully added!');
 
     Navigator.pop(context);
   }

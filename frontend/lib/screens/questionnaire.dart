@@ -11,7 +11,11 @@ Future<Map<String, int>> fetchChorePlan(String plan) async {
   if (!doc.exists) {
     throw Exception('User not found');
   }
+  if (!doc.exists) {
+    throw Exception('User not found');
+  }
 
+  Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
   Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
 
   // Convert dynamic map to Map<String, int>
@@ -21,7 +25,15 @@ Future<Map<String, int>> fetchChorePlan(String plan) async {
       chores[key] = value;
     }
   });
+  // Convert dynamic map to Map<String, int>
+  Map<String, int> chores = {};
+  data.forEach((key, value) {
+    if (value is int) {
+      chores[key] = value;
+    }
+  });
 
+  return chores;
   return chores;
 }
 
@@ -332,8 +344,11 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
               ),
             );
           }).toList(),
+          }).toList(),
         );
       },
+      },
     );
+  }
   }
 }

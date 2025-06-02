@@ -4,7 +4,6 @@ import 'package:frontend/models/user.dart';
 import 'package:frontend/screens/login.dart';
 import 'package:frontend/screens/questionnaire.dart';
 
-
 class AddFlatPage extends StatefulWidget {
   final String username;
   final Function(User) onLogin;
@@ -89,10 +88,10 @@ class _AddFlatPageState extends State<AddFlatPage> {
           .collection('Users')
           .doc(flatmate['username'])
           .set({
-        'flat': flatName,
-        'name': flatmate['name'],
-        // 'flatId': flatRef.id,
-      });
+            'flat': flatName,
+            'name': flatmate['name'],
+            // 'flatId': flatRef.id,
+          });
     }
 
     // Navigate to QuestionnairePage
@@ -129,7 +128,8 @@ class _AddFlatPageState extends State<AddFlatPage> {
                     TextFormField(
                       controller: controllers['username'],
                       decoration: InputDecoration(
-                          labelText: 'Flatmate ${index + 1} Username'),
+                        labelText: 'Flatmate ${index + 1} Username',
+                      ),
                       validator: (value) => value!.isEmpty
                           ? 'Enter a username for flatmate ${index + 1}'
                           : null,
@@ -137,7 +137,8 @@ class _AddFlatPageState extends State<AddFlatPage> {
                     TextFormField(
                       controller: controllers['name'],
                       decoration: InputDecoration(
-                          labelText: 'Flatmate ${index + 1} Name'),
+                        labelText: 'Flatmate ${index + 1} Name',
+                      ),
                       validator: (value) => value!.isEmpty
                           ? 'Enter a name for flatmate ${index + 1}'
                           : null,

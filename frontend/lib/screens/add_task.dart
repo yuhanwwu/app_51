@@ -20,7 +20,7 @@ class _TaskInputScreenState extends State<TaskInputScreen> {
 
   bool _isOneOff = true;
   bool _priority = false;
-  
+
   // Future<String> getUserFlat(String userId) async {
   //   final userDoc = await FirebaseFirestore.instance
   //       .collection("Users")
@@ -36,7 +36,6 @@ class _TaskInputScreenState extends State<TaskInputScreen> {
     final description = _descriptionController.text.trim();
     // final assignedFlat = getUserFlat(widget.curUser);
     final assignedFlat = widget.curUser.flat;
-    
 
     final taskData = {
       'description': description,
@@ -114,7 +113,8 @@ class _TaskInputScreenState extends State<TaskInputScreen> {
                 TextFormField(
                   controller: _frequencyController,
                   decoration: const InputDecoration(
-                      labelText: 'Frequency (in days)'),
+                    labelText: 'Frequency (in days)',
+                  ),
                   keyboardType: TextInputType.number,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {

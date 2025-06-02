@@ -79,7 +79,7 @@ class Task {
       description: data['description'],
       isOneOff: data['isOneOff'] ?? false,
       taskId: doc.id,
-      assignedFlat: data['assignedFlat'],
+      assignedFlat: data['assignedFlat'] as DocumentReference,
       assignedTo: isOneOff
           ? data['assignedTo'] as DocumentReference?
           : data['assignedTo'] as DocumentReference,

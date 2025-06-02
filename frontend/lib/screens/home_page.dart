@@ -11,8 +11,7 @@ import 'nudge_user.dart';
 
 class HomePage extends StatefulWidget {
   final User user;
-  final DocumentReference userRef;
-  const HomePage({Key? key, required this.user, required this.userRef})
+  const HomePage({Key? key, required this.user})
     : super(key: key);
 
   @override
@@ -33,7 +32,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    userRef = widget.userRef;
+    userRef = widget.user.userRef;
     flatDoc = widget.user.flat;
     username = widget.user.username;
     name = widget.user.name;

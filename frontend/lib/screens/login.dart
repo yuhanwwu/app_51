@@ -23,7 +23,6 @@ class _LoginPageState extends State<LoginPage> {
   String error = '';
   bool _isLoading = false;
   String username = '';
-  late DocumentReference userRef;
 
   Future<User?> fetchUser(String inputUsername) async {
     final docRef = FirebaseFirestore.instance
@@ -32,7 +31,6 @@ class _LoginPageState extends State<LoginPage> {
     final docSnap = await docRef.get();
 
     if (docSnap.exists) {
-      userRef = docRef;
       return User.fromFirestore(docSnap);
     } else {
       return null;
@@ -128,7 +126,6 @@ class _LoginPageState extends State<LoginPage> {
                                     MaterialPageRoute(
                                       builder: (context) => HomePage(
                                         user: user,
-                                        userRef: userRef,
                                       ),
                                     ),
                                   );

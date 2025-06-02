@@ -22,6 +22,7 @@ class _HomePageState extends State<HomePage> {
   late final User user;
   late Future<List<Task>> _oneOffTasks;
   late Future<List<Task>> _repeatTasks;
+  late Future<List<Task>> _allFlatTasks;
 
   @override
   void initState() {
@@ -30,8 +31,15 @@ class _HomePageState extends State<HomePage> {
     username = widget.user.username;
     name = widget.user.name;
     user = widget.user;
-    _oneOffTasks = fetchOneOffTasks(flatDoc);
-    _repeatTasks = fetchRepeatTasks(flatDoc);
+    _loadTasks();
+  }
+
+  void _loadTasks() async {
+    setState(() {
+    _allFlatTasks = fetchAllFlatTasks(flatDoc);
+    _oneOffTasks = fetchOneOffTasks(_allFlatTasks);
+    _repeatTasks = fetchRepeatTasks(_allFlatTasks);
+    });
   }
 
   @override
@@ -115,7 +123,7 @@ Widget build(BuildContext context) {
           heightFactor: 0.8, // 80% of the screen height
           child: TaskInputScreen(curUser: user), 
         ),
-      );
+      ).then((_) => _loadTasks()); 
       }, 
       child: Text('Add Task')),
   ],
@@ -124,43 +132,77 @@ Widget build(BuildContext context) {
     );
 }
 
+// 
+// USER IS NOT A DOCUMENT REFERENCE
+// 
 
-  Future<List<Task>> fetchOneOffTasks(DocumentReference flat) async {
-    List<Task> oneOffTasks = [];
-    print(flat);
+
+  Future<List<Task>> fetchAllFlatTasks(DocumentReference flat) async {
+    List<Task> allFlatTasks = [];
 
     final queryRef = FirebaseFirestore.instance
         .collection('Tasks')
-        .where("assignedFlat", isEqualTo: flat)
-        .where("isOneOff", isEqualTo: true);
+        .where("assignedFlat", isEqualTo: flat);
 
     final querySnap = await queryRef.get();
 
     if (querySnap.docs.isNotEmpty) {
-      print("in one off tasks");
-      oneOffTasks = querySnap.docs.map((doc) {
+      print("in flat tasks");
+      allFlatTasks = querySnap.docs.map((doc) {
         final data = doc.data();
         return Task.fromFirestore(doc, isOneOff: true);
       }).toList();
     }
-    print("end of one off tasks");
-    return oneOffTasks;
+    return allFlatTasks;
   }
 
-  Future<List<Task>> fetchRepeatTasks(DocumentReference flat) async {
-    final queryRef = FirebaseFirestore.instance
-        .collection('Tasks')
-        .where("assignedFlat", isEqualTo: flat)
-        .where("isOneOff", isEqualTo: false);
-
-    final querySnap = await queryRef.get();
-
-    if (querySnap.docs.isNotEmpty) {
-      querySnap.docs.map((doc) {
-        final data = doc.data();
-        return Task.fromFirestore(doc, isOneOff: false);
-      }).toList();
-    }
-    return [];
+  Future<List<Task>> fetchOneOffTasks(Future<List<Task>> allFlatTasks) async {
+    final tasks = await allFlatTasks;
+    return tasks.where((t) => t.isOneOff).toList();
   }
+
+  Future<List<Task>> fetchRepeatTasks(Future<List<Task>> allFlatTasks) async {
+    final tasks = await allFlatTasks;
+    return tasks.where((t) => !t.isOneOff).toList();
+  }
+
+
+  // Future<List<Task>> fetchOneOffTasks(DocumentReference flat) async {
+  //   List<Task> oneOffTasks = [];
+  //   print(flat);
+
+  //   final queryRef = FirebaseFirestore.instance
+  //       .collection('Tasks')
+  //       .where("assignedFlat", isEqualTo: flat)
+  //       .where("isOneOff", isEqualTo: true);
+
+  //   final querySnap = await queryRef.get();
+
+  //   if (querySnap.docs.isNotEmpty) {
+  //     print("in one off tasks");
+  //     oneOffTasks = querySnap.docs.map((doc) {
+  //       final data = doc.data();
+  //       return Task.fromFirestore(doc, isOneOff: true);
+  //     }).toList();
+  //   }
+  //   print("end of one off tasks");
+  //   return oneOffTasks;
+  // }
+
+  // Future<List<Task>> fetchRepeatTasks(DocumentReference flat) async {
+  //   final queryRef = FirebaseFirestore.instance
+  //       .collection('Tasks')
+  //       .where("assignedFlat", isEqualTo: flat)
+  //       .where("isOneOff", isEqualTo: false);
+
+  //   final querySnap = await queryRef.get();
+
+  //   if (querySnap.docs.isNotEmpty) {
+  //     querySnap.docs.map((doc) {
+  //       final data = doc.data();
+  //       return Task.fromFirestore(doc, isOneOff: false);
+  //     }).toList();
+  //   }
+  //   return [];
+  // }
 }

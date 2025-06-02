@@ -77,7 +77,7 @@ class Task {
     final data = doc.data() as Map<String, dynamic>;
     return Task(
       description: data['description'],
-      isOneOff: data['isOneOff'],
+      isOneOff: data['isOneOff'] ?? false,
       taskId: doc.id,
       assignedFlat: data['assignedFlat'],
       assignedTo: isOneOff

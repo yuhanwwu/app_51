@@ -10,7 +10,8 @@ import 'add_task.dart';
 class HomePage extends StatefulWidget {
   final User user;
   final DocumentReference userRef;
-  const HomePage({Key? key, required this.user, required this.userRef}) : super(key: key);
+  const HomePage({Key? key, required this.user, required this.userRef})
+    : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -51,105 +52,127 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Welcome, $name')),
-      body: Column (
-        children: [ 
-          Expanded(child: Row(
-        mainAxisAlignment:
-            MainAxisAlignment.spaceEvenly, // horizontal alignment
-        crossAxisAlignment: CrossAxisAlignment.center, // vertical alignment
+      body: Column(
         children: [
           Expanded(
-            child: Column(
+            child: Row(
+              mainAxisAlignment:
+                  MainAxisAlignment.spaceEvenly, // horizontal alignment
+              crossAxisAlignment:
+                  CrossAxisAlignment.center, // vertical alignment
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    "One-Off Tasks",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                ),
                 Expanded(
-                  child: FutureBuilder<List<Task>>(
-                    future: _userOneOffTasks,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      } else if (snapshot.hasError) {
-                        return Center(child: Text("Error: ${snapshot.error}"));
-                      } else if (snapshot.hasData) {
-                        final oneOffTasks = snapshot.data!;
-                        if (oneOffTasks.isEmpty)
-                          return const Center(
-                            child: Text("No one-off tasks left!"),
-                          );
-                        return ListView(
-                          children: oneOffTasks
-                              .map(
-                                (e) => ListTile(
-                                  title: Text(e.description),
-                                  subtitle: const Text("One off"),
-                                ),
-                              )
-                              .toList(),
-                        );
-                      } else {
-                        return const Center(child: Text("No tasks left!"));
-                      }
-                    },
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          "One-Off Tasks",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: FutureBuilder<List<Task>>(
+                          future: _userOneOffTasks,
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            } else if (snapshot.hasError) {
+                              return Center(
+                                child: Text("Error: ${snapshot.error}"),
+                              );
+                            } else if (snapshot.hasData) {
+                              final oneOffTasks = snapshot.data!;
+                              if (oneOffTasks.isEmpty)
+                                return const Center(
+                                  child: Text("No one-off tasks left!"),
+                                );
+                              return ListView(
+                                children: oneOffTasks
+                                    .map(
+                                      (e) => ListTile(
+                                        title: Text(e.description),
+                                        subtitle: const Text("One off"),
+                                      ),
+                                    )
+                                    .toList(),
+                              );
+                            } else {
+                              return const Center(
+                                child: Text("No tasks left!"),
+                              );
+                            }
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ),
 
-          Expanded(
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    "Repeat Tasks",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                ),
                 Expanded(
-                  child: FutureBuilder<List<Task>>(
-                    future: _repeatTasks,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      } else if (snapshot.hasError) {
-                        return Center(child: Text("Error: ${snapshot.error}"));
-                      } else if (snapshot.hasData) {
-                        final repeatTasks = snapshot.data!;
-                        if (repeatTasks.isEmpty) {
-                          return const Center(
-                            child: Text("No repeat tasks left!"),
-                          );
-                        }
-                        return ListView(
-                          children: repeatTasks
-                              .map(
-                                (e) => ListTile(
-                                  title: Text(e.description),
-                                  subtitle: const Text("Repeat"),
-                                ),
-                              )
-                              .toList(),
-                        );
-                      } else {
-                        return const Center(child: Text("No tasks left!"));
-                      }
-                    },
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          "Repeat Tasks",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: FutureBuilder<List<Task>>(
+                          future: _repeatTasks,
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            } else if (snapshot.hasError) {
+                              return Center(
+                                child: Text("Error: ${snapshot.error}"),
+                              );
+                            } else if (snapshot.hasData) {
+                              final repeatTasks = snapshot.data!;
+                              if (repeatTasks.isEmpty) {
+                                return const Center(
+                                  child: Text("No repeat tasks left!"),
+                                );
+                              }
+                              return ListView(
+                                children: repeatTasks
+                                    .map(
+                                      (e) => ListTile(
+                                        title: Text(e.description),
+                                        subtitle: const Text("Repeat"),
+                                      ),
+                                    )
+                                    .toList(),
+                              );
+                            } else {
+                              return const Center(
+                                child: Text("No tasks left!"),
+                              );
+                            }
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
-        ],
-      ),
-      ),
-      Expanded(
+          Expanded(
             child: Column(
               children: [
                 Padding(
@@ -185,7 +208,9 @@ class _HomePageState extends State<HomePage> {
                               .toList(),
                         );
                       } else {
-                        return const Center(child: Text("No unclaimed tasks left!"));
+                        return const Center(
+                          child: Text("No unclaimed tasks left!"),
+                        );
                       }
                     },
                   ),
@@ -193,7 +218,6 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ),
-      
         ],
       ),
       bottomNavigationBar: Container(
@@ -251,9 +275,11 @@ class _HomePageState extends State<HomePage> {
   //   return tasks.where((t) => t.isOneOff).toList();
   // }
 
-  Future<List<Task>> fetchUserOneOffTasks(Future<List<Task>> allFlatTasks) async {
+  Future<List<Task>> fetchUserOneOffTasks(
+    Future<List<Task>> allFlatTasks,
+  ) async {
     final tasks = await allFlatTasks;
-    return tasks.where((t) => t.assignedTo == userRef ).toList();
+    return tasks.where((t) => t.assignedTo == userRef).toList();
   }
 
   Future<List<Task>> fetchRepeatTasks(Future<List<Task>> allFlatTasks) async {
@@ -261,7 +287,9 @@ class _HomePageState extends State<HomePage> {
     return tasks.where((t) => !t.isOneOff).toList();
   }
 
-  Future<List<Task>> fetchUnclaimedTasks(Future<List<Task>> allFlatTasks) async {
+  Future<List<Task>> fetchUnclaimedTasks(
+    Future<List<Task>> allFlatTasks,
+  ) async {
     final tasks = await allFlatTasks;
     return tasks.where((t) => (t.assignedTo == null)).toList();
   }

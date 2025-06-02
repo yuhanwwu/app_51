@@ -17,10 +17,6 @@ class User {
 
   factory User.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
-    return User(
-      username: doc.id, 
-      name: data['name'],
-      flat: data['flat']
-      );
+    return User(username: doc.id, name: data['name'], flat: data['flat']);
   }
 }

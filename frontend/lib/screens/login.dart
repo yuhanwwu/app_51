@@ -23,6 +23,7 @@ class _LoginPageState extends State<LoginPage> {
   String error = '';
   bool _isLoading = false;
   String username = '';
+  late DocumentReference userRef;
 
   Future<User?> fetchUser(String inputUsername) async {
     final docRef = FirebaseFirestore.instance
@@ -31,6 +32,7 @@ class _LoginPageState extends State<LoginPage> {
     final docSnap = await docRef.get();
 
     if (docSnap.exists) {
+      userRef = docRef;
       return User.fromFirestore(docSnap);
     } else {
       return null;
@@ -71,7 +73,7 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       backgroundColor: AppColors.beige,
       appBar: AppBar(
-        title: Text('Login'), 
+        title: Text('Login'),
         actions: [
           IconButton(
             icon: Icon(Icons.add_home),
@@ -125,7 +127,7 @@ class _LoginPageState extends State<LoginPage> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) =>
-                                          HomePage(user: user),
+                                          HomePage(user: user, userRef: userRef),
                                     ),
                                   );
                                 }

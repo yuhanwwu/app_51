@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:frontend/models/user.dart';
+import 'package:frontend/screens/login.dart';
 import 'package:frontend/screens/questionnaire.dart';
 
 
 class AddFlatPage extends StatefulWidget {
+  final String username;
+  final Function(User) onLogin;
+  const AddFlatPage({super.key, required this.username, required this.onLogin});
+
   @override
   _AddFlatPageState createState() => _AddFlatPageState();
 }
@@ -93,9 +99,8 @@ class _AddFlatPageState extends State<AddFlatPage> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => QuestionnairePage(flatId: flatRef.id),
-      ),
-    );
+        builder: (context) => LoginPage(onLogin: widget.onLogin)),
+      );
   }
 
   @override

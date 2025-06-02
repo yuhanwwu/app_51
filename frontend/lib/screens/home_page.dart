@@ -9,7 +9,7 @@ import 'add_task.dart';
 
 class HomePage extends StatefulWidget {
   final User user;
-  const HomePage({Key? key, required this.user}) : super(key: key);
+  const HomePage({super.key, required this.user});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -20,6 +20,7 @@ class _HomePageState extends State<HomePage> {
   late final String username;
   late final String name;
   late final User user;
+  late final bool questionnaireDone;
   late Future<List<Task>> _oneOffTasks;
   late Future<List<Task>> _repeatTasks;
 
@@ -30,6 +31,7 @@ class _HomePageState extends State<HomePage> {
     username = widget.user.username;
     name = widget.user.name;
     user = widget.user;
+    questionnaireDone = widget.user.questionnaireDone;
     _oneOffTasks = fetchOneOffTasks(flatDoc);
     _repeatTasks = fetchRepeatTasks(flatDoc);
   }

@@ -12,7 +12,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class LoginPage extends StatefulWidget {
   final Function(User) onLogin;
 
-  const LoginPage({Key? key, required this.onLogin}) : super(key: key);
+  const LoginPage({super.key, required this.onLogin});
 
   @override
   _LoginPageState createState() => _LoginPageState();
@@ -77,10 +77,11 @@ class _LoginPageState extends State<LoginPage> {
             icon: Icon(Icons.add_home),
             tooltip: 'Add Flat',
             onPressed: () {
+              final inputUsername = _usernameController.text.trim();
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => AddFlatPage()),
-              );
+                MaterialPageRoute(builder: (context) => AddFlatPage(username: inputUsername, onLogin: widget.onLogin,),
+              ));
             },
           ),
         ],
@@ -121,13 +122,7 @@ class _LoginPageState extends State<LoginPage> {
                             : () async {
                                 final user = await login();
                                 if (user != null) {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          HomePage(user: user),
-                                    ),
-                                  );
+                                  widget.onLogin(user); // Let main.dart handle navigation!
                                 }
                               },
                         style: ElevatedButton.styleFrom(

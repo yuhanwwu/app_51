@@ -7,7 +7,7 @@ import '../models/user.dart';
 class TaskInputScreen extends StatefulWidget {
   final User curUser;
 
-  const TaskInputScreen({Key? key, required this.curUser}) : super(key: key);
+  const TaskInputScreen({super.key, required this.curUser});
 
   @override
   State<TaskInputScreen> createState() => _TaskInputScreenState();

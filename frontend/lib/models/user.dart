@@ -4,23 +4,17 @@ class User {
   final String username;
   final String name;
   final DocumentReference flat;
+  final bool questionnaireDone;
 
-  User({required this.username, required this.name, required this.flat});
-
-  factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-      username: json['username'] ?? '',
-      name: json['name'] ?? '',
-      flat: json['flat'] ?? '',
-    );
-  }
+  User({required this.username, required this.name, required this.flat, required this.questionnaireDone});
 
   factory User.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return User(
       username: doc.id, 
       name: data['name'],
-      flat: data['flat']
+      flat: data['flat'],
+      questionnaireDone: data['questionnaireDone']
       );
   }
 }

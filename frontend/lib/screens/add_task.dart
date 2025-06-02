@@ -6,8 +6,13 @@ import '../models/user.dart';
 
 class TaskInputScreen extends StatefulWidget {
   final User curUser;
+  final DocumentReference userRef;
 
-  const TaskInputScreen({Key? key, required this.curUser}) : super(key: key);
+  const TaskInputScreen({
+    Key? key,
+    required this.curUser,
+    required this.userRef,
+  }) : super(key: key);
 
   @override
   State<TaskInputScreen> createState() => _TaskInputScreenState();
@@ -41,7 +46,8 @@ class _TaskInputScreenState extends State<TaskInputScreen> {
       'description': description,
       'isOneOff': _isOneOff,
       'assignedFlat': assignedFlat,
-      'assignedTo': null, //_isOneOff ? null : 'TO_BE_FILLED_IF_NEEDED',
+      'assignedTo':
+          widget.userRef, //_isOneOff ? null : 'TO_BE_FILLED_IF_NEEDED',
       'done': _isOneOff ? false : null,
       'setDate': _isOneOff
           ? DateFormat('yyyy-MM-dd').format(DateTime.now())

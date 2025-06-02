@@ -6,7 +6,12 @@ class User {
   final String name;
   final DocumentReference flat;
 
-  User({required this.userRef, required this.username, required this.name, required this.flat});
+  User({
+    required this.userRef,
+    required this.username,
+    required this.name,
+    required this.flat,
+  });
 
   // factory User.fromJson(Map<String, dynamic> json) {
   //   return User(
@@ -19,10 +24,10 @@ class User {
   factory User.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return User(
-      userRef: doc.reference, 
+      userRef: doc.reference,
       username: doc.id,
       name: data['name'],
-      flat: data['flat']
-      );
+      flat: data['flat'],
+    );
   }
 }

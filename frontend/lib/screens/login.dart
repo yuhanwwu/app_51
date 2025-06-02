@@ -124,9 +124,8 @@ class _LoginPageState extends State<LoginPage> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => HomePage(
-                                        user: user,
-                                      ),
+                                      builder: (context) =>
+                                          HomePage(user: user),
                                     ),
                                   );
                                 }
@@ -155,16 +154,20 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             SizedBox(height: 20),
-            Text(
-              'Available users: alice, bob, charlie',
-              style: TextStyle(color: Colors.grey, fontSize: 12),
-              textAlign: TextAlign.center,
-            ),
+            // Text(
+            //   'Available users: alice, bob, charlie',
+            //   style: TextStyle(color: Colors.grey, fontSize: 12),
+            //   textAlign: TextAlign.center,
+            // ),
             SizedBox(height: 10),
             OutlinedButton(
-              onPressed: () {
+              onPressed: () async {
+                final user = (await fetchUser('xiting'))!;
                 _usernameController.text = 'xiting';
-                login();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => HomePage(user: user)),
+                );
               },
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.black,

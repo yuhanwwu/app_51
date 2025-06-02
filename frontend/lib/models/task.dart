@@ -57,7 +57,7 @@ class Task {
   //repeat tasks
   final int frequency; //0 for one off
   final String? lastDoneOn; //? for repeat
-  final String? lastDoneBy; //? for repeat
+  final DocumentReference? lastDoneBy; //? for repeat
 
   Task({
     required this.description,
@@ -88,7 +88,7 @@ class Task {
       priority: isOneOff ? (data['priority'] as bool? ?? false) : false,
       frequency: isOneOff ? 0 : data['frequency'] as int,
       lastDoneOn: isOneOff ? null : data['lastDoneOn'] as String?,
-      lastDoneBy: isOneOff ? null : data['lastDoneBy'] as String?,
+      lastDoneBy: isOneOff ? null : data['lastDoneBy'] as DocumentReference?,
     );
   }
 }

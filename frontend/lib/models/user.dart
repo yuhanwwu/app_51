@@ -7,7 +7,7 @@ class User {
   final DocumentReference flat;
   final bool questionnaireDone;
 
-  User({required this.username, required this.name, required this.flat, required this.questionnaireDone});
+  User({required this.userRef, required this.username, required this.name, required this.flat, required this.questionnaireDone});
 
   factory User.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;

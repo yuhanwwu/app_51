@@ -6,6 +6,8 @@ import '../models/task.dart';
 import '../models/user.dart';
 import '../models/flat.dart';
 import 'add_task.dart';
+import 'nudge_user.dart';
+
 
 class HomePage extends StatefulWidget {
   final User user;
@@ -221,35 +223,78 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       bottomNavigationBar: Container(
-        color: Colors.grey[200],
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center, // horizontal alignment
-          crossAxisAlignment: CrossAxisAlignment.center, // vertical alignment
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true, // allow full height customization
-                  backgroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(20),
-                    ),
-                  ),
-                  builder: (context) => FractionallySizedBox(
-                    heightFactor: 0.8, // 80% of the screen height
-                    child: TaskInputScreen(curUser: user),
-                  ),
-                ).then((_) => _loadTasks());
-              },
-              child: Text('Add Task'),
-            ),
-          ],
-        ),
+      color: Colors.grey[200],
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          ElevatedButton(
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                builder: (context) => FractionallySizedBox(
+                  heightFactor: 0.8,
+                  child: TaskInputScreen(curUser: user),
+                ),
+              );
+            },
+            child: Text('Add Task'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final users = await fetchAllUsers(flatDoc); // You need to define this function
+              showModalBottomSheet(
+                context: context,
+                backgroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                builder: (context) => ListView(
+                  shrinkWrap: true,
+                  children: users.where((u) => u != user).map((u) => ListTile(
+                    title: Text(u.name),
+                    onTap: () {
+                      Navigator.pop(context); // Close the sheet
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => NudgeUserPage(user: u, allFlatTasks: _allFlatTasks),
+                        ),
+                      );
+                    },
+                  )).toList(),
+                ),
+              );
+            },
+            child: Text('View Flatmates\' Tasks'),
+          ),
+        ],
       ),
+    ),
     );
+  }
+
+
+  Future<List<User>> fetchAllUsers(DocumentReference flat) async {
+    List<User> allUsers = [];
+    final queryRef = FirebaseFirestore.instance
+        .collection('Users')
+        .where('flat', isEqualTo: flat);
+    final querySnap = await queryRef.get();
+    if (querySnap.docs.isNotEmpty) {
+      // print("in flat tasks");
+      allUsers = querySnap.docs.map((doc) {
+        return User.fromFirestore(doc);
+      }).toList();
+    }
+    return allUsers;
+
   }
 
   Future<List<Task>> fetchAllFlatTasks(DocumentReference flat) async {
@@ -264,7 +309,7 @@ class _HomePageState extends State<HomePage> {
     if (querySnap.docs.isNotEmpty) {
       allFlatTasks = querySnap.docs.map((doc) {
         final data = doc.data();
-        return Task.fromFirestore(doc, isOneOff: true);
+        return Task.fromFirestore(doc, isOneOff: data['isOneOff']!);
       }).toList();
     }
     return allFlatTasks;
@@ -294,3 +339,7 @@ class _HomePageState extends State<HomePage> {
     return tasks.where((t) => (t.assignedTo == null)).toList();
   }
 }
+
+
+
+

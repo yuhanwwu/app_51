@@ -166,7 +166,7 @@ class _LoginPageState extends State<LoginPage> {
             SizedBox(height: 10),
             OutlinedButton(
               onPressed: () {
-                _usernameController.text = 'alice';
+                _usernameController.text = 'xiting';
                 login();
               },
               style: OutlinedButton.styleFrom(
@@ -175,7 +175,7 @@ class _LoginPageState extends State<LoginPage> {
                 side: BorderSide(color: AppColors.green),
                 padding: EdgeInsets.symmetric(vertical: 15),
               ),
-              child: Text("DEV: Quick Login as Alice"),
+              child: Text("DEV: Quick Login as xiting"),
             ),
           ],
         ),

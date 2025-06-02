@@ -13,7 +13,7 @@ class NudgeUserPage extends StatelessWidget {
 
   Future<List<Task>> fetchUserTasks(Future<List<Task>> allFlatTasks) async {
     final tasks = await allFlatTasks;
-    return tasks.where((t) => t.assignedTo == user.username).toList();
+    return tasks.where((t) => t.assignedTo == user.userRef).toList();
     // Replace with actual fetch logic based on the user
     // return await getTasksForUser(user.id);
   }

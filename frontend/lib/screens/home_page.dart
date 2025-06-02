@@ -257,7 +257,7 @@ class _HomePageState extends State<HomePage> {
                 ),
                 builder: (context) => ListView(
                   shrinkWrap: true,
-                  children: users.where((u) => u != user).map((u) => ListTile(
+                  children: users.where((u) => u.username != user.username).map((u) => ListTile(
                     title: Text(u.name),
                     onTap: () {
                       Navigator.pop(context); // Close the sheet
@@ -309,7 +309,7 @@ class _HomePageState extends State<HomePage> {
     if (querySnap.docs.isNotEmpty) {
       allFlatTasks = querySnap.docs.map((doc) {
         final data = doc.data();
-        return Task.fromFirestore(doc, isOneOff: data['isOneOff']!);
+        return Task.fromFirestore(doc, isOneOff: true);
       }).toList();
     }
     return allFlatTasks;

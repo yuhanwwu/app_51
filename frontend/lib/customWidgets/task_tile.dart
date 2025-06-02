@@ -60,7 +60,7 @@ class _TaskTileState extends State<TaskTile> {
   Future<void> _claimTask() async {
     try {
       await FirebaseFirestore.instance
-          .collection('tasks')
+          .collection('Tasks')
           .doc(task.taskId)
           .update({'assignedTo': widget.userRef});
 
@@ -95,7 +95,7 @@ class _TaskTileState extends State<TaskTile> {
 
     try {
       await FirebaseFirestore.instance
-          .collection('tasks')
+          .collection('Tasks')
           .doc(task.taskId)
           .update(updateData);
 

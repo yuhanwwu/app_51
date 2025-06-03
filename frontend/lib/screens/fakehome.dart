@@ -164,9 +164,9 @@
 //     );
 // }
 
-// // 
+// //
 // // USER IS NOT A DOCUMENT REFERENCE
-// // 
+// //
 //   Future<List<User>> fetchAllUsers(DocumentReference flat) async {
 //     List<User> allUsers = [];
 //     final queryRef = FirebaseFirestore.instance
@@ -182,7 +182,6 @@
 //     return allUsers;
 
 //   }
-
 
 //   Future<List<Task>> fetchAllFlatTasks(DocumentReference flat) async {
 //     List<Task> allFlatTasks = [];
@@ -212,7 +211,6 @@
 //     final tasks = await allFlatTasks;
 //     return tasks.where((t) => !t.isOneOff).toList();
 //   }
-
 
 //   // Future<List<Task>> fetchOneOffTasks(DocumentReference flat) async {
 //   //   List<Task> oneOffTasks = [];

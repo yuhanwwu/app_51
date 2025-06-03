@@ -7,12 +7,11 @@ import '../models/user.dart';
 import '../models/flat.dart';
 import 'add_task.dart';
 import 'nudge_user.dart';
-
+import '../customWidgets/task_tile.dart';
 
 class HomePage extends StatefulWidget {
   final User user;
-  const HomePage({Key? key, required this.user})
-    : super(key: key);
+  const HomePage({Key? key, required this.user}) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -99,9 +98,10 @@ class _HomePageState extends State<HomePage> {
                               return ListView(
                                 children: oneOffTasks
                                     .map(
-                                      (e) => ListTile(
-                                        title: Text(e.description),
-                                        subtitle: const Text("One off"),
+                                      (e) => TaskTile(
+                                        task: e,
+                                        userRef: userRef,
+                                        onDone: _loadTasks,
                                       ),
                                     )
                                     .toList(),
@@ -154,9 +154,10 @@ class _HomePageState extends State<HomePage> {
                               return ListView(
                                 children: repeatTasks
                                     .map(
-                                      (e) => ListTile(
-                                        title: Text(e.description),
-                                        subtitle: const Text("Repeat"),
+                                      (e) => TaskTile(
+                                        task: e,
+                                        userRef: userRef,
+                                        onDone: _loadTasks,
                                       ),
                                     )
                                     .toList(),
@@ -203,9 +204,10 @@ class _HomePageState extends State<HomePage> {
                         return ListView(
                           children: repeatTasks
                               .map(
-                                (e) => ListTile(
-                                  title: Text(e.description),
-                                  subtitle: const Text("Unclaimed"),
+                                (e) => TaskTile(
+                                  task: e,
+                                  userRef: userRef,
+                                  onDone: _loadTasks,
                                 ),
                               )
                               .toList(),
@@ -224,63 +226,76 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       bottomNavigationBar: Container(
-      color: Colors.grey[200],
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          ElevatedButton(
-            onPressed: () {
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                backgroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                ),
-                builder: (context) => FractionallySizedBox(
-                  heightFactor: 0.8,
-                  child: TaskInputScreen(curUser: user),
-                ),
-              );
-            },
-            child: Text('Add Task'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final users = await fetchAllUsers(flatDoc); // You need to define this function
-              showModalBottomSheet(
-                context: context,
-                backgroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                ),
-                builder: (context) => ListView(
-                  shrinkWrap: true,
-                  children: users.where((u) => u.username != user.username).map((u) => ListTile(
-                    title: Text(u.name),
-                    onTap: () {
-                      Navigator.pop(context); // Close the sheet
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => NudgeUserPage(user: u, allFlatTasks: _allFlatTasks),
-                        ),
-                      );
-                    },
-                  )).toList(),
-                ),
-              );
-            },
-            child: Text('View Flatmates\' Tasks'),
-          ),
-        ],
+        color: Colors.grey[200],
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(20),
+                    ),
+                  ),
+                  builder: (context) => FractionallySizedBox(
+                    heightFactor: 0.8,
+                    child: TaskInputScreen(curUser: user, userRef: userRef),
+                  ),
+                );
+              },
+              child: Text('Add Task'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final users = await fetchAllUsers(
+                  flatDoc,
+                ); // You need to define this function
+                showModalBottomSheet(
+                  context: context,
+                  backgroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(20),
+                    ),
+                  ),
+                  builder: (context) => ListView(
+                    shrinkWrap: true,
+                    children: users
+                        .where((u) => u.username != user.username)
+                        .map(
+                          (u) => ListTile(
+                            title: Text(u.name),
+                            onTap: () {
+                              Navigator.pop(context); // Close the sheet
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => NudgeUserPage(
+                                    user: u,
+                                    allFlatTasks: _allFlatTasks,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        )
+                        .toList(),
+                  ),
+                );
+              },
+              child: Text('View Flatmates\' Tasks'),
+            ),
+          ],
+        ),
       ),
-    ),
     );
   }
-
 
   Future<List<User>> fetchAllUsers(DocumentReference flat) async {
     List<User> allUsers = [];
@@ -295,7 +310,6 @@ class _HomePageState extends State<HomePage> {
       }).toList();
     }
     return allUsers;
-
   }
 
   Future<List<Task>> fetchAllFlatTasks(DocumentReference flat) async {
@@ -337,10 +351,6 @@ class _HomePageState extends State<HomePage> {
     Future<List<Task>> allFlatTasks,
   ) async {
     final tasks = await allFlatTasks;
-    return tasks.where((t) => (t.assignedTo == null)).toList();
+    return tasks.where((t) => (t.assignedTo == null && t.isOneOff)).toList();
   }
 }
-
-
-
-

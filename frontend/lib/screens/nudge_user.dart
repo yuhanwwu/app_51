@@ -36,6 +36,21 @@ class NudgeUserPage extends StatelessWidget {
               children: tasks.map((e) => ListTile(
                 title: Text(e.description),
                 subtitle: Text(e.isOneOff ? "One-off" : "Repeat"),
+                trailing: IconButton(
+                  icon: Icon(Icons.notifications_active),
+                  tooltip: 'Nudge',
+                  onPressed: () async {
+                    await FirebaseFirestore.instance.collection('nudges').add({
+                      'userId': user.username,       // or user.username if that's your doc ID
+                      'taskId': e.taskId,
+                      'timestamp': Timestamp.now(),
+                    });
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Nudge sent to ${user.name}')),
+                    );
+                  },
+                ),
               )).toList(),
             );
           } else {
@@ -45,4 +60,22 @@ class NudgeUserPage extends StatelessWidget {
       ),
     );
   }
+}
+
+Future<void> sendNudgeNotification(User user, Task task) async {
+  // Assume you store the FCM token in the user document
+  final userDoc = await FirebaseFirestore.instance
+      .collection('users')
+      .doc(user.username)
+      .get();
+
+  final token = userDoc['fcmToken'];
+
+  // if (token != null) {
+  //   await sendFCM(
+  //     token: token,
+  //     title: "Nudge: ${task.description}",
+  //     body: "${user.name}, please check this task.",
+  //   );
+  // }
 }

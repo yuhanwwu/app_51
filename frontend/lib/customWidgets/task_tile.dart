@@ -133,7 +133,10 @@ class _TaskTileState extends State<TaskTile> {
   @override
   Widget build(BuildContext context) {
     if (task.isOneOff == true) {
-      return Card(
+      return FutureBuilder(
+        future: getNameFromDocRef(task.assignedTo), 
+        builder: (context, snapshot) {
+        return Card(
         margin: EdgeInsets.all(12),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -170,10 +173,12 @@ class _TaskTileState extends State<TaskTile> {
                 ),
 
               if (task.assignedTo != null && task.assignedTo != widget.userRef)
-                Text("Claimed by: ${task.assignedTo.toString()}"),
+                Text("Claimed by: ${snapshot.data}"),
             ],
           ),
         ),
+      );
+        }
       );
     } else {
       return FutureBuilder(

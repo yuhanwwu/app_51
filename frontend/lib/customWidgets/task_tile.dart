@@ -35,7 +35,7 @@ import 'package:intl/intl.dart';
 class TaskTile extends StatefulWidget {
   final Task task;
   final DocumentReference userRef;
-  final VoidCallback? onDone;
+  final VoidCallback onDone;
 
   const TaskTile({
     Key? key,
@@ -84,6 +84,7 @@ class _TaskTileState extends State<TaskTile> {
         context,
       ).showSnackBar(SnackBar(content: Text('Error claiming task: $e')));
     }
+    widget.onDone();
   }
 
   Future<void> _markDone() async {
@@ -119,6 +120,7 @@ class _TaskTileState extends State<TaskTile> {
         context,
       ).showSnackBar(SnackBar(content: Text('Error marking task as done: $e')));
     }
+    widget.onDone();
   }
 
   @override

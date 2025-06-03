@@ -11,7 +11,7 @@ import '../customWidgets/task_tile.dart';
 
 class HomePage extends StatefulWidget {
   final User user;
-  const HomePage({Key? key, required this.user}) : super(key: key);
+  const HomePage({super.key, required this.user});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -91,10 +91,11 @@ class _HomePageState extends State<HomePage> {
                               );
                             } else if (snapshot.hasData) {
                               final oneOffTasks = snapshot.data!;
-                              if (oneOffTasks.isEmpty)
+                              if (oneOffTasks.isEmpty) {
                                 return const Center(
                                   child: Text("No one-off tasks left!"),
                                 );
+                              }
                               return ListView(
                                 children: oneOffTasks
                                     .map(
@@ -182,7 +183,7 @@ class _HomePageState extends State<HomePage> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
-                    "Unclaimed tasks",
+                    "Unclaimed Tasks",
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -301,7 +302,8 @@ class _HomePageState extends State<HomePage> {
     List<User> allUsers = [];
     final queryRef = FirebaseFirestore.instance
         .collection('Users')
-        .where('flat', isEqualTo: flat);
+        .where('flat', isEqualTo: flat)
+        .orderBy('name');
     final querySnap = await queryRef.get();
     if (querySnap.docs.isNotEmpty) {
       // print("in flat tasks");

@@ -195,7 +195,7 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
                                   .set(data);
 
                               // set repeat tasks based on chosen plan
-                              populateRepeatTasks(plan);
+                              await populateRepeatTasks(plan);
 
                               // Mark questionnaire as done
                               await FirebaseFirestore.instance
@@ -341,7 +341,7 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
           });
         }
         
-          void populateRepeatTasks(String plan) async {
+        Future<void> populateRepeatTasks(String plan) async {
             // 1. Fetch the user's flat reference
             final userDoc = await FirebaseFirestore.instance
               .collection('Users')
@@ -355,7 +355,11 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
             final userData = userDoc.data();
             final flatRef = userData!['flat']; // Should be a DocumentReference
             final now = DateTime.now();
-            final setDate = DateFormat('yyyy-MM-dd').format(now);
+            final setDate = DateFormat('yyyy-MM-dd').format(now);      
+
+            // fetch existing flat's chore preferences
+            final flatSnapshot = await flatRef.get();
+            final flatData = flatSnapshot.data() as Map<String, dynamic>;
 
             // 2. Fetch the plan's chores
             final chores = await fetchChorePlan(plan);
@@ -385,18 +389,27 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
               default:
                 description = entry.key;
             }
+            
+            final int existingSum = flatData[entry.key]*flatData['numOfCompletedQuestionnaires'];
+            flatData['numOfCompletedQuestionnaires'] += 1;
+            flatData[entry.key] = ((existingSum + entry.value) / flatData['numOfCompletedQuestionnaires']).round();
+                       
+            if (flatData['numOfCompletedQuestionnaires'] == 1) {
               await FirebaseFirestore.instance.collection('Tasks').add({
-                'description': description,
-                'isOneOff': false,
-                'assignedFlat': flatRef,
-                'assignedTo': userRef,
-                'done': null,
-                'setDate': setDate,
-                'priority': false,
-                'frequency': entry.value, // e.g. every X days
-                'lastDoneOn': null,
-                'lastDoneBy': null,
-              });
-            }
+              'description': description,
+              'isOneOff': false,
+              'assignedFlat': flatRef,
+              'assignedTo': userRef,
+              'done': null,
+              'setDate': setDate,
+              'priority': false,
+              'frequency': entry.value, // e.g. every X days
+              'lastDoneOn': null,
+              'lastDoneBy': null,
+            });
           }
+            
+          }
+          await flatRef.update(flatData);
+        }
 }

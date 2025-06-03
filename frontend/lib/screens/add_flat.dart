@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:frontend/models/user.dart';
 import 'package:frontend/screens/login.dart';
-import 'package:frontend/screens/questionnaire.dart';
 
 class AddFlatPage extends StatefulWidget {
   final String username;
@@ -57,6 +56,7 @@ class _AddFlatPageState extends State<AddFlatPage> {
     }).toList();
 
     final usernames = flatmates.map((f) => f['username']!).toList();
+    // final numOfUsers = usernames.length;
     final localUnique = usernames.toSet().length == usernames.length;
 
     if (!localUnique) {
@@ -80,6 +80,13 @@ class _AddFlatPageState extends State<AddFlatPage> {
     // Add flat and users to Firestore
     final flatRef = await FirebaseFirestore.instance.collection('Flat').add({
       'name': flatName,
+      'numOfCompletedQuestionnaires': 0,
+      'bathroom': 0,
+      'dishes': 0,
+      'kitchen': 0,
+      'laundry': 0,
+      'recycling': 0,
+      'rubbish': 0
       // 'createdAt': FieldValue.serverTimestamp(),
     });
 

@@ -1,9 +1,6 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
 import '../models/user.dart';
 import 'add_flat.dart';
-import 'user_tasks.dart';
 import '../constants/colors.dart';
 import 'home_page.dart';
 

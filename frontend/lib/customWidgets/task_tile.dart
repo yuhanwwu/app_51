@@ -5,6 +5,7 @@ import 'package:frontend/screens/flat_tasks.dart';
 import '../../models/task.dart';
 import '../../models/user.dart';
 import '../../models/flat.dart';
+import '../screens/home_page.dart';
 
 // class TaskTile extends StatelessWidget {
 //   final Task task;
@@ -38,11 +39,11 @@ class TaskTile extends StatefulWidget {
   final VoidCallback onDone;
 
   const TaskTile({
-    Key? key,
+    super.key,
     required this.task,
     required this.userRef,
     required this.onDone,
-  }) : super(key: key);
+  });
 
   @override
   State<TaskTile> createState() => _TaskTileState();
@@ -77,6 +78,7 @@ class _TaskTileState extends State<TaskTile> {
           frequency: task.frequency,
           lastDoneOn: task.lastDoneOn,
           lastDoneBy: task.lastDoneBy,
+          isPersonal: task.isPersonal,
         );
       });
     } catch (e) {
@@ -87,12 +89,16 @@ class _TaskTileState extends State<TaskTile> {
     widget.onDone();
   }
 
-  Future<void> _markDone() async {
+  // modify so that for a 'flat task', will assign to next flatmate in round robin manner
+  Future<void> _markDone(DocumentReference nextUser) async {
     final now = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
+    // final allUsers = await fetchAllUsers(widget.assignedFlat);
     final updateData = task.isOneOff
-        ? {'done': true}
-        : {'lastDoneOn': now, 'lastDoneBy': widget.userRef};
+        ? {'done': true} 
+        : task.isPersonal ? {'lastDoneOn': now, 'lastDoneBy': widget.userRef}
+          : {'lastDoneOn': now, 'lastDoneBy': nextUser};
+        // : {'lastDoneOn': now, 'lastDoneBy': widget.userRef};
 
     try {
       await FirebaseFirestore.instance
@@ -113,6 +119,7 @@ class _TaskTileState extends State<TaskTile> {
           frequency: task.frequency,
           lastDoneOn: task.isOneOff ? null : now,
           lastDoneBy: task.isOneOff ? null : widget.userRef,
+          isPersonal: task.isOneOff ? false :                                                                                                                                                                                                                                                                                                                                                                                                                                     task.isPersonal,
         );
       });
     } catch (e) {
@@ -154,7 +161,7 @@ class _TaskTileState extends State<TaskTile> {
                 ElevatedButton(
                   onPressed: task.isOneOff && task.done == true
                       ? null
-                      : _markDone,
+                      : () {_markDone(widget.userRef);},
                   child: Text(
                     task.isOneOff && task.done == true
                         ? 'Already Done'
@@ -194,7 +201,15 @@ class _TaskTileState extends State<TaskTile> {
 
                   if (task.assignedTo == widget.userRef)
                     ElevatedButton(
-                      onPressed: _markDone,
+                      onPressed: () async {
+                        DocumentReference next = widget.userRef;
+                        if (!task.isPersonal) {
+                          final users = await fetchAllUserRefs(task.assignedFlat);
+                          final nextIndex = (users.indexOf(widget.userRef) + 1) % users.length;
+                          next = users[nextIndex];
+                        }
+                        _markDone(next);
+                      },
                       child: Text('Mark as Done'),
                     ),
                 ],
@@ -215,3 +230,17 @@ class _TaskTileState extends State<TaskTile> {
     }
   }
 }
+  Future<List<DocumentReference>> fetchAllUserRefs(DocumentReference flat) async {
+    List<DocumentReference> allUsers = [];
+    final queryRef = FirebaseFirestore.instance
+        .collection('Users')
+        .where('flat', isEqualTo: flat)
+        .orderBy('name');
+    final querySnap = await queryRef.get();
+    if (querySnap.docs.isNotEmpty) {
+      // print("in flat tasks");
+      allUsers = querySnap.docs.map((doc) =>
+         doc.reference).toList();
+    }
+    return allUsers;
+  }

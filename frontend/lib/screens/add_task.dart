@@ -49,7 +49,7 @@ class _TaskInputScreenState extends State<TaskInputScreen> {
       'isOneOff': _isOneOff,
       'assignedFlat': assignedFlat,
       'assignedTo':
-          widget.userRef, //_isOneOff ? null : 'TO_BE_FILLED_IF_NEEDED',
+          _isOneOff ? null : widget.userRef,
       'done': _isOneOff ? false : null,
       'setDate': _isOneOff
           ? DateFormat('yyyy-MM-dd').format(DateTime.now())

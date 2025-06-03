@@ -7,11 +7,13 @@ import '../models/user.dart';
 class TaskInputScreen extends StatefulWidget {
   final User curUser;
   final DocumentReference userRef;
+  final VoidCallback onTaskSubmitted;
 
   const TaskInputScreen({
     Key? key,
     required this.curUser,
     required this.userRef,
+    required this.onTaskSubmitted,
   }) : super(key: key);
 
   @override
@@ -63,6 +65,7 @@ class _TaskInputScreenState extends State<TaskInputScreen> {
     await FirebaseFirestore.instance.collection('Tasks').add(taskData);
     // print('Task successfully added!');
 
+    widget.onTaskSubmitted();
     Navigator.pop(context);
   }
 

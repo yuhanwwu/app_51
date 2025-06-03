@@ -243,7 +243,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   builder: (context) => FractionallySizedBox(
                     heightFactor: 0.8,
-                    child: TaskInputScreen(curUser: user, userRef: userRef),
+                    child: TaskInputScreen(curUser: user, userRef: userRef, onTaskSubmitted: _loadTasks),
                   ),
                 );
               },

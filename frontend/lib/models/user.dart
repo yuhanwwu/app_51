@@ -19,9 +19,9 @@ class User {
     return User(
       userRef: doc.reference,
       username: doc.id,
-      name: data['name'],
+      name: data['name'] ?? '',
       flat: data['flat'],
-      questionnaireDone: data['questionnaireDone']
+      questionnaireDone: data['questionnaireDone'] ?? false,
       );
   }
 }

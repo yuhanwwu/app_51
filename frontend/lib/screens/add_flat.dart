@@ -90,18 +90,17 @@ class _AddFlatPageState extends State<AddFlatPage> {
       // 'createdAt': FieldValue.serverTimestamp(),
     });
 
-    for (var flatmate in flatmates) {
+    await Future.wait(flatmates.map((flatmate) async {
       await FirebaseFirestore.instance
           .collection('Users')
           .doc(flatmate['username'])
           .set({
             'flat': flatRef,
             'name': flatmate['name'],
-            // 'flatId': flatRef.id,
+            'questionnaireDone': false,
           });
-    }
+    }));
 
-    // Navigate to QuestionnairePage
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(

@@ -390,11 +390,12 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
                 description = entry.key;
             }
             
-            final int existingSum = flatData[entry.key]*flatData['numOfCompletedQuestionnaires'];
-            flatData['numOfCompletedQuestionnaires'] += 1;
-            flatData[entry.key] = ((existingSum + entry.value) / flatData['numOfCompletedQuestionnaires']).round();
+            final int existingSum = flatData[entry.key.trim()]*flatData['numOfCompletedQuestionnaires'];
+            // flatData['numOfCompletedQuestionnaires'] += 1;
+            flatData[entry.key.trim()] = ((existingSum + entry.value) / (flatData['numOfCompletedQuestionnaires'] + 1)).round();
+
                        
-            if (flatData['numOfCompletedQuestionnaires'] == 1) {
+            if (flatData['numOfCompletedQuestionnaires'] == 0) {
               await FirebaseFirestore.instance.collection('Tasks').add({
               'description': description,
               'isOneOff': false,
@@ -406,10 +407,13 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
               'frequency': entry.value, // e.g. every X days
               'lastDoneOn': null,
               'lastDoneBy': null,
+              // 'isPersonal': true,
             });
           }
             
           }
+
+          flatData['numOfCompletedQuestionnaires'] += 1;
           await flatRef.update(flatData);
         }
 }

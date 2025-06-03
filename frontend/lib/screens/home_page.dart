@@ -11,7 +11,9 @@ import '../customWidgets/task_tile.dart';
 
 class HomePage extends StatefulWidget {
   final User user;
-  const HomePage({super.key, required this.user});
+  // const HomePage({super.key, required this.user});
+  const HomePage({Key? key, required this.user}) : super(key: key);
+
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -302,8 +304,7 @@ class _HomePageState extends State<HomePage> {
     List<User> allUsers = [];
     final queryRef = FirebaseFirestore.instance
         .collection('Users')
-        .where('flat', isEqualTo: flat)
-        .orderBy('name');
+        .where('flat', isEqualTo: flat);
     final querySnap = await queryRef.get();
     if (querySnap.docs.isNotEmpty) {
       allUsers = querySnap.docs.map((doc) {
@@ -325,7 +326,7 @@ class _HomePageState extends State<HomePage> {
     if (querySnap.docs.isNotEmpty) {
       allFlatTasks = querySnap.docs.map((doc) {
         final data = doc.data();
-        return Task.fromFirestore(doc, isOneOff: true);
+        return Task.fromFirestore(doc);
       }).toList();
     }
     return allFlatTasks;

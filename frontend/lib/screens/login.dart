@@ -28,7 +28,12 @@ class _LoginPageState extends State<LoginPage> {
     final docSnap = await docRef.get();
 
     if (docSnap.exists) {
-      return User.fromFirestore(docSnap);
+      try {
+        return User.fromFirestore(docSnap);
+    } catch (e) {
+        print('Error in User.fromFirestore: $e');
+        return null;
+    }
     } else {
       return null;
     }

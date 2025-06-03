@@ -58,7 +58,7 @@ class Task {
   final int frequency; //0 for one off
   final String? lastDoneOn; //? for repeat
   final DocumentReference? lastDoneBy; //? for repeat
-  final bool isPersonal; //false for one off
+  // final bool isPersonal; //false for one off
 
   Task({
     required this.description,
@@ -72,11 +72,12 @@ class Task {
     required this.frequency,
     this.lastDoneOn,
     this.lastDoneBy,
-    required this.isPersonal,
+    // required this.isPersonal,
   });
 
-  factory Task.fromFirestore(DocumentSnapshot doc, {required bool isOneOff}) {
+  factory Task.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
+    final isOneOff = data['isOneOff'] as bool;
     return Task(
       description: data['description'],
       isOneOff: data['isOneOff'] ?? false,
@@ -89,9 +90,10 @@ class Task {
       setDate: isOneOff ? data['setDate'] : null,
       priority: isOneOff ? (data['priority'] as bool? ?? false) : false,
       frequency: isOneOff ? 0 : data['frequency'] as int,
+        // frequency: isOneOff ? 0 : (data['frequency'] as int? ?? 0),
       lastDoneOn: isOneOff ? null : data['lastDoneOn'] as String?,
       lastDoneBy: isOneOff ? null : data['lastDoneBy'] as DocumentReference?,
-      isPersonal: isOneOff ? false : data['isPersonal'] as bool,
+      // isPersonal: isOneOff ? false : data['isPersonal'] as bool,
      );
   }
 }

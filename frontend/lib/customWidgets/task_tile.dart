@@ -78,7 +78,7 @@ class _TaskTileState extends State<TaskTile> {
           frequency: task.frequency,
           lastDoneOn: task.lastDoneOn,
           lastDoneBy: task.lastDoneBy,
-          isPersonal: task.isPersonal,
+          // isPersonal: task.isPersonal,
         );
       });
     } catch (e) {
@@ -89,16 +89,12 @@ class _TaskTileState extends State<TaskTile> {
     widget.onDone();
   }
 
-  // modify so that for a 'flat task', will assign to next flatmate in round robin manner
-  Future<void> _markDone(DocumentReference nextUser) async {
+   Future<void> _markDone() async {
     final now = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
-    // final allUsers = await fetchAllUsers(widget.assignedFlat);
     final updateData = task.isOneOff
-        ? {'done': true} 
-        : task.isPersonal ? {'lastDoneOn': now, 'lastDoneBy': widget.userRef}
-          : {'lastDoneOn': now, 'lastDoneBy': nextUser};
-        // : {'lastDoneOn': now, 'lastDoneBy': widget.userRef};
+        ? {'done': true}
+        : {'lastDoneOn': now, 'lastDoneBy': widget.userRef};
 
     try {
       await FirebaseFirestore.instance
@@ -119,7 +115,6 @@ class _TaskTileState extends State<TaskTile> {
           frequency: task.frequency,
           lastDoneOn: task.isOneOff ? null : now,
           lastDoneBy: task.isOneOff ? null : widget.userRef,
-          isPersonal: task.isOneOff ? false :                                                                                                                                                                                                                                                                                                                                                                                                                                     task.isPersonal,
         );
       });
     } catch (e) {
@@ -129,6 +124,47 @@ class _TaskTileState extends State<TaskTile> {
     }
     widget.onDone();
   }
+
+  // modify so that for a 'flat task', will assign to next flatmate in round robin manner
+  // Future<void> _markDone(DocumentReference nextUser) async {
+  //   final now = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+  //   // final allUsers = await fetchAllUsers(widget.assignedFlat);
+  //   final updateData = task.isOneOff
+  //       ? {'done': true} 
+  //       // : task.isPersonal ? {'lastDoneOn': now, 'lastDoneBy': widget.userRef}
+  //         // : {'lastDoneOn': now, 'lastDoneBy': widget.userRef, 'assignedTo': nextUser};
+  //       : {'lastDoneOn': now, 'lastDoneBy': widget.userRef};
+
+  //   try {
+  //     await FirebaseFirestore.instance
+  //         .collection('Tasks')
+  //         .doc(task.taskId)
+  //         .update(updateData);
+
+  //     setState(() {
+  //       task = Task(
+  //         description: task.description,
+  //         isOneOff: task.isOneOff,
+  //         taskId: task.taskId,
+  //         assignedFlat: task.assignedFlat,
+  //         assignedTo: task.assignedTo,
+  //         done: task.isOneOff ? true : task.done,
+  //         setDate: task.setDate,
+  //         priority: task.priority,
+  //         frequency: task.frequency,
+  //         lastDoneOn: task.isOneOff ? null : now,
+  //         lastDoneBy: task.isOneOff ? null : widget.userRef,
+  //         // isPersonal: task.isOneOff ? false : task.isPersonal,
+  //         );
+  //     });
+  //   } catch (e) {
+  //     ScaffoldMessenger.of(
+  //       context,
+  //     ).showSnackBar(SnackBar(content: Text('Error marking task as done: $e')));
+  //   }
+  //   widget.onDone();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -163,8 +199,8 @@ class _TaskTileState extends State<TaskTile> {
               if (task.assignedTo == widget.userRef)
                 ElevatedButton(
                   onPressed: task.isOneOff && task.done == true
-                      ? null
-                      : () {_markDone(widget.userRef);},
+                      ? null : _markDone,
+                      // : () {_markDone(widget.userRef);},
                   child: Text(
                     task.isOneOff && task.done == true
                         ? 'Already Done'
@@ -197,24 +233,32 @@ class _TaskTileState extends State<TaskTile> {
                   ),
                   SizedBox(height: 10),
                   Text("Frequency: every ${task.frequency} day(s)"),
-                  if (task.lastDoneOn != null)
-                    Text(
-                      "Last done on: ${task.lastDoneOn} by ${task.lastDoneBy ?? "Unknown"}",
-                    ), //should never be unknown tho
+                  if (task.lastDoneOn != null && task.lastDoneBy != null)
+                    FutureBuilder<String>(
+                      future: getNameFromDocRef(task.lastDoneBy),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return Text("Last done on: ${task.lastDoneOn} by ...");
+                        }
+                        return Text(
+                          "Last done on: ${task.lastDoneOn} by ${snapshot.data ?? "Unknown"}",
+                        );
+                      },
+                    ),
                   Text("Assigned to: ${snapshot.data}"),
                   SizedBox(height: 20),
 
                   if (task.assignedTo == widget.userRef)
-                    ElevatedButton(
-                      onPressed: () async {
-                        DocumentReference next = widget.userRef;
-                        if (!task.isPersonal) {
-                          final users = await fetchAllUserRefs(task.assignedFlat);
-                          final nextIndex = (users.indexOf(widget.userRef) + 1) % users.length;
-                          next = users[nextIndex];
-                        }
-                        _markDone(next);
-                      },
+                    ElevatedButton(onPressed : _markDone,
+                      // onPressed: () async {
+                      //   DocumentReference next = widget.userRef;
+                      //   if (!task.isPersonal) {
+                      //     final users = await fetchAllUserRefs(task.assignedFlat);
+                      //     final nextIndex = (users.indexOf(widget.userRef) + 1) % users.length;
+                      //     next = users[nextIndex];
+                      //   }
+                      //   await _markDone(next);
+                      // },
                       child: Text('Mark as Done'),
                     ),
                 ],

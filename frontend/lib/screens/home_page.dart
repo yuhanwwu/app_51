@@ -302,7 +302,6 @@ class _HomePageState extends State<HomePage> {
         .where('flat', isEqualTo: flat);
     final querySnap = await queryRef.get();
     if (querySnap.docs.isNotEmpty) {
-      // print("in flat tasks");
       allUsers = querySnap.docs.map((doc) {
         return User.fromFirestore(doc);
       }).toList();
@@ -328,19 +327,24 @@ class _HomePageState extends State<HomePage> {
     return allFlatTasks;
   }
 
-  // Future<List<Task>> fetchOneOffTasks(Future<List<Task>> allFlatTasks) async {
-  //   final tasks = await allFlatTasks;
-  //   return tasks.where((t) => t.isOneOff).toList();
-  // }
-
   Future<List<Task>> fetchUserOneOffTasks(
     Future<List<Task>> allFlatTasks,
   ) async {
     final tasks = await allFlatTasks;
     return tasks.where((t) => 
-    t.assignedTo == userRef && 
-    t.isOneOff &&
-    (t.done ?? false) ? false : true ).toList();
+    (t.assignedTo == userRef) && 
+    (t.isOneOff) &&
+    ((t.done ?? false) ? false : true)).toList()
+    ..sort((a, b) {
+      final priorityCompare = (b.priority ? 1 : 0) - (a.priority ? 1 : 0);
+      if (priorityCompare != 0) return priorityCompare;
+
+      if (a.setDate == null && b.setDate == null) return 0;
+      if (a.setDate == null) return 1;  // 🐌 a comes after
+      if (b.setDate == null) return -1; // 🚀 a comes before
+
+      return a.setDate!.compareTo(b.setDate!);
+    });
   }
 
   Future<List<Task>> fetchRepeatTasks(Future<List<Task>> allFlatTasks) async {
@@ -352,6 +356,16 @@ class _HomePageState extends State<HomePage> {
     Future<List<Task>> allFlatTasks,
   ) async {
     final tasks = await allFlatTasks;
-    return tasks.where((t) => (t.assignedTo == null && t.isOneOff)).toList();
+    return tasks.where((t) => (t.assignedTo == null && t.isOneOff)).toList()
+    ..sort((a, b) {
+      final priorityCompare = (b.priority ? 1 : 0) - (a.priority ? 1 : 0);
+      if (priorityCompare != 0) return priorityCompare;
+
+      if (a.setDate == null && b.setDate == null) return 0;
+      if (a.setDate == null) return 1;  // 🐌 a comes after
+      if (b.setDate == null) return -1; // 🚀 a comes before
+
+      return a.setDate!.compareTo(b.setDate!);
+    });
   }
 }

@@ -35,7 +35,7 @@ import 'package:intl/intl.dart';
 class TaskTile extends StatefulWidget {
   final Task task;
   final DocumentReference userRef;
-  final VoidCallback? onDone;
+  final VoidCallback onDone;
 
   const TaskTile({
     Key? key,
@@ -84,6 +84,7 @@ class _TaskTileState extends State<TaskTile> {
         context,
       ).showSnackBar(SnackBar(content: Text('Error claiming task: $e')));
     }
+    widget.onDone();
   }
 
   Future<void> _markDone() async {
@@ -119,6 +120,7 @@ class _TaskTileState extends State<TaskTile> {
         context,
       ).showSnackBar(SnackBar(content: Text('Error marking task as done: $e')));
     }
+    widget.onDone();
   }
 
   @override
@@ -168,7 +170,7 @@ class _TaskTileState extends State<TaskTile> {
       );
     } else {
       return FutureBuilder(
-        future: getUserFromDocRef(task.assignedTo!),
+        future: getNameFromDocRef(task.assignedTo),
         builder: (context, snapshot) {
           return Card(
             margin: EdgeInsets.all(12),
@@ -204,8 +206,12 @@ class _TaskTileState extends State<TaskTile> {
     }
   }
 
-  Future<String> getUserFromDocRef(DocumentReference dref) async {
-    final data = await dref.get();
-    return data['name'];
+  Future<String> getNameFromDocRef(DocumentReference? dref) async {
+    if (dref != null) {
+      final data = await dref.get();
+      return data['name'];
+    } else {
+      return "Nobody";
+    }
   }
 }

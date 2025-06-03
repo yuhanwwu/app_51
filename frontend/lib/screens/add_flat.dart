@@ -88,7 +88,7 @@ class _AddFlatPageState extends State<AddFlatPage> {
           .collection('Users')
           .doc(flatmate['username'])
           .set({
-            'flat': flatName,
+            'flat': flatRef,
             'name': flatmate['name'],
             // 'flatId': flatRef.id,
           });

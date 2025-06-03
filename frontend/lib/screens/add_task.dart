@@ -7,11 +7,13 @@ import '../models/user.dart';
 class TaskInputScreen extends StatefulWidget {
   final User curUser;
   final DocumentReference userRef;
+  final VoidCallback onTaskSubmitted;
 
   const TaskInputScreen({
     Key? key,
     required this.curUser,
     required this.userRef,
+    required this.onTaskSubmitted,
   }) : super(key: key);
 
   @override
@@ -47,7 +49,7 @@ class _TaskInputScreenState extends State<TaskInputScreen> {
       'isOneOff': _isOneOff,
       'assignedFlat': assignedFlat,
       'assignedTo':
-          widget.userRef, //_isOneOff ? null : 'TO_BE_FILLED_IF_NEEDED',
+          _isOneOff ? null : widget.userRef,
       'done': _isOneOff ? false : null,
       'setDate': _isOneOff
           ? DateFormat('yyyy-MM-dd').format(DateTime.now())
@@ -63,6 +65,7 @@ class _TaskInputScreenState extends State<TaskInputScreen> {
     await FirebaseFirestore.instance.collection('Tasks').add(taskData);
     // print('Task successfully added!');
 
+    widget.onTaskSubmitted();
     Navigator.pop(context);
   }
 

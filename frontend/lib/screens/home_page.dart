@@ -337,7 +337,10 @@ class _HomePageState extends State<HomePage> {
     Future<List<Task>> allFlatTasks,
   ) async {
     final tasks = await allFlatTasks;
-    return tasks.where((t) => t.assignedTo == userRef && t.isOneOff).toList();
+    return tasks.where((t) => 
+    t.assignedTo == userRef && 
+    t.isOneOff &&
+    (t.done ?? false) ? false : true ).toList();
   }
 
   Future<List<Task>> fetchRepeatTasks(Future<List<Task>> allFlatTasks) async {

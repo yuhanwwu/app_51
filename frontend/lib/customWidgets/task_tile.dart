@@ -245,7 +245,7 @@ class _TaskTileState extends State<TaskTile> {
                         );
                       },
                     ),
-                  Text("Assigned to: ${snapshot.data}"),
+                  // Text("Assigned to: ${snapshot.data}"),
                   SizedBox(height: 20),
 
                   if (task.assignedTo == widget.userRef)

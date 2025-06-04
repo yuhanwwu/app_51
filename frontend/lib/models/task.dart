@@ -48,10 +48,10 @@ class Task {
   final String taskId;
   final DocumentReference assignedFlat;
   final DocumentReference? assignedTo; //? for one off, required for repeat
+  final String setDate;
 
   //one off tasks
   final bool? done;
-  final String? setDate;
   final bool priority; //False for repeat
 
   //repeat tasks
@@ -67,7 +67,7 @@ class Task {
     required this.assignedFlat,
     this.assignedTo,
     this.done,
-    this.setDate,
+    required this.setDate,
     required this.priority,
     required this.frequency,
     this.lastDoneOn,
@@ -87,7 +87,7 @@ class Task {
           ? data['assignedTo'] as DocumentReference?
           : data['assignedTo'] as DocumentReference,
       done: isOneOff ? data['done'] : null,
-      setDate: isOneOff ? data['setDate'] : null,
+      setDate: data['setDate'],
       priority: isOneOff ? (data['priority'] as bool? ?? false) : false,
       frequency: isOneOff ? 0 : data['frequency'] as int,
         // frequency: isOneOff ? 0 : (data['frequency'] as int? ?? 0),

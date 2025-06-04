@@ -43,6 +43,7 @@ class Task {
   // }
 
   //needed for all tasks
+  final DocumentReference taskRef;
   final String description;
   final bool isOneOff;
   final String taskId;
@@ -61,6 +62,7 @@ class Task {
   final bool isPersonal; //false for one off
 
   Task({
+    required this.taskRef,
     required this.description,
     required this.isOneOff,
     required this.taskId,
@@ -79,6 +81,7 @@ class Task {
     final data = doc.data() as Map<String, dynamic>;
     final isOneOff = data['isOneOff'] as bool;
     return Task(
+      taskRef: doc.reference as DocumentReference,
       description: data['description'],
       isOneOff: data['isOneOff'] ?? false,
       taskId: doc.id,
@@ -90,10 +93,10 @@ class Task {
       setDate: isOneOff ? data['setDate'] : null,
       priority: isOneOff ? (data['priority'] as bool? ?? false) : false,
       frequency: isOneOff ? 0 : data['frequency'] as int,
-        // frequency: isOneOff ? 0 : (data['frequency'] as int? ?? 0),
+      // frequency: isOneOff ? 0 : (data['frequency'] as int? ?? 0),
       lastDoneOn: isOneOff ? null : data['lastDoneOn'] as String?,
       lastDoneBy: isOneOff ? null : data['lastDoneBy'] as DocumentReference?,
       isPersonal: isOneOff ? false : data['isPersonal'] as bool,
-     );
+    );
   }
 }

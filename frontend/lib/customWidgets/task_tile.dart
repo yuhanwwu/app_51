@@ -6,28 +6,6 @@ import '../../models/task.dart';
 import '../../models/user.dart';
 import '../../models/flat.dart';
 import '../screens/home_page.dart';
-
-// class TaskTile extends StatelessWidget {
-//   final Task task;
-//   final VoidCallback? onDone;
-//   final String curUser;
-
-//   const TaskTile({Key? key, required this.task, this.onDone, required this.curUser}) : super(key: key);
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return ListTile(
-//       title: Text(task.description),
-//       subtitle: Text(task.isOneOff
-//           ? 'Priority: ${task.priority ? "High" : "Normal"}'
-//           : 'Frequency: every ${task.frequency} days'),
-//       trailing: Icon(Icons.chevron_right),
-//       onTap: onTap,
-//     );
-//   }
-
-// }
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 // import 'models/task.dart'; // your Task class
@@ -57,6 +35,25 @@ class _TaskTileState extends State<TaskTile> {
     super.initState();
     task = widget.task;
   }
+
+  IconData getChoreIcon(String key) {
+  switch (key.trim()) {
+    case 'Cleaning the kitchen':
+      return Icons.kitchen;
+    case 'Cleaning the bathroom':
+      return Icons.bathtub;
+    case 'Doing laundry':
+      return Icons.local_laundry_service;
+    case 'Doing the dishes':
+      return Icons.restaurant;
+    case 'Taking out recycling':
+      return Icons.recycling;
+    case 'Taking out the trash':
+      return Icons.delete;
+    default:
+      return Icons.task_alt; // fallback icon
+  }
+}
 
   Future<void> _claimTask() async {
     try {
@@ -227,12 +224,21 @@ class _TaskTileState extends State<TaskTile> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    task.description,
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  Row(
+                    children: [
+                      Icon(getChoreIcon(task.description), color: const Color.fromARGB(255, 20, 0, 150), size: 28),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          task.description,
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
                   ),
                   SizedBox(height: 10),
-                  Text("Frequency: every ${task.frequency} day(s)"),
+                  
+                  Text("Frequency: ${formatDisplayFrequency(task.frequency)}"),
                   if (task.lastDoneOn != null && task.lastDoneBy != null)
                     FutureBuilder<String>(
                       future: getNameFromDocRef(task.lastDoneBy),
@@ -276,6 +282,16 @@ class _TaskTileState extends State<TaskTile> {
       return data['name'];
     } else {
       return "Nobody";
+    }
+  }
+  
+  formatDisplayFrequency(int frequency) {
+    if (frequency == 1) {
+      return 'Daily';
+    } else if (frequency == 7) {
+      return 'Weekly';
+    } else {
+      return 'Every $frequency days';
     }
   }
 }

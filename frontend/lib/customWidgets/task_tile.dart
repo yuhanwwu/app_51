@@ -2,35 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frontend/screens/edit_task.dart';
-import 'package:frontend/screens/flat_tasks.dart';
+import 'package:http/http.dart';
 import '../../models/task.dart';
 import '../../models/user.dart';
-import '../../models/flat.dart';
-import '../screens/home_page.dart';
-
-// class TaskTile extends StatelessWidget {
-//   final Task task;
-//   final VoidCallback? onDone;
-//   final String curUser;
-
-//   const TaskTile({Key? key, required this.task, this.onDone, required this.curUser}) : super(key: key);
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return ListTile(
-//       title: Text(task.description),
-//       subtitle: Text(task.isOneOff
-//           ? 'Priority: ${task.priority ? "High" : "Normal"}'
-//           : 'Frequency: every ${task.frequency} days'),
-//       trailing: Icon(Icons.chevron_right),
-//       onTap: onTap,
-//     );
-//   }
-
-// }
-
-import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 // import 'models/task.dart'; // your Task class
 import 'package:intl/intl.dart';
 
@@ -61,7 +35,9 @@ class _TaskTileState extends State<TaskTile> {
     task = widget.task;
   }
 
-  Future<void> _editTask() async {}
+  Future<void> _deleteTask() async {
+      await widget.task.taskRef.delete();
+  }
 
   Future<void> _claimTask() async {
     try {
@@ -175,6 +151,20 @@ class _TaskTileState extends State<TaskTile> {
     );
   }
 
+  Widget deleteButton() {
+    return ElevatedButton(
+      onPressed: () {
+        showModalBottomSheet(
+          context: context,
+          builder: (context) => FractionallySizedBox(
+            heightFactor: 0.8,
+            child: ElevatedButton(onPressed: () {_deleteTask(); widget.onDone(); Navigator.pop(context);}, child: Text('Confirm Delete?'))
+          )
+        );
+      },
+      child: Text('Delete Task'));
+  }
+
   Widget editButton() {
     return ElevatedButton(
       onPressed: () {
@@ -222,10 +212,10 @@ class _TaskTileState extends State<TaskTile> {
                 SizedBox(height: 20),
 
                 if (task.assignedTo == null)
-                  Row(children: [claimButton(), editButton()]),
+                  Row(children: [claimButton(), editButton(), deleteButton()]),
 
                 if (task.assignedTo == widget.userRef)
-                  Row(children: [doneOneOffButton(), editButton()]),
+                  Row(children: [doneOneOffButton(), editButton(), deleteButton()]),
 
                 if (task.assignedTo != null &&
                     task.assignedTo != widget.userRef)
@@ -285,8 +275,14 @@ class _TaskTileState extends State<TaskTile> {
                   // Text("Assigned to: ${snapshot.data}"),
                   SizedBox(height: 20),
 
-                if (task.assignedTo == widget.userRef) doneRepeatButton(),
-                editButton(),
+                if (task.assignedTo == widget.userRef) 
+                  Row(
+                    children: [
+                      doneRepeatButton(),
+                      editButton(),
+                      deleteButton(),
+                    ],
+                  )
               ],
             ),
           ),

@@ -1,12 +1,15 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:frontend/screens/home_page.dart';
 import 'package:frontend/screens/questionnaire.dart';
 import 'firebase_options.dart';
-
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'screens/login.dart';
 import 'models/user.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,6 +30,80 @@ class _MyAppState extends State<MyApp> {
   User? user;
   AppPage currentPage = AppPage.login;
   String? questionnaireUsername;
+
+  Timer? _nudgeTimer;
+  Timestamp? _lastCheckedNudge;
+
+  @override
+  void initState() {
+    super.initState();
+    _initFirebaseMessaging();
+  }
+
+  Future<void> _initFirebaseMessaging() async {
+    // Request notification permissions (important for web)
+    NotificationSettings settings = await FirebaseMessaging.instance.requestPermission();
+    // print('Notification permission status: ${settings.authorizationStatus}');
+
+    // Get the FCM token (you can send this to your backend if needed)
+    String? token = await FirebaseMessaging.instance.getToken();
+    // print('FCM Token: $token');
+
+    // Listen for foreground messages
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      // print('Received a message in the foreground!');
+      // print('Message data: ${message.data}');
+      if (message.notification != null) {
+        print('Notification: ${message.notification!.title}');
+      }
+      // You can show a custom dialog/snackbar here if you want
+    });
+  }
+
+  void _startNudgePolling() {
+    _nudgeTimer?.cancel();
+    _lastCheckedNudge = Timestamp.now();
+    _nudgeTimer = Timer.periodic(const Duration(seconds: 30), (_) => _checkForNudges());
+  }
+
+  void _stopNudgePolling() {
+    _nudgeTimer?.cancel();
+  }
+
+  Future<void> _checkForNudges() async {
+    if (user == null) return;
+    final query = await FirebaseFirestore.instance
+        .collection('Nudges')
+        .where('userId', isEqualTo: user!.username)
+        .where('timestamp', isGreaterThan: _lastCheckedNudge ?? Timestamp(0, 0))
+        .get();
+
+    if (query.docs.isNotEmpty) {
+      // Show a notification for each new nudge
+      for (var doc in query.docs) {
+        final taskId = doc['taskId'];
+        // Fetch the task description from Firestore
+        final taskSnap = await FirebaseFirestore.instance
+            .collection('Tasks')
+            .doc(taskId)
+            .get();
+        String description = 'a task';
+        if (taskSnap.exists) {
+          final taskData = taskSnap.data() as Map<String, dynamic>;
+          description = taskData['description'] ?? 'a task';
+        }
+      
+      }
+      // Update last checked time
+      _lastCheckedNudge = Timestamp.now();
+    }
+  }
+
+  @override
+  void dispose() {
+    _stopNudgePolling();
+    super.dispose();
+  }
 
   Future<void> onLogin(User loggedInUser) async {
     setState(() {
@@ -51,6 +128,8 @@ class _MyAppState extends State<MyApp> {
         currentPage = AppPage.home;
       });
     }
+
+     _startNudgePolling();
   }
 
   void onQuestionnaireComplete(User updatedUser) {

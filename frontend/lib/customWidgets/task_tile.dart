@@ -61,9 +61,7 @@ class _TaskTileState extends State<TaskTile> {
     task = widget.task;
   }
 
-  Future<void> _editTask() async {
-
-  }
+  Future<void> _editTask() async {}
 
   Future<void> _claimTask() async {
     try {
@@ -150,60 +148,55 @@ class _TaskTileState extends State<TaskTile> {
 
   Widget doneRepeatButton() {
     return ElevatedButton(
-                    //onPressed : _markDone,
-                    onPressed: () async {
-                      DocumentReference next = widget.userRef;
-                      if (!task.isPersonal) {
-                        final users = await fetchAllUserRefs(task.assignedFlat);
-                        final nextIndex =
-                            (users.indexOf(widget.userRef) + 1) % users.length;
-                        next = users[nextIndex];
-                      }
-                      await _markDone(next);
-                    },
-                    child: Text('Mark as Done'),
-                  );
+      //onPressed : _markDone,
+      onPressed: () async {
+        DocumentReference next = widget.userRef;
+        if (!task.isPersonal) {
+          final users = await fetchAllUserRefs(task.assignedFlat);
+          final nextIndex = (users.indexOf(widget.userRef) + 1) % users.length;
+          next = users[nextIndex];
+        }
+        await _markDone(next);
+      },
+      child: Text('Mark as Done'),
+    );
   }
 
   Widget doneOneOffButton() {
     return ElevatedButton(
-                    onPressed: task.isOneOff && task.done == true
-                        ? null //: _markDone,
-                        : () {
-                            _markDone(widget.userRef);
-                          },
-                    child: Text(
-                      task.isOneOff && task.done == true
-                          ? 'Already Done'
-                          : 'Mark as Done',
-                    ),
-                  );
+      onPressed: task.isOneOff && task.done == true
+          ? null //: _markDone,
+          : () {
+              _markDone(widget.userRef);
+            },
+      child: Text(
+        task.isOneOff && task.done == true ? 'Already Done' : 'Mark as Done',
+      ),
+    );
   }
 
   Widget editButton() {
     return ElevatedButton(
-              onPressed: () {
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  backgroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(20),
-                    ),
-                  ),
-                  builder: (context) => FractionallySizedBox(
-                    heightFactor: 0.8,
-                    child: EditTaskPage(
-                      curUser: widget.user,
-                      onTaskSubmitted: widget.onDone,
-                      task: widget.task,
-                    ),
-                  ),
-                );
-              },
-              child: Text('Edit Task'),
-            );
+      onPressed: () {
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          builder: (context) => FractionallySizedBox(
+            heightFactor: 0.8,
+            child: EditTaskPage(
+              curUser: widget.user,
+              onTaskSubmitted: widget.onDone,
+              task: widget.task,
+            ),
+          ),
+        );
+      },
+      child: Text('Edit Task'),
+    );
   }
 
   Widget buildOneOffTile(BuildContext context) {
@@ -229,13 +222,10 @@ class _TaskTileState extends State<TaskTile> {
                 SizedBox(height: 20),
 
                 if (task.assignedTo == null)
-                  Row(children: [claimButton(), editButton()],),
-                
+                  Row(children: [claimButton(), editButton()]),
+
                 if (task.assignedTo == widget.userRef)
-                  Row(children: [
-                    doneOneOffButton(),
-                    editButton(),
-                  ],),
+                  Row(children: [doneOneOffButton(), editButton()]),
 
                 if (task.assignedTo != null &&
                     task.assignedTo != widget.userRef)
@@ -280,9 +270,8 @@ class _TaskTileState extends State<TaskTile> {
                 Text("Assigned to: ${snapshot.data}"),
                 SizedBox(height: 20),
 
-                if (task.assignedTo == widget.userRef)
-                  doneRepeatButton(),
-                  editButton(),
+                if (task.assignedTo == widget.userRef) doneRepeatButton(),
+                editButton(),
               ],
             ),
           ),

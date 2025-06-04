@@ -13,9 +13,7 @@ Future<Map<String, int>> fetchChorePlan(String plan) async {
     throw Exception('User not found');
   }
 
-
   Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-
 
   // Convert dynamic map to Map<String, int>
   Map<String, int> chores = {};
@@ -181,13 +179,15 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
                             }
 
                             try {
-                              // Save the plan to Firestore 
-                              DocumentSnapshot planDoc = await FirebaseFirestore.instance
+                              // Save the plan to Firestore
+                              DocumentSnapshot planDoc = await FirebaseFirestore
+                                  .instance
                                   .collection('VibeTemplates')
                                   .doc(plan)
                                   .get();
 
-                              Map<String, dynamic> data = planDoc.data() as Map<String, dynamic>;
+                              Map<String, dynamic> data =
+                                  planDoc.data() as Map<String, dynamic>;
 
                               await FirebaseFirestore.instance
                                   .collection('UserPreferences')
@@ -240,7 +240,10 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
                           )
                         : const Text(
                             'Choose this',
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                   ),
                 ),
@@ -274,7 +277,10 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          return Text('Error: ${snapshot.error}', style: const TextStyle(color: Colors.red));
+          return Text(
+            'Error: ${snapshot.error}',
+            style: const TextStyle(color: Colors.red),
+          );
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return const Text('No chores found.');
         }
@@ -322,10 +328,7 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    chore,
-                    style: const TextStyle(fontSize: 16),
-                  ),
+                  Text(chore, style: const TextStyle(fontSize: 16)),
                   Text(
                     frequency,
                     style: TextStyle(
@@ -337,83 +340,87 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
                 ],
               ),
             );
-          }).toList());
-          });
-        }
-        
-        Future<void> populateRepeatTasks(String plan) async {
-            // 1. Fetch the user's flat reference
-            final userDoc = await FirebaseFirestore.instance
-              .collection('Users')
-              .doc(widget.username)
-              .get();
+          }).toList(),
+        );
+      },
+    );
+  }
 
-            final userRef = FirebaseFirestore.instance
-              .collection('Users')
-              .doc(widget.username);
-            
-            final userData = userDoc.data();
-            final flatRef = userData!['flat']; // Should be a DocumentReference
-            final now = DateTime.now();
-            final setDate = DateFormat('yyyy-MM-dd').format(now);      
+  Future<void> populateRepeatTasks(String plan) async {
+    // 1. Fetch the user's flat reference
+    final userDoc = await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(widget.username)
+        .get();
 
-            // fetch existing flat's chore preferences
-            final flatSnapshot = await flatRef.get();
-            final flatData = flatSnapshot.data() as Map<String, dynamic>;
+    final userRef = FirebaseFirestore.instance
+        .collection('Users')
+        .doc(widget.username);
 
-            // 2. Fetch the plan's chores
-            final chores = await fetchChorePlan(plan);
+    final userData = userDoc.data();
+    final flatRef = userData!['flat']; // Should be a DocumentReference
+    final now = DateTime.now();
+    final setDate = DateFormat('yyyy-MM-dd').format(now);
 
-            // 3. For each chore, create a repeat task
-            for (final entry in chores.entries) {
-            String description;
-            switch (entry.key.trim()) {
-              case 'bathroom':
-                description = 'Clean the bathroom';
-                break;
-              case 'dishes':
-                description = 'Do the dishes';
-                break;
-              case 'kitchen':
-                description = 'Clean the kitchen';
-                break;
-              case 'laundry':
-                description = 'Do laundry';
-                break;
-              case 'recycling':
-                description = 'Take out recycling';
-                break;
-              case 'rubbish':
-                description = 'Take out the trash';
-                break;
-              default:
-                description = entry.key;
-            }
-            
-            final int existingSum = flatData[entry.key.trim()]*flatData['numOfCompletedQuestionnaires'];
-            // flatData['numOfCompletedQuestionnaires'] += 1;
-            flatData[entry.key.trim()] = ((existingSum + entry.value) / (flatData['numOfCompletedQuestionnaires'] + 1)).round();
+    // fetch existing flat's chore preferences
+    final flatSnapshot = await flatRef.get();
+    final flatData = flatSnapshot.data() as Map<String, dynamic>;
 
-                       
-            if (flatData['numOfCompletedQuestionnaires'] == 0) {
-              await FirebaseFirestore.instance.collection('Tasks').add({
-              'description': description,
-              'isOneOff': false,
-              'assignedFlat': flatRef,
-              'assignedTo': userRef,
-              'done': null,
-              'setDate': setDate,
-              'priority': false,
-              'frequency': entry.value, // e.g. every X days
-              'lastDoneOn': null,
-              'lastDoneBy': null,
-              'isPersonal': true,
-            });
-          }
-            
-          }
+    // 2. Fetch the plan's chores
+    final chores = await fetchChorePlan(plan);
 
-          flatData['numOfCompletedQuestionnaires'] += 1;
-          await flatRef.update(flatData);
-        }
+    // 3. For each chore, create a repeat task
+    for (final entry in chores.entries) {
+      String description;
+      switch (entry.key.trim()) {
+        case 'bathroom':
+          description = 'Clean the bathroom';
+          break;
+        case 'dishes':
+          description = 'Do the dishes';
+          break;
+        case 'kitchen':
+          description = 'Clean the kitchen';
+          break;
+        case 'laundry':
+          description = 'Do laundry';
+          break;
+        case 'recycling':
+          description = 'Take out recycling';
+          break;
+        case 'rubbish':
+          description = 'Take out the trash';
+          break;
+        default:
+          description = entry.key;
+      }
+
+      final int existingSum =
+          flatData[entry.key.trim()] * flatData['numOfCompletedQuestionnaires'];
+      // flatData['numOfCompletedQuestionnaires'] += 1;
+      flatData[entry.key.trim()] =
+          ((existingSum + entry.value) /
+                  (flatData['numOfCompletedQuestionnaires'] + 1))
+              .round();
+
+      if (flatData['numOfCompletedQuestionnaires'] == 0) {
+        await FirebaseFirestore.instance.collection('Tasks').add({
+          'description': description,
+          'isOneOff': false,
+          'assignedFlat': flatRef,
+          'assignedTo': userRef,
+          'done': null,
+          'setDate': setDate,
+          'priority': false,
+          'frequency': entry.value, // e.g. every X days
+          'lastDoneOn': null,
+          'lastDoneBy': null,
+          'isPersonal': true,
+        });
+      }
+    }
+
+    flatData['numOfCompletedQuestionnaires'] += 1;
+    await flatRef.update(flatData);
+  }
 }

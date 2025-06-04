@@ -49,8 +49,7 @@ class _TaskInputScreenState extends State<TaskInputScreen> {
       'description': description,
       'isOneOff': _isOneOff,
       'assignedFlat': assignedFlat,
-      'assignedTo':
-          _isOneOff ? null : widget.userRef,
+      'assignedTo': _isOneOff ? null : widget.userRef,
       'done': _isOneOff ? false : null,
       'setDate': _isOneOff
           ? DateFormat('yyyy-MM-dd').format(DateTime.now())
@@ -138,17 +137,17 @@ class _TaskInputScreenState extends State<TaskInputScreen> {
                     return null;
                   },
                 ),
-                if (!_isOneOff)
-                  SwitchListTile(
-                    title: const Text('Personal Task'),
-                    subtitle: const Text('If off, this is a flat/shared task'),
-                    value: _isPersonal,
-                    onChanged: (val) {
-                      setState(() {
-                        _isPersonal = val;
-                      });
-                    },
-                  ),
+              if (!_isOneOff)
+                SwitchListTile(
+                  title: const Text('Personal Task'),
+                  subtitle: const Text('If off, this is a flat/shared task'),
+                  value: _isPersonal,
+                  onChanged: (val) {
+                    setState(() {
+                      _isPersonal = val;
+                    });
+                  },
+                ),
 
               const SizedBox(height: 24),
               ElevatedButton(

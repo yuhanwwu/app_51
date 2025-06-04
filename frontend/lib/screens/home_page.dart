@@ -220,6 +220,7 @@ class _HomePageState extends State<HomePage> {
                                               children: othersRepeatTasks.map((task) {
                                                 return TaskTile(
                                                   task: task,
+                                                  user: user,
                                                   userRef: userRef,
                                                   onDone: _loadTasks,
                                                   // You could add: disableDone: true

@@ -1,9 +1,8 @@
-import 'dart:html' as html;
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:frontend/models/user.dart';
 import 'package:frontend/screens/login.dart';
+import 'package:universal_html/html.dart' as html;
 
 class AddFlatPage extends StatefulWidget {
   final String username;

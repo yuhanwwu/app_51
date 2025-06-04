@@ -407,7 +407,7 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
               'frequency': entry.value, // e.g. every X days
               'lastDoneOn': null,
               'lastDoneBy': null,
-              // 'isPersonal': true,
+              'isPersonal': true,
             });
           }
             

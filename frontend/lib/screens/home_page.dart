@@ -70,12 +70,55 @@ class _HomePageState extends State<HomePage> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          "One-Off Tasks",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "One-Off Tasks",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () async {
+                                final allTasks = await _allFlatTasks;
+                                final archivedTasks = allTasks.where((t) =>
+                                    t.assignedTo == userRef &&
+                                    t.isOneOff &&
+                                    (t.done ?? false)).toList();
+                                  // ..sort((a, b) => b.setDate?.compareTo(a.setDate ?? DateTime(0)) ?? 0);
+
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  backgroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                                  ),
+                                  builder: (context) => FractionallySizedBox(
+                                    heightFactor: 0.8,
+                                    child: Scaffold(
+                                      appBar: AppBar(title: Text('Archived One-Off Tasks')),
+                                      body: archivedTasks.isEmpty
+                                          ? Center(child: Text('No archived tasks found.'))
+                                          : ListView(
+                                              children: archivedTasks.map((task) {
+                                                return TaskTile(
+                                                  task: task,
+                                                  userRef: userRef,
+                                                  onDone: _loadTasks,
+                                                  // disableDone: true, // You can customize TaskTile to handle this
+                                                );
+                                              }).toList(),
+                                            ),
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: Text("View Archive"),
+                            ),
+                          ],
                         ),
                       ),
                       Expanded(

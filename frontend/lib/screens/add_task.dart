@@ -27,7 +27,7 @@ class _TaskInputScreenState extends State<TaskInputScreen> {
 
   bool _isOneOff = true;
   bool _priority = false;
-  // bool _isPersonal = true;
+  bool _isPersonal = true;
 
   // Future<String> getUserFlat(String userId) async {
   //   final userDoc = await FirebaseFirestore.instance
@@ -61,7 +61,7 @@ class _TaskInputScreenState extends State<TaskInputScreen> {
           : int.tryParse(_frequencyController.text.trim()) ?? 1,
       'lastDoneOn': _isOneOff ? null : null,
       'lastDoneBy': _isOneOff ? null : null,
-      // 'isPersonal': _isOneOff ? false : _isPersonal,
+      'isPersonal': _isOneOff ? false : _isPersonal,
     };
 
     await FirebaseFirestore.instance.collection('Tasks').add(taskData);
@@ -138,17 +138,17 @@ class _TaskInputScreenState extends State<TaskInputScreen> {
                     return null;
                   },
                 ),
-                // if (!_isOneOff)
-                //   SwitchListTile(
-                //     title: const Text('Personal Task'),
-                //     subtitle: const Text('If off, this is a flat/shared task'),
-                //     value: _isPersonal,
-                //     onChanged: (val) {
-                //       setState(() {
-                //         _isPersonal = val;
-                //       });
-                //     },
-                //   ),
+                if (!_isOneOff)
+                  SwitchListTile(
+                    title: const Text('Personal Task'),
+                    subtitle: const Text('If off, this is a flat/shared task'),
+                    value: _isPersonal,
+                    onChanged: (val) {
+                      setState(() {
+                        _isPersonal = val;
+                      });
+                    },
+                  ),
 
               const SizedBox(height: 24),
               ElevatedButton(

@@ -5,7 +5,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:frontend/screens/home_page.dart';
 import 'package:frontend/screens/questionnaire.dart';
 import 'firebase_options.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'screens/login.dart';
 import 'models/user.dart';
@@ -37,27 +36,6 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    _initFirebaseMessaging();
-  }
-
-  Future<void> _initFirebaseMessaging() async {
-    // Request notification permissions (important for web)
-    NotificationSettings settings = await FirebaseMessaging.instance.requestPermission();
-    // print('Notification permission status: ${settings.authorizationStatus}');
-
-    // Get the FCM token (you can send this to your backend if needed)
-    String? token = await FirebaseMessaging.instance.getToken();
-    // print('FCM Token: $token');
-
-    // Listen for foreground messages
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      // print('Received a message in the foreground!');
-      // print('Message data: ${message.data}');
-      if (message.notification != null) {
-        print('Notification: ${message.notification!.title}');
-      }
-      // You can show a custom dialog/snackbar here if you want
-    });
   }
 
   void _startNudgePolling() {

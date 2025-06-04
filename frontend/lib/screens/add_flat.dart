@@ -1,3 +1,5 @@
+import 'dart:html' as html;
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:frontend/models/user.dart';
@@ -101,11 +103,13 @@ class _AddFlatPageState extends State<AddFlatPage> {
           });
     }));
 
+    html.window.location.reload();
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
         builder: (context) => LoginPage(onLogin: widget.onLogin)),
       );
+
   }
 
   @override

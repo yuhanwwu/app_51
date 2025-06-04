@@ -1,6 +1,5 @@
 import 'dart:html' as html;
 
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:frontend/models/user.dart';
@@ -93,8 +92,6 @@ class _AddFlatPageState extends State<AddFlatPage> {
       // 'createdAt': FieldValue.serverTimestamp(),
     });
 
-    String? token = await FirebaseMessaging.instance.getToken();
-
     await Future.wait(flatmates.map((flatmate) async {
       await FirebaseFirestore.instance
           .collection('Users')
@@ -103,7 +100,6 @@ class _AddFlatPageState extends State<AddFlatPage> {
             'flat': flatRef,
             'name': flatmate['name'],
             'questionnaireDone': false,
-            'fcmToken': token
           });
     }));
 

@@ -267,8 +267,23 @@ class _TaskTileState extends State<TaskTile> {
                       );
                     },
                   ),
-                Text("Assigned to: ${snapshot.data}"),
-                SizedBox(height: 20),
+                
+                  SizedBox(height: 10),
+                  Text("Frequency: every ${task.frequency} day(s)"),
+                  if (task.lastDoneOn != null && task.lastDoneBy != null)
+                    FutureBuilder<String>(
+                      future: getNameFromDocRef(task.lastDoneBy),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return Text("Last done on: ${task.lastDoneOn} by ...");
+                        }
+                        return Text(
+                          "Last done on: ${task.lastDoneOn} by ${snapshot.data ?? "Unknown"}",
+                        );
+                      },
+                    ),
+                  // Text("Assigned to: ${snapshot.data}"),
+                  SizedBox(height: 20),
 
                 if (task.assignedTo == widget.userRef) doneRepeatButton(),
                 editButton(),

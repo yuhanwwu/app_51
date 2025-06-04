@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frontend/screens/flat_tasks.dart';
+import 'package:intl/intl.dart';
 import '../models/task.dart';
 import '../models/user.dart';
 import '../models/flat.dart';
@@ -184,14 +185,57 @@ class _HomePageState extends State<HomePage> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          "Repeat Tasks",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Repeat Tasks",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () async {
+                                final allTasks = await _allFlatTasks;
+                                final othersRepeatTasks = allTasks.where((t) =>
+                                    !t.isOneOff &&
+                                    t.assignedTo != null &&
+                                    t.assignedTo != userRef).toList();
+
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  backgroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                                  ),
+                                  builder: (context) => FractionallySizedBox(
+                                    heightFactor: 0.8,
+                                    child: Scaffold(
+                                      appBar: AppBar(title: Text("Others' Repeat Tasks")),
+                                      body: othersRepeatTasks.isEmpty
+                                          ? Center(child: Text("No repeat tasks assigned to others."))
+                                          : ListView(
+                                              children: othersRepeatTasks.map((task) {
+                                                return TaskTile(
+                                                  task: task,
+                                                  userRef: userRef,
+                                                  onDone: _loadTasks,
+                                                  // You could add: disableDone: true
+                                                );
+                                              }).toList(),
+                                            ),
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: Text("View Others' Tasks"),
+                            ),
+                          ],
                         ),
                       ),
+
                       Expanded(
                         child: FutureBuilder<List<Task>>(
                           future: _repeatTasks,
@@ -214,6 +258,7 @@ class _HomePageState extends State<HomePage> {
                               }
                               return ListView(
                                 children: repeatTasks
+                                    .where((e) => e.assignedTo == userRef)
                                     .map(
                                       (e) => TaskTile(
                                         task: e,
@@ -422,7 +467,26 @@ class _HomePageState extends State<HomePage> {
 
   Future<List<Task>> fetchRepeatTasks(Future<List<Task>> allFlatTasks) async {
     final tasks = await allFlatTasks;
-    return tasks.where((t) => !t.isOneOff).toList();
+    final now = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    return tasks.where((t) => !t.isOneOff).toList()
+    ..sort((a, b) {
+      DateTime parseDate(String? dateStr) {
+        try {
+          return dateStr != null ? DateFormat('yyyy-MM-dd').parse(dateStr) : DateTime(2000);
+        } catch (_) {
+          return DateTime(2000);
+        }
+      }
+      DateTime aLastDone = a.lastDoneOn != null
+        ? DateFormat('yyyy-MM-dd').parse(a.lastDoneOn!)
+        : parseDate(a.setDate);
+      DateTime bLastDone = b.lastDoneOn != null
+          ? DateFormat('yyyy-MM-dd').parse(b.lastDoneOn!)
+          : parseDate(b.setDate);
+      DateTime aExpected = aLastDone.add(Duration(days: a.frequency));
+      DateTime bExpected = bLastDone.add(Duration(days: b.frequency));
+      return aExpected.compareTo(bExpected);
+    });
   }
 
   Future<List<Task>> fetchUnclaimedTasks(

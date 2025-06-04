@@ -1,9 +1,8 @@
-import 'dart:html' as html;
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:frontend/models/user.dart';
 import 'package:frontend/screens/login.dart';
+import 'package:universal_html/html.dart' as html;
 
 class AddFlatPage extends StatefulWidget {
   final String username;
@@ -88,28 +87,30 @@ class _AddFlatPageState extends State<AddFlatPage> {
       'kitchen': 0,
       'laundry': 0,
       'recycling': 0,
-      'rubbish': 0
+      'rubbish': 0,
       // 'createdAt': FieldValue.serverTimestamp(),
     });
 
-    await Future.wait(flatmates.map((flatmate) async {
-      await FirebaseFirestore.instance
-          .collection('Users')
-          .doc(flatmate['username'])
-          .set({
-            'flat': flatRef,
-            'name': flatmate['name'],
-            'questionnaireDone': false,
-          });
-    }));
+    await Future.wait(
+      flatmates.map((flatmate) async {
+        await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(flatmate['username'])
+            .set({
+              'flat': flatRef,
+              'name': flatmate['name'],
+              'questionnaireDone': false,
+            });
+      }),
+    );
 
     html.window.location.reload();
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => LoginPage(onLogin: widget.onLogin)),
-      );
-
+        builder: (context) => LoginPage(onLogin: widget.onLogin),
+      ),
+    );
   }
 
   @override

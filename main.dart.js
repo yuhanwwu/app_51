@@ -82382,7 +82382,8 @@ q.e!==$&&A.bi()
 q.e=new A.cR(new A.ch(s.b,B.bV,B.aB),r)
 s=B.i.k(s.y)
 q.f!==$&&A.bi()
-q.f=new A.cR(new A.ch(s,B.bV,B.aB),r)},
+q.f=new A.cR(new A.ch(s,B.bV,B.aB),r)
+q.w=q.a.e.x},
 vz(){var s=0,r=A.K(t.H),q,p=this,o,n,m,l
 var $async$vz=A.L(function(a,b){if(a===1)return A.H(b,r)
 while(true)switch(s){case 0:if(!p.d.gK().pR()){s=1
@@ -82394,7 +82395,7 @@ o===$&&A.a()
 m=A.pQ(B.c.cA(o.a.a),null)
 l=p.a.e
 s=3
-return A.M(l.a.uN(0,A.ac(["description",n,"isOneOff",l.c,"assignedFlat",l.e,"assignedTo",l.f,"done",l.w,"setDate",l.r,"priority",l.x,"frequency",m,"lastDoneOn",l.z,"lastDoneBy",l.Q,"isPersonal",l.as],t.N,t.X)),$async$vz)
+return A.M(l.a.uN(0,A.ac(["description",n,"isOneOff",l.c,"assignedFlat",l.e,"assignedTo",l.f,"done",l.w,"setDate",l.r,"priority",p.w,"frequency",m,"lastDoneOn",l.z,"lastDoneBy",l.Q,"isPersonal",l.as],t.N,t.X)),$async$vz)
 case 3:p.a.GM()
 o=p.c
 o.toString

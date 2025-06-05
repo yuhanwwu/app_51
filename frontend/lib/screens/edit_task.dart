@@ -27,7 +27,7 @@ class _EditTaskPageState extends State<EditTaskPage> {
   late final TextEditingController _frequencyController;
 
   bool _isOneOff = true;
-  bool _priority = false;
+  late bool _priority;
 
   @override
   void initState() {

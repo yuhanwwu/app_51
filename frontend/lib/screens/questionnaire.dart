@@ -14,7 +14,9 @@ Future<Map<String, int>> fetchChorePlan(String plan) async {
     throw Exception('User not found');
   }
 
+
   Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+
 
   // Convert dynamic map to Map<String, int>
   Map<String, int> chores = {};
@@ -202,17 +204,6 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
                             String plan = getPlanDescription(selectedVibe);
 
                             try {
-// <<<<<<< edit_task
-//                               // Save the plan to Firestore
-//                               DocumentSnapshot planDoc = await FirebaseFirestore
-//                                   .instance
-//                                   .collection('VibeTemplates')
-//                                   .doc(plan)
-//                                   .get();
-
-//                               Map<String, dynamic> data =
-//                                   planDoc.data() as Map<String, dynamic>;
-// =======
                               final chores = await fetchChorePlan(plan);
 
                               // Navigate to amend screen
@@ -229,7 +220,6 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
                                 return;
                               }
                               
-// >>>>>>> master
 
                               await FirebaseFirestore.instance
                                   .collection('UserPreferences')
@@ -282,10 +272,7 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
                           )
                         : const Text(
                             'Choose this',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                           ),
                   ),
                 ),
@@ -306,10 +293,7 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          return Text(
-            'Error: ${snapshot.error}',
-            style: const TextStyle(color: Colors.red),
-          );
+          return Text('Error: ${snapshot.error}', style: const TextStyle(color: Colors.red));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return const Text('No chores found.');
         }
@@ -335,7 +319,10 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(chore, style: const TextStyle(fontSize: 16)),
+                  Text(
+                    chore,
+                    style: const TextStyle(fontSize: 16),
+                  ),
                   Text(
                     frequency,
                     style: TextStyle(

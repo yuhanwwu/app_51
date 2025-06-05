@@ -10,16 +10,9 @@ class Flat {
   final int recycling;
   final int rubbish;
 
-  Flat({
-    required this.id,
-    required this.name,
-    required this.numOfCompletedQuestionnaires,
-    required this.bathroom,
-    required this.kitchen,
-    required this.laundry,
-    required this.recycling,
-    required this.rubbish,
-  });
+  Flat({required this.id, required this.name, required this.numOfCompletedQuestionnaires, 
+        required this.bathroom, required this.kitchen, required this.laundry, 
+        required this.recycling, required this.rubbish});
 
   //   factory User.fromJson(Map<String, dynamic> json) {
   //     return User(
@@ -30,15 +23,12 @@ class Flat {
 
   factory Flat.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
-    return Flat(
-      id: doc.id,
-      name: data['name'],
-      numOfCompletedQuestionnaires: data['numOfCompletedQuestionnaires'] ?? 0,
-      bathroom: data['bathroom'] ?? 0,
-      kitchen: data['kitchen'] ?? 0,
-      laundry: data['laundry'] ?? 0,
-      recycling: data['recycling'] ?? 0,
-      rubbish: data['rubbish'] ?? 0,
-    );
+    return Flat(id: doc.id, name: data['name'], 
+                numOfCompletedQuestionnaires: data['numOfCompletedQuestionnaires'] ?? 0, 
+                bathroom: data['bathroom'] ?? 0, 
+                kitchen: data['kitchen'] ?? 0, 
+                laundry: data['laundry'] ?? 0, 
+                recycling: data['recycling'] ?? 0, 
+                rubbish: data['rubbish'] ?? 0);
   }
 }

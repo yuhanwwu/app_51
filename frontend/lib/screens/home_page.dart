@@ -2,10 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frontend/screens/flat_tasks.dart';
-
-import 'package:intl/intl.dart';
 import 'package:frontend/screens/notifications_page.dart';
-
 import '../models/task.dart';
 import '../models/user.dart';
 import '../models/flat.dart';
@@ -17,6 +14,7 @@ class HomePage extends StatefulWidget {
   final User user;
   // const HomePage({super.key, required this.user});
   const HomePage({Key? key, required this.user}) : super(key: key);
+
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -142,44 +140,29 @@ class _HomePageState extends State<HomePage> {
                             TextButton(
                               onPressed: () async {
                                 final allTasks = await _allFlatTasks;
-                                final archivedTasks = allTasks
-                                    .where(
-                                      (t) =>
-                                          t.assignedTo == userRef &&
-                                          t.isOneOff &&
-                                          (t.done ?? false),
-                                    )
-                                    .toList();
-                                // ..sort((a, b) => b.setDate?.compareTo(a.setDate ?? DateTime(0)) ?? 0);
+                                final archivedTasks = allTasks.where((t) =>
+                                    t.assignedTo == userRef &&
+                                    t.isOneOff &&
+                                    (t.done ?? false)).toList();
+                                  // ..sort((a, b) => b.setDate?.compareTo(a.setDate ?? DateTime(0)) ?? 0);
 
                                 showModalBottomSheet(
                                   context: context,
                                   isScrollControlled: true,
                                   backgroundColor: Colors.white,
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.vertical(
-                                      top: Radius.circular(20),
-                                    ),
+                                    borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                                   ),
                                   builder: (context) => FractionallySizedBox(
                                     heightFactor: 0.8,
                                     child: Scaffold(
-                                      appBar: AppBar(
-                                        title: Text('Archived One-Off Tasks'),
-                                      ),
+                                      appBar: AppBar(title: Text('Archived One-Off Tasks')),
                                       body: archivedTasks.isEmpty
-                                          ? Center(
-                                              child: Text(
-                                                'No archived tasks found.',
-                                              ),
-                                            )
+                                          ? Center(child: Text('No archived tasks found.'))
                                           : ListView(
-                                              children: archivedTasks.map((
-                                                task,
-                                              ) {
+                                              children: archivedTasks.map((task) {
                                                 return TaskTile(
                                                   task: task,
-                                                  user: user,
                                                   userRef: userRef,
                                                   onDone: _loadTasks,
                                                   // disableDone: true, // You can customize TaskTile to handle this
@@ -220,7 +203,6 @@ class _HomePageState extends State<HomePage> {
                                     .map(
                                       (e) => TaskTile(
                                         task: e,
-                                        user: user,
                                         userRef: userRef,
                                         onDone: _loadTasks,
                                       ),
@@ -244,58 +226,14 @@ class _HomePageState extends State<HomePage> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Repeat Tasks",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () async {
-                                final allTasks = await _allFlatTasks;
-                                final othersRepeatTasks = allTasks.where((t) =>
-                                    !t.isOneOff &&
-                                    t.assignedTo != null &&
-                                    t.assignedTo != userRef).toList();
-
-                                showModalBottomSheet(
-                                  context: context,
-                                  isScrollControlled: true,
-                                  backgroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                                  ),
-                                  builder: (context) => FractionallySizedBox(
-                                    heightFactor: 0.8,
-                                    child: Scaffold(
-                                      appBar: AppBar(title: Text("Others' Repeat Tasks")),
-                                      body: othersRepeatTasks.isEmpty
-                                          ? Center(child: Text("No repeat tasks assigned to others."))
-                                          : ListView(
-                                              children: othersRepeatTasks.map((task) {
-                                                return TaskTile(
-                                                  task: task,
-                                                  user: user,
-                                                  userRef: userRef,
-                                                  onDone: _loadTasks,
-                                                  // You could add: disableDone: true
-                                                );
-                                              }).toList(),
-                                            ),
-                                    ),
-                                  ),
-                                );
-                              },
-                              child: Text("View Others' Tasks"),
-                            ),
-                          ],
+                        child: Text(
+                          "Repeat Tasks",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-
                       Expanded(
                         child: FutureBuilder<List<Task>>(
                           future: _repeatTasks,
@@ -318,11 +256,9 @@ class _HomePageState extends State<HomePage> {
                               }
                               return ListView(
                                 children: repeatTasks
-                                    .where((e) => e.assignedTo == userRef)
                                     .map(
                                       (e) => TaskTile(
                                         task: e,
-                                        user: user,
                                         userRef: userRef,
                                         onDone: _loadTasks,
                                       ),
@@ -373,7 +309,6 @@ class _HomePageState extends State<HomePage> {
                               .map(
                                 (e) => TaskTile(
                                   task: e,
-                                  user: user,
                                   userRef: userRef,
                                   onDone: _loadTasks,
                                 ),
@@ -413,11 +348,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   builder: (context) => FractionallySizedBox(
                     heightFactor: 0.8,
-                    child: TaskInputScreen(
-                      curUser: user,
-                      userRef: userRef,
-                      onTaskSubmitted: _loadTasks,
-                    ),
+                    child: TaskInputScreen(curUser: user, userRef: userRef, onTaskSubmitted: _loadTasks),
                   ),
                 );
               },
@@ -505,48 +436,25 @@ class _HomePageState extends State<HomePage> {
     Future<List<Task>> allFlatTasks,
   ) async {
     final tasks = await allFlatTasks;
-    return tasks
-        .where(
-          (t) =>
-              (t.assignedTo == userRef) &&
-              (t.isOneOff) &&
-              ((t.done ?? false) ? false : true),
-        )
-        .toList()
-      ..sort((a, b) {
-        final priorityCompare = (b.priority ? 1 : 0) - (a.priority ? 1 : 0);
-        if (priorityCompare != 0) return priorityCompare;
+    return tasks.where((t) => 
+    (t.assignedTo == userRef) && 
+    (t.isOneOff) &&
+    ((t.done ?? false) ? false : true)).toList()
+    ..sort((a, b) {
+      final priorityCompare = (b.priority ? 1 : 0) - (a.priority ? 1 : 0);
+      if (priorityCompare != 0) return priorityCompare;
 
-        if (a.setDate == null && b.setDate == null) return 0;
-        if (a.setDate == null) return 1; // 🐌 a comes after
-        if (b.setDate == null) return -1; // 🚀 a comes before
+      if (a.setDate == null && b.setDate == null) return 0;
+      if (a.setDate == null) return 1;  // 🐌 a comes after
+      if (b.setDate == null) return -1; // 🚀 a comes before
 
-        return a.setDate!.compareTo(b.setDate!);
-      });
+      return a.setDate!.compareTo(b.setDate!);
+    });
   }
 
   Future<List<Task>> fetchRepeatTasks(Future<List<Task>> allFlatTasks) async {
     final tasks = await allFlatTasks;
-    final now = DateFormat('yyyy-MM-dd').format(DateTime.now());
-    return tasks.where((t) => !t.isOneOff).toList()
-    ..sort((a, b) {
-      DateTime parseDate(String? dateStr) {
-        try {
-          return dateStr != null ? DateFormat('yyyy-MM-dd').parse(dateStr) : DateTime(2000);
-        } catch (_) {
-          return DateTime(2000);
-        }
-      }
-      DateTime aLastDone = a.lastDoneOn != null
-        ? DateFormat('yyyy-MM-dd').parse(a.lastDoneOn!)
-        : parseDate(a.setDate);
-      DateTime bLastDone = b.lastDoneOn != null
-          ? DateFormat('yyyy-MM-dd').parse(b.lastDoneOn!)
-          : parseDate(b.setDate);
-      DateTime aExpected = aLastDone.add(Duration(days: a.frequency));
-      DateTime bExpected = bLastDone.add(Duration(days: b.frequency));
-      return aExpected.compareTo(bExpected);
-    });
+    return tasks.where((t) => !t.isOneOff).toList();
   }
 
   Future<List<Task>> fetchUnclaimedTasks(
@@ -554,15 +462,15 @@ class _HomePageState extends State<HomePage> {
   ) async {
     final tasks = await allFlatTasks;
     return tasks.where((t) => (t.assignedTo == null && t.isOneOff)).toList()
-      ..sort((a, b) {
-        final priorityCompare = (b.priority ? 1 : 0) - (a.priority ? 1 : 0);
-        if (priorityCompare != 0) return priorityCompare;
+    ..sort((a, b) {
+      final priorityCompare = (b.priority ? 1 : 0) - (a.priority ? 1 : 0);
+      if (priorityCompare != 0) return priorityCompare;
 
-        if (a.setDate == null && b.setDate == null) return 0;
-        if (a.setDate == null) return 1; // 🐌 a comes after
-        if (b.setDate == null) return -1; // 🚀 a comes before
+      if (a.setDate == null && b.setDate == null) return 0;
+      if (a.setDate == null) return 1;  // 🐌 a comes after
+      if (b.setDate == null) return -1; // 🚀 a comes before
 
-        return a.setDate!.compareTo(b.setDate!);
-      });
+      return a.setDate!.compareTo(b.setDate!);
+    });
   }
 }

@@ -87,30 +87,28 @@ class _AddFlatPageState extends State<AddFlatPage> {
       'kitchen': 0,
       'laundry': 0,
       'recycling': 0,
-      'rubbish': 0,
+      'rubbish': 0
       // 'createdAt': FieldValue.serverTimestamp(),
     });
 
-    await Future.wait(
-      flatmates.map((flatmate) async {
-        await FirebaseFirestore.instance
-            .collection('Users')
-            .doc(flatmate['username'])
-            .set({
-              'flat': flatRef,
-              'name': flatmate['name'],
-              'questionnaireDone': false,
-            });
-      }),
-    );
+    await Future.wait(flatmates.map((flatmate) async {
+      await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(flatmate['username'])
+          .set({
+            'flat': flatRef,
+            'name': flatmate['name'],
+            'questionnaireDone': false,
+          });
+    }));
 
     html.window.location.reload();
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => LoginPage(onLogin: widget.onLogin),
-      ),
-    );
+        builder: (context) => LoginPage(onLogin: widget.onLogin)),
+      );
+
   }
 
   @override

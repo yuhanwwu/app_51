@@ -5,13 +5,9 @@ import 'package:frontend/screens/edit_task.dart';
 import 'package:http/http.dart';
 import '../../models/task.dart';
 import '../../models/user.dart';
-<<<<<<< HEAD
 import '../../models/flat.dart';
 import '../screens/home_page.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-=======
->>>>>>> edit_task
 // import 'models/task.dart'; // your Task class
 import 'package:intl/intl.dart';
 
@@ -41,8 +37,7 @@ class _TaskTileState extends State<TaskTile> {
     super.initState();
     task = widget.task;
   }
-
-<<<<<<< HEAD
+  
   IconData getChoreIcon(String key) {
   switch (key.trim()) {
     case 'Cleaning the kitchen':
@@ -59,13 +54,13 @@ class _TaskTileState extends State<TaskTile> {
       return Icons.delete;
     default:
       return Icons.task_alt; // fallback icon
+    }
   }
-}
-=======
+
   Future<void> _deleteTask() async {
       await widget.task.taskRef.delete();
   }
->>>>>>> edit_task
+
 
   Future<void> _claimTask() async {
     try {
@@ -160,31 +155,6 @@ class _TaskTileState extends State<TaskTile> {
           final nextIndex = (users.indexOf(widget.userRef) + 1) % users.length;
           next = users[nextIndex];
         }
-<<<<<<< HEAD
-      );
-    } else {
-      return FutureBuilder(
-        future: getNameFromDocRef(task.assignedTo),
-        builder: (context, snapshot) {
-          return Card(
-            margin: EdgeInsets.all(12),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(getChoreIcon(task.description), color: const Color.fromARGB(255, 20, 0, 150), size: 28),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          task.description,
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ],
-=======
         await _markDone(next);
       },
       child: Text('Mark as Done'),
@@ -276,6 +246,7 @@ class _TaskTileState extends State<TaskTile> {
               ],
             ),
           ),
+// <<<<<<< edit_task
         );
       },
     );
@@ -283,35 +254,27 @@ class _TaskTileState extends State<TaskTile> {
 
   Widget buildRepeatTile(BuildContext context) {
     return FutureBuilder(
-      future: getNameFromDocRef(task.assignedTo),
-      builder: (context, snapshot) {
-        return Card(
-          margin: EdgeInsets.all(12),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  task.description,
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 10),
-                Text("Frequency: every ${task.frequency} day(s)"),
-                if (task.lastDoneOn != null && task.lastDoneBy != null)
-                  FutureBuilder<String>(
-                    future: getNameFromDocRef(task.lastDoneBy),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Text("Last done on: ${task.lastDoneOn} by ...");
-                      }
-                      return Text(
-                        "Last done on: ${task.lastDoneOn} by ${snapshot.data ?? "Unknown"}",
-                      );
-                    },
->>>>>>> edit_task
+        future: getNameFromDocRef(task.assignedTo),
+        builder: (context, snapshot) {
+          return Card(
+            margin: EdgeInsets.all(12),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(getChoreIcon(task.description), color: const Color.fromARGB(255, 20, 0, 150), size: 28),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          task.description,
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
                   ),
-                
                   SizedBox(height: 10),
                   
                   Text("Frequency: ${formatDisplayFrequency(task.frequency)}"),
@@ -327,7 +290,6 @@ class _TaskTileState extends State<TaskTile> {
                         );
                       },
                     ),
-                  // Text("Assigned to: ${snapshot.data}"),
                   SizedBox(height: 20),
 
                 if (task.assignedTo == widget.userRef) 
@@ -345,7 +307,7 @@ class _TaskTileState extends State<TaskTile> {
       },
     );
   }
-
+    
   @override
   Widget build(BuildContext context) {
     if (task.isOneOff == true) {

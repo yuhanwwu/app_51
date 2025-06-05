@@ -43,15 +43,16 @@ class Task {
   // }
 
   //needed for all tasks
+  final DocumentReference taskRef;
   final String description;
   final bool isOneOff;
   final String taskId;
   final DocumentReference assignedFlat;
   final DocumentReference? assignedTo; //? for one off, required for repeat
+  final String setDate;
 
   //one off tasks
   final bool? done;
-  final String? setDate;
   final bool priority; //False for repeat
 
   //repeat tasks
@@ -61,13 +62,14 @@ class Task {
   final bool isPersonal; //false for one off
 
   Task({
+    required this.taskRef,
     required this.description,
     required this.isOneOff,
     required this.taskId,
     required this.assignedFlat,
     this.assignedTo,
     this.done,
-    this.setDate,
+    required this.setDate,
     required this.priority,
     required this.frequency,
     this.lastDoneOn,
@@ -79,6 +81,7 @@ class Task {
     final data = doc.data() as Map<String, dynamic>;
     final isOneOff = data['isOneOff'] as bool;
     return Task(
+      taskRef: doc.reference as DocumentReference,
       description: data['description'],
       isOneOff: data['isOneOff'] ?? false,
       taskId: doc.id,
@@ -87,13 +90,13 @@ class Task {
           ? data['assignedTo'] as DocumentReference?
           : data['assignedTo'] as DocumentReference,
       done: isOneOff ? data['done'] : null,
-      setDate: isOneOff ? data['setDate'] : null,
+      setDate: data['setDate'],
       priority: isOneOff ? (data['priority'] as bool? ?? false) : false,
       frequency: isOneOff ? 0 : data['frequency'] as int,
-        // frequency: isOneOff ? 0 : (data['frequency'] as int? ?? 0),
+      // frequency: isOneOff ? 0 : (data['frequency'] as int? ?? 0),
       lastDoneOn: isOneOff ? null : data['lastDoneOn'] as String?,
       lastDoneBy: isOneOff ? null : data['lastDoneBy'] as DocumentReference?,
       isPersonal: isOneOff ? false : data['isPersonal'] as bool,
-     );
+    );
   }
 }

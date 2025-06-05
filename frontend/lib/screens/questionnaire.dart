@@ -14,9 +14,7 @@ Future<Map<String, int>> fetchChorePlan(String plan) async {
     throw Exception('User not found');
   }
 
-
   Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-
 
   // Convert dynamic map to Map<String, int>
   Map<String, int> chores = {};
@@ -272,7 +270,10 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
                           )
                         : const Text(
                             'Choose this',
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                   ),
                 ),
@@ -293,7 +294,10 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          return Text('Error: ${snapshot.error}', style: const TextStyle(color: Colors.red));
+          return Text(
+            'Error: ${snapshot.error}',
+            style: const TextStyle(color: Colors.red),
+          );
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return const Text('No chores found.');
         }
@@ -319,10 +323,7 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    chore,
-                    style: const TextStyle(fontSize: 16),
-                  ),
+                  Text(chore, style: const TextStyle(fontSize: 16)),
                   Text(
                     frequency,
                     style: TextStyle(

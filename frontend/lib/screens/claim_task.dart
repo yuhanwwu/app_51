@@ -1,4 +1,0 @@
-
-// class ClaimTaskPage extends StatefulWidget {
-
-// }

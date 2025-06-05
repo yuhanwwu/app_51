@@ -38,6 +38,7 @@ class _EditTaskPageState extends State<EditTaskPage> {
     _frequencyController = TextEditingController(
       text: widget.task.frequency.toString(),
     );
+    _priority = widget.task.priority;
   }
 
   Future<void> _editTask() async {
@@ -56,7 +57,7 @@ class _EditTaskPageState extends State<EditTaskPage> {
       'assignedTo': _task.assignedTo,
       'done': _task.done,
       'setDate': _task.setDate,
-      'priority': _task.priority,
+      'priority': _priority,
       'frequency': frequency,
       'lastDoneOn': _task.lastDoneOn,
       'lastDoneBy': _task.lastDoneBy,

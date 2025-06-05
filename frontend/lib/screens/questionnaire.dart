@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:frontend/models/user.dart';
+import 'package:frontend/screens/amend_questionnaire.dart';
 import 'package:intl/intl.dart';
 
 Future<Map<String, int>> fetchChorePlan(String plan) async {
@@ -43,6 +44,41 @@ class QuestionnairePage extends StatefulWidget {
 class _QuestionnairePageState extends State<QuestionnairePage> {
   int? _expandedIndex;
   bool isSubmitting = false;
+
+  String getChoreDescription(String key) {
+    switch (key.trim()) {
+      case 'bathroom':
+        return 'Cleaning the bathroom';
+      case 'dishes':
+        return 'Doing the dishes';
+      case 'kitchen':
+        return 'Cleaning the kitchen';
+      case 'laundry':
+        return 'Doing laundry';
+      case 'recycling':
+        return 'Taking out recycling';
+      case 'rubbish':
+        return 'Taking out the trash';
+      default:
+        return key; // Fallback for any other chore
+    }
+  }
+
+  String getPlanDescription(String plan) {
+    switch (plan) {
+      case 'I like it tidy':
+        return plan = 'clean';
+        
+      case "I don't mind a bit of mess":
+        return plan = 'medium';
+        
+      case "I want it super-relaxed":
+        return plan = 'dirty';
+        
+      default:
+        return plan;
+    }
+  }
 
   final List<String> vibeOptions = [
     'I like it tidy',
@@ -163,39 +199,45 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
                               isSubmitting = true;
                             });
                             String selectedVibe = vibeOptions[index];
-                            String plan;
-                            switch (selectedVibe) {
-                              case 'I like it tidy':
-                                plan = 'clean';
-                                break;
-                              case "I don't mind a bit of mess":
-                                plan = 'medium';
-                                break;
-                              case "I want it super-relaxed":
-                                plan = 'dirty';
-                                break;
-                              default:
-                                plan = 'unknown';
-                            }
+                            String plan = getPlanDescription(selectedVibe);
 
                             try {
-                              // Save the plan to Firestore
-                              DocumentSnapshot planDoc = await FirebaseFirestore
-                                  .instance
-                                  .collection('VibeTemplates')
-                                  .doc(plan)
-                                  .get();
+// <<<<<<< edit_task
+//                               // Save the plan to Firestore
+//                               DocumentSnapshot planDoc = await FirebaseFirestore
+//                                   .instance
+//                                   .collection('VibeTemplates')
+//                                   .doc(plan)
+//                                   .get();
 
-                              Map<String, dynamic> data =
-                                  planDoc.data() as Map<String, dynamic>;
+//                               Map<String, dynamic> data =
+//                                   planDoc.data() as Map<String, dynamic>;
+// =======
+                              final chores = await fetchChorePlan(plan);
+
+                              // Navigate to amend screen
+                              final amendedChores = await Navigator.push<Map<String, int>>(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => AmendQuestionnaireScreen(chores: chores),
+                                ),
+                              );
+
+                              // If user cancels, don't proceed
+                              if (amendedChores == null) {
+                                setState(() => isSubmitting = false);
+                                return;
+                              }
+                              
+// >>>>>>> master
 
                               await FirebaseFirestore.instance
                                   .collection('UserPreferences')
                                   .doc(widget.username)
-                                  .set(data);
+                                  .set(amendedChores);
 
                               // set repeat tasks based on chosen plan
-                              await populateRepeatTasks(plan);
+                              await populateRepeatTasks(amendedChores);
 
                               // Mark questionnaire as done
                               await FirebaseFirestore.instance
@@ -256,20 +298,7 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
   }
 
   Widget _buildPlanDetails(String vibeOption) {
-    String plan = 'This string should have been re-assigned.';
-    switch (vibeOption) {
-      case 'I like it tidy':
-        plan = 'clean';
-        break;
-      case "I don't mind a bit of mess":
-        plan = 'medium';
-        break;
-      case "I want it super-relaxed":
-        plan = 'dirty';
-        break;
-      default:
-        plan = 'unknown';
-    }
+    String plan = getPlanDescription(vibeOption);
 
     return FutureBuilder<Map<String, int>>(
       future: fetchChorePlan(plan),
@@ -289,29 +318,7 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: chores.entries.map((entry) {
-            String chore;
-            switch (entry.key.trim()) {
-              case 'bathroom':
-                chore = 'Cleaning the bathroom';
-                break;
-              case 'dishes':
-                chore = 'Doing the dishes';
-                break;
-              case 'kitchen':
-                chore = 'Cleaning the kitchen';
-                break;
-              case 'laundry':
-                chore = 'Doing laundry';
-                break;
-              case 'recycling':
-                chore = 'Taking out recycling';
-                break;
-              case 'rubbish':
-                chore = 'Taking out the trash';
-                break;
-              default:
-                chore = entry.key;
-            }
+            String chore = getChoreDescription(entry.key.trim());
             int days = entry.value;
 
             String frequency;
@@ -344,7 +351,7 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
           });
         }
         
-        Future<void> populateRepeatTasks(String plan) async {
+        Future<void> populateRepeatTasks(Map<String, int> plan) async {
             // 1. Fetch the user's flat reference
             final userDoc = await FirebaseFirestore.instance
               .collection('Users')
@@ -364,34 +371,9 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
             final flatSnapshot = await flatRef.get();
             final flatData = flatSnapshot.data() as Map<String, dynamic>;
 
-            // 2. Fetch the plan's chores
-            final chores = await fetchChorePlan(plan);
-
             // 3. For each chore, create a repeat task
-            for (final entry in chores.entries) {
-            String description;
-            switch (entry.key.trim()) {
-              case 'bathroom':
-                description = 'Clean the bathroom';
-                break;
-              case 'dishes':
-                description = 'Do the dishes';
-                break;
-              case 'kitchen':
-                description = 'Clean the kitchen';
-                break;
-              case 'laundry':
-                description = 'Do laundry';
-                break;
-              case 'recycling':
-                description = 'Take out recycling';
-                break;
-              case 'rubbish':
-                description = 'Take out the trash';
-                break;
-              default:
-                description = entry.key;
-            }
+            for (final entry in plan.entries) {
+            String description = getChoreDescription(entry.key.trim());
             
             final int existingSum = flatData[entry.key.trim()]*flatData['numOfCompletedQuestionnaires'];
             // flatData['numOfCompletedQuestionnaires'] += 1;

@@ -12,7 +12,8 @@ class User {
     required this.username,
     required this.name,
     required this.flat,
-    required this.questionnaireDone});
+    required this.questionnaireDone,
+  });
 
   factory User.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
@@ -22,6 +23,6 @@ class User {
       name: data['name'] ?? '',
       flat: data['flat'],
       questionnaireDone: data['questionnaireDone'] ?? false,
-      );
+    );
   }
 }

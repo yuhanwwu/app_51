@@ -30,10 +30,10 @@ class _LoginPageState extends State<LoginPage> {
     if (docSnap.exists) {
       try {
         return User.fromFirestore(docSnap);
-    } catch (e) {
+      } catch (e) {
         print('Error in User.fromFirestore: $e');
         return null;
-    }
+      }
     } else {
       return null;
     }
@@ -82,8 +82,13 @@ class _LoginPageState extends State<LoginPage> {
               final inputUsername = _usernameController.text.trim();
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => AddFlatPage(username: inputUsername, onLogin: widget.onLogin,),
-              ));
+                MaterialPageRoute(
+                  builder: (context) => AddFlatPage(
+                    username: inputUsername,
+                    onLogin: widget.onLogin,
+                  ),
+                ),
+              );
             },
           ),
         ],
@@ -124,7 +129,9 @@ class _LoginPageState extends State<LoginPage> {
                             : () async {
                                 final user = await login();
                                 if (user != null) {
-                                  widget.onLogin(user); // Let main.dart handle navigation!
+                                  widget.onLogin(
+                                    user,
+                                  ); // Let main.dart handle navigation!
                                 }
                               },
                         style: ElevatedButton.styleFrom(
@@ -159,8 +166,8 @@ class _LoginPageState extends State<LoginPage> {
             SizedBox(height: 10),
             OutlinedButton(
               onPressed: () async {
-                final user = (await fetchUser('xiting'))!;
-                _usernameController.text = 'xiting';
+                final user = (await fetchUser('xt'))!;
+                _usernameController.text = 'xt';
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => HomePage(user: user)),
@@ -172,7 +179,7 @@ class _LoginPageState extends State<LoginPage> {
                 side: BorderSide(color: AppColors.green),
                 padding: EdgeInsets.symmetric(vertical: 15),
               ),
-              child: Text("DEV: Quick Login as xiting"),
+              child: Text("DEV: Quick Login as xt"),
             ),
           ],
         ),

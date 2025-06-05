@@ -7,7 +7,11 @@ class NudgeUserPage extends StatelessWidget {
   final User user;
   final Future<List<Task>> allFlatTasks;
 
-  const NudgeUserPage({required this.user, required this.allFlatTasks, super.key});
+  const NudgeUserPage({
+    required this.user,
+    required this.allFlatTasks,
+    super.key,
+  });
 
   Future<List<Task>> fetchUserTasks(Future<List<Task>> allFlatTasks) async {
     final tasks = await allFlatTasks;
@@ -29,8 +33,28 @@ class NudgeUserPage extends StatelessWidget {
             return Center(child: Text("Error: ${snapshot.error}"));
           } else if (snapshot.hasData) {
             final tasks = snapshot.data!;
-            if (tasks.isEmpty) return const Center(child: Text("No tasks found."));
+            if (tasks.isEmpty)
+              return const Center(child: Text("No tasks found."));
             return ListView(
+// <<<<<<< edit_task
+//               children: tasks
+//                   .map(
+//                     (e) => ListTile(
+//                       title: Text(e.description),
+//                       subtitle: Text(e.isOneOff ? "One-off" : "Repeat"),
+//                       trailing: IconButton(
+//                         icon: Icon(Icons.notifications_active),
+//                         tooltip: 'Nudge',
+//                         onPressed: () async {
+//                           await FirebaseFirestore.instance
+//                               .collection('nudges')
+//                               .add({
+//                                 'userId': user
+//                                     .username, // or user.username if that's your doc ID
+//                                 'taskId': e.taskId,
+//                                 'timestamp': Timestamp.now(),
+//                               });
+// =======
               children: tasks.map((e) => ListTile(
                 title: Text(e.description),
                 subtitle: Text(e.isOneOff ? "One-off" : "Repeat"),
@@ -44,13 +68,18 @@ class NudgeUserPage extends StatelessWidget {
                       'timestamp': Timestamp.now(),
                       'read': false,
                     });
+// >>>>>>> master
 
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Nudge sent to ${user.name}')),
-                    );
-                  },
-                ),
-              )).toList(),
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Nudge sent to ${user.name}'),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  )
+                  .toList(),
             );
           } else {
             return const Center(child: Text("No tasks."));
@@ -61,3 +90,23 @@ class NudgeUserPage extends StatelessWidget {
   }
 }
 
+// <<<<<<< edit_task
+// Future<void> sendNudgeNotification(User user, Task task) async {
+//   // Assume you store the FCM token in the user document
+//   final userDoc = await FirebaseFirestore.instance
+//       .collection('users')
+//       .doc(user.username)
+//       .get();
+
+//   final token = userDoc['fcmToken'];
+
+//   // if (token != null) {
+//   //   await sendFCM(
+//   //     token: token,
+//   //     title: "Nudge: ${task.description}",
+//   //     body: "${user.name}, please check this task.",
+//   //   );
+//   // }
+// }
+// =======
+// >>>>>>> master

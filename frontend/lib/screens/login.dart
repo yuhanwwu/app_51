@@ -226,7 +226,10 @@ class _LoginPageState extends State<LoginPage> {
                 _usernameController.text = 'xt';
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => HomePage(user: user, onLogout: widget.onLogout,)),
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        HomePage(user: user, onLogout: widget.onLogout),
+                  ),
                 );
               },
               style: OutlinedButton.styleFrom(

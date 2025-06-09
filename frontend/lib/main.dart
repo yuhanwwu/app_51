@@ -84,12 +84,12 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-void onLogout() {
-  setState(() {
-    user = null;
-    currentPage = AppPage.login;
-  });
-}
+  void onLogout() {
+    setState(() {
+      user = null;
+      currentPage = AppPage.login;
+    });
+  }
 
   void _startNudgePolling() {
     _nudgeTimer?.cancel();

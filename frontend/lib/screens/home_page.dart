@@ -13,12 +13,16 @@ import 'nudge_user.dart';
 import '../customWidgets/task_tile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_popup_card/flutter_popup_card.dart';
+import '../constants/colors.dart';
+
 
 class HomePage extends StatefulWidget {
   final FlatUser user;
   final VoidCallback onLogout;
   // const HomePage({super.key, required this.user});
-  const HomePage({Key? key, required this.user, required this.onLogout}) : super(key: key);
+  const HomePage({Key? key, required this.user, required this.onLogout})
+    : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -31,11 +35,11 @@ class _HomePageState extends State<HomePage> {
   late final FlatUser user;
   late final DocumentReference userRef;
   late final bool questionnaireDone;
+  late final Flat flat;
   late Future<List<Task>> _userOneOffTasks;
   late Future<List<Task>> _repeatTasks;
   late Future<List<Task>> _allFlatTasks;
   late Future<List<Task>> _unclaimedTasks;
-  
 
   @override
   void initState() {
@@ -46,15 +50,25 @@ class _HomePageState extends State<HomePage> {
     name = widget.user.name;
     user = widget.user;
     questionnaireDone = widget.user.questionnaireDone;
-    _loadTasks();
+    _loadEverything();
   }
 
-Future<void> logout() async {
-  final prefs = await SharedPreferences.getInstance();
-  await prefs.remove('loggedInUsername');
-  await FirebaseAuth.instance.signOut();
-  widget.onLogout(); // Call the parent callback
-}
+  void _loadEverything() async {
+    _loadTasks();
+    flat = await _loadFlat();
+  }
+
+  Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('loggedInUsername');
+    await FirebaseAuth.instance.signOut();
+    widget.onLogout(); // Call the parent callback
+  }
+
+  Future<Flat> _loadFlat() async {
+      DocumentSnapshot flatSnap = await flatDoc.get();
+      return Flat.fromFirestore(flatSnap);
+  }
 
   void _loadTasks() async {
     setState(() {
@@ -65,12 +79,73 @@ Future<void> logout() async {
     });
   }
 
+  Future<void> showRoutineCard(BuildContext context, flat) {
+  return showPopupCard(
+    context: context,
+    builder: (context) => FractionallySizedBox(
+      heightFactor: 0.5,
+      widthFactor: 0.5,
+      child: PopupCard(
+      elevation: 8,
+      color: AppColors.beige,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Container(
+          child: 
+          getChoreAndFreqCol(flat),
+          ),
+      ),
+    ),
+    ),
+    //offset: const Offset(-16, 70),
+    alignment: Alignment.center,
+    useSafeArea: true,
+    dimBackground: true,
+  );
+}
+
+Widget getChoreAndFreqCol(Flat flat) {
+  return Column(
+    mainAxisAlignment: MainAxisAlignment.spaceEvenly, // horizontal alignment
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+    Text('Cleaning the bathroom: ${flat.bathroom.toString()}'),
+    Text('Doing the dishes: ${flat.dishes.toString()}'),
+    Text('Cleaning the kitchen: ${flat.kitchen.toString()}'),
+    Text('Doing laundry: ${flat.laundry.toString()}'),
+    Text('Taking out recycling: ${flat.recycling.toString()}'),
+    Text('Taking out the rubbish: ${flat.rubbish.toString()}'),
+  ],);
+}
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Welcome, $name'),
         actions: [
+          TextButton(
+    onPressed: () {
+      logout(); // Your logout function, no doubt.
+    },
+    child: Text(
+      'Log Out',
+      style: TextStyle(color: Colors.black), // Text color must be visible!
+    ),
+  ),
+  TextButton(
+    onPressed: () {
+      showRoutineCard(context, flat); // Your logout function, no doubt.
+    },
+    child: Text(
+      'Show Routine',
+      style: TextStyle(color: Colors.black), // Text color must be visible!
+    ),
+  ),
           StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
                 .collection('Nudges')
@@ -497,12 +572,12 @@ Future<void> logout() async {
   }
 
   Widget logoutButton() {
-   return ElevatedButton(
-              onPressed: () async {
-                logout();
-              },
-              child: Text('Logout'),
-            );
+    return ElevatedButton(
+      onPressed: () async {
+        logout();
+      },
+      child: Text('Logout'),
+    );
   }
 
   Future<List<FlatUser>> fetchAllUsers(DocumentReference flat) async {

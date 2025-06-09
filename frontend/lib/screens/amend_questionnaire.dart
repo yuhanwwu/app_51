@@ -25,7 +25,7 @@ class _AmendQuestionnaireScreenState extends State<AmendQuestionnaireScreen> {
       case 'recycling':
         return 'Taking out recycling';
       case 'rubbish':
-        return 'Taking out the trash';
+        return 'Taking out the rubbish';
       default:
         return key; // Fallback for any other chore
     }

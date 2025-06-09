@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:frontend/screens/home_page.dart';
 import 'package:frontend/screens/questionnaire.dart';
@@ -8,11 +9,15 @@ import 'firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'screens/login.dart';
 import 'models/user.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await FirebaseAuth.instance.setPersistence(Persistence.LOCAL);
+  if (FirebaseAuth.instance.currentUser == null) {
+    await FirebaseAuth.instance.signInAnonymously();
+  }
   runApp(const MyApp());
 }
 
@@ -26,7 +31,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  User? user;
+  FlatUser? user;
   AppPage currentPage = AppPage.login;
   String? questionnaireUsername;
 
@@ -36,12 +41,63 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
+    _restoreUserSession();
   }
+
+  Future<void> saveLoggedInUsername(String username) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('loggedInUsername', username);
+  }
+
+  Future<void> _restoreUserSession() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedUsername = prefs.getString('loggedInUsername');
+
+    if (savedUsername != null) {
+      final doc = await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(savedUsername)
+          .get();
+
+      if (doc.exists) {
+        final userData = FlatUser.fromFirestore(doc);
+        final data = doc.data()!;
+        final questionnaireDone = data['questionnaireDone'] == true;
+
+        setState(() {
+          user = userData;
+          currentPage = questionnaireDone
+              ? AppPage.home
+              : AppPage.questionnaire;
+          questionnaireUsername = savedUsername;
+        });
+
+        _startNudgePolling();
+        return;
+      }
+    }
+
+    // fallback to login if not found
+    setState(() {
+      currentPage = AppPage.login;
+      user = null;
+    });
+  }
+
+void onLogout() {
+  setState(() {
+    user = null;
+    currentPage = AppPage.login;
+  });
+}
 
   void _startNudgePolling() {
     _nudgeTimer?.cancel();
     _lastCheckedNudge = Timestamp.now();
-    _nudgeTimer = Timer.periodic(const Duration(seconds: 30), (_) => _checkForNudges());
+    _nudgeTimer = Timer.periodic(
+      const Duration(seconds: 30),
+      (_) => _checkForNudges(),
+    );
   }
 
   void _stopNudgePolling() {
@@ -70,7 +126,6 @@ class _MyAppState extends State<MyApp> {
           final taskData = taskSnap.data() as Map<String, dynamic>;
           description = taskData['description'] ?? 'a task';
         }
-      
       }
       // Update last checked time
       _lastCheckedNudge = Timestamp.now();
@@ -83,7 +138,8 @@ class _MyAppState extends State<MyApp> {
     super.dispose();
   }
 
-  Future<void> onLogin(User loggedInUser) async {
+  Future<void> onLogin(FlatUser loggedInUser) async {
+    await saveLoggedInUsername(loggedInUser.username);
     setState(() {
       user = loggedInUser;
     });
@@ -107,10 +163,10 @@ class _MyAppState extends State<MyApp> {
       });
     }
 
-     _startNudgePolling();
+    _startNudgePolling();
   }
 
-  void onQuestionnaireComplete(User updatedUser) {
+  void onQuestionnaireComplete(FlatUser updatedUser) {
     setState(() {
       user = updatedUser;
       currentPage = AppPage.home;
@@ -122,7 +178,7 @@ class _MyAppState extends State<MyApp> {
     Widget page;
     switch (currentPage) {
       case AppPage.login:
-        page = LoginPage(onLogin: onLogin);
+        page = LoginPage(onLogin: onLogin, onLogout: onLogout);
         break;
       case AppPage.questionnaire:
         page = QuestionnairePage(
@@ -131,7 +187,7 @@ class _MyAppState extends State<MyApp> {
         );
         break;
       case AppPage.home:
-        page = HomePage(user: user!);
+        page = HomePage(user: user!, onLogout: onLogout);
         break;
     }
     return MaterialApp(

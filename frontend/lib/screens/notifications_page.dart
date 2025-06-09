@@ -20,15 +20,15 @@ class _NotificationsPageState extends State<NotificationsPage> {
   }
 
   Future<void> markNudgesAsRead() async {
-  final query = await FirebaseFirestore.instance
-      .collection('Nudges')
-      .where('userId', isEqualTo: widget.username)
-      .where('read', isEqualTo: false)
-      .get();
-  for (var doc in query.docs) {
-    doc.reference.update({'read': true});
+    final query = await FirebaseFirestore.instance
+        .collection('Nudges')
+        .where('userId', isEqualTo: widget.username)
+        .where('read', isEqualTo: false)
+        .get();
+    for (var doc in query.docs) {
+      doc.reference.update({'read': true});
+    }
   }
-}
 
   Future<List<QueryDocumentSnapshot>> _fetchNudges() async {
     final query = await FirebaseFirestore.instance
@@ -85,7 +85,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 builder: (context, taskSnap) {
                   final description = taskSnap.data ?? 'a task';
                   return ListTile(
-                    leading: const Icon(Icons.notifications_active, color: Colors.teal),
+                    leading: const Icon(
+                      Icons.notifications_active,
+                      color: Colors.teal,
+                    ),
                     title: Text('You were nudged for: $description'),
                     subtitle: Text('${date.toLocal()}'),
                     trailing: IconButton(
@@ -103,4 +106,3 @@ class _NotificationsPageState extends State<NotificationsPage> {
     );
   }
 }
-

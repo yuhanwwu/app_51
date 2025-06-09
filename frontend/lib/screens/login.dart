@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../models/user.dart';
 import 'add_flat.dart';
@@ -7,9 +8,10 @@ import 'home_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LoginPage extends StatefulWidget {
-  final Function(User) onLogin;
+  final Function(FlatUser) onLogin;
+  final VoidCallback onLogout;
 
-  const LoginPage({super.key, required this.onLogin});
+  const LoginPage({super.key, required this.onLogin, required this.onLogout});
 
   @override
   _LoginPageState createState() => _LoginPageState();
@@ -21,7 +23,7 @@ class _LoginPageState extends State<LoginPage> {
   bool _isLoading = false;
   String username = '';
 
-  Future<User?> fetchUser(String inputUsername) async {
+  Future<FlatUser?> fetchUser(String inputUsername) async {
     final docRef = FirebaseFirestore.instance
         .collection('Users')
         .doc(inputUsername);
@@ -29,7 +31,7 @@ class _LoginPageState extends State<LoginPage> {
 
     if (docSnap.exists) {
       try {
-        return User.fromFirestore(docSnap);
+        return FlatUser.fromFirestore(docSnap);
       } catch (e) {
         print('Error in User.fromFirestore: $e');
         return null;
@@ -39,7 +41,36 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  Future<User?> login() async {
+  // Future<FlatUser?> login() async {
+  //   setState(() {
+  //     _isLoading = true;
+  //     error = '';
+  //   });
+
+  //   final inputUsername = _usernameController.text.trim();
+
+  //   if (inputUsername.isEmpty) {
+  //     setState(() {
+  //       _isLoading = false;
+  //       error = 'Please enter a username';
+  //     });
+  //     return null;
+  //   }
+
+  //   final user = await fetchUser(inputUsername);
+  //   if (user != null) {
+  //     setState(() => _isLoading = false);
+  //     return user;
+  //   } else {
+  //     setState(() {
+  //       _isLoading = false;
+  //       error = 'Username not found';
+  //     });
+  //     return null;
+  //   }
+  // }
+
+  Future<FlatUser?> login() async {
     setState(() {
       _isLoading = true;
       error = '';
@@ -55,14 +86,38 @@ class _LoginPageState extends State<LoginPage> {
       return null;
     }
 
-    final user = await fetchUser(inputUsername);
-    if (user != null) {
+    final docRef = FirebaseFirestore.instance
+        .collection('Users')
+        .doc(inputUsername);
+    final docSnap = await docRef.get();
+
+    if (docSnap.exists) {
+      try {
+        setState(() => _isLoading = false);
+        return FlatUser.fromFirestore(docSnap);
+      } catch (e) {
+        print('Error in User.fromFirestore: $e');
+        setState(() {
+          _isLoading = false;
+          error = 'Failed to load user.';
+        });
+        return null;
+      }
+    }
+
+    try {
+      final userCredential = await FirebaseAuth.instance.signInAnonymously();
+      final uid = userCredential.user!.uid;
+
+      await docRef.set({'uid': uid, 'createdAt': FieldValue.serverTimestamp()});
+
+      final newUserSnap = await docRef.get();
       setState(() => _isLoading = false);
-      return user;
-    } else {
+      return FlatUser.fromFirestore(newUserSnap);
+    } catch (e) {
       setState(() {
         _isLoading = false;
-        error = 'Username not found';
+        error = 'Could not create user.';
       });
       return null;
     }
@@ -86,6 +141,7 @@ class _LoginPageState extends State<LoginPage> {
                   builder: (context) => AddFlatPage(
                     username: inputUsername,
                     onLogin: widget.onLogin,
+                    onLogout: widget.onLogout,
                   ),
                 ),
               );
@@ -170,7 +226,7 @@ class _LoginPageState extends State<LoginPage> {
                 _usernameController.text = 'xt';
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => HomePage(user: user)),
+                  MaterialPageRoute(builder: (context) => HomePage(user: user, onLogout: widget.onLogout,)),
                 );
               },
               style: OutlinedButton.styleFrom(

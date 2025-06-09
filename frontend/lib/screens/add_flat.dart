@@ -6,8 +6,9 @@ import 'package:universal_html/html.dart' as html;
 
 class AddFlatPage extends StatefulWidget {
   final String username;
-  final Function(User) onLogin;
-  const AddFlatPage({super.key, required this.username, required this.onLogin});
+  final Function(FlatUser) onLogin;
+  final VoidCallback onLogout;
+  const AddFlatPage({super.key, required this.username, required this.onLogin, required this.onLogout});
 
   @override
   _AddFlatPageState createState() => _AddFlatPageState();
@@ -108,7 +109,7 @@ class _AddFlatPageState extends State<AddFlatPage> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => LoginPage(onLogin: widget.onLogin),
+        builder: (context) => LoginPage(onLogin: widget.onLogin, onLogout: widget.onLogout),
       ),
     );
   }

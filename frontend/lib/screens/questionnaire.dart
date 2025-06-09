@@ -29,7 +29,7 @@ Future<Map<String, int>> fetchChorePlan(String plan) async {
 
 class QuestionnairePage extends StatefulWidget {
   final String username;
-  final Function(User) onComplete;
+  final Function(FlatUser) onComplete;
 
   const QuestionnairePage({
     super.key,
@@ -68,13 +68,13 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
     switch (plan) {
       case 'I like it tidy':
         return plan = 'clean';
-        
+
       case "I don't mind a bit of mess":
         return plan = 'medium';
-        
+
       case "I want it super-relaxed":
         return plan = 'dirty';
-        
+
       default:
         return plan;
     }
@@ -205,19 +205,22 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
                               final chores = await fetchChorePlan(plan);
 
                               // Navigate to amend screen
-                              final amendedChores = await Navigator.push<Map<String, int>>(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => AmendQuestionnaireScreen(chores: chores),
-                                ),
-                              );
+                              final amendedChores =
+                                  await Navigator.push<Map<String, int>>(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          AmendQuestionnaireScreen(
+                                            chores: chores,
+                                          ),
+                                    ),
+                                  );
 
                               // If user cancels, don't proceed
                               if (amendedChores == null) {
                                 setState(() => isSubmitting = false);
                                 return;
                               }
-                              
 
                               await FirebaseFirestore.instance
                                   .collection('UserPreferences')
@@ -238,7 +241,7 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
                                   .collection('Users')
                                   .doc(widget.username)
                                   .get();
-                              final user = User.fromFirestore(userDoc);
+                              final user = FlatUser.fromFirestore(userDoc);
 
                               // Call the onComplete callback to update app state and navigate
                               widget.onComplete(user);
@@ -335,58 +338,62 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
                 ],
               ),
             );
-          }).toList());
-          });
-        }
-        
-        Future<void> populateRepeatTasks(Map<String, int> plan) async {
-            // 1. Fetch the user's flat reference
-            final userDoc = await FirebaseFirestore.instance
-              .collection('Users')
-              .doc(widget.username)
-              .get();
+          }).toList(),
+        );
+      },
+    );
+  }
 
-            final userRef = FirebaseFirestore.instance
-              .collection('Users')
-              .doc(widget.username);
-            
-            final userData = userDoc.data();
-            final flatRef = userData!['flat']; // Should be a DocumentReference
-            final now = DateTime.now();
-            final setDate = DateFormat('yyyy-MM-dd').format(now);      
+  Future<void> populateRepeatTasks(Map<String, int> plan) async {
+    // 1. Fetch the user's flat reference
+    final userDoc = await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(widget.username)
+        .get();
 
-            // fetch existing flat's chore preferences
-            final flatSnapshot = await flatRef.get();
-            final flatData = flatSnapshot.data() as Map<String, dynamic>;
+    final userRef = FirebaseFirestore.instance
+        .collection('Users')
+        .doc(widget.username);
 
-            // 3. For each chore, create a repeat task
-            for (final entry in plan.entries) {
-            String description = getChoreDescription(entry.key.trim());
-            
-            final int existingSum = flatData[entry.key.trim()]*flatData['numOfCompletedQuestionnaires'];
-            // flatData['numOfCompletedQuestionnaires'] += 1;
-            flatData[entry.key.trim()] = ((existingSum + entry.value) / (flatData['numOfCompletedQuestionnaires'] + 1)).round();
+    final userData = userDoc.data();
+    final flatRef = userData!['flat']; // Should be a DocumentReference
+    final now = DateTime.now();
+    final setDate = DateFormat('yyyy-MM-dd').format(now);
 
-                       
-            if (flatData['numOfCompletedQuestionnaires'] == 0) {
-              await FirebaseFirestore.instance.collection('Tasks').add({
-              'description': description,
-              'isOneOff': false,
-              'assignedFlat': flatRef,
-              'assignedTo': userRef,
-              'done': null,
-              'setDate': setDate,
-              'priority': false,
-              'frequency': entry.value, // e.g. every X days
-              'lastDoneOn': null,
-              'lastDoneBy': null,
-              'isPersonal': false,
-            });
-          }
-            
-          }
+    // fetch existing flat's chore preferences
+    final flatSnapshot = await flatRef.get();
+    final flatData = flatSnapshot.data() as Map<String, dynamic>;
 
-          flatData['numOfCompletedQuestionnaires'] += 1;
-          await flatRef.update(flatData);
-        }
+    // 3. For each chore, create a repeat task
+    for (final entry in plan.entries) {
+      String description = getChoreDescription(entry.key.trim());
+
+      final int existingSum =
+          flatData[entry.key.trim()] * flatData['numOfCompletedQuestionnaires'];
+      // flatData['numOfCompletedQuestionnaires'] += 1;
+      flatData[entry.key.trim()] =
+          ((existingSum + entry.value) /
+                  (flatData['numOfCompletedQuestionnaires'] + 1))
+              .round();
+
+      if (flatData['numOfCompletedQuestionnaires'] == 0) {
+        await FirebaseFirestore.instance.collection('Tasks').add({
+          'description': description,
+          'isOneOff': false,
+          'assignedFlat': flatRef,
+          'assignedTo': userRef,
+          'done': null,
+          'setDate': setDate,
+          'priority': false,
+          'frequency': entry.value, // e.g. every X days
+          'lastDoneOn': null,
+          'lastDoneBy': null,
+          'isPersonal': false,
+        });
+      }
+    }
+
+    flatData['numOfCompletedQuestionnaires'] += 1;
+    await flatRef.update(flatData);
+  }
 }

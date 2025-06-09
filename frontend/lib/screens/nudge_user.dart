@@ -4,7 +4,7 @@ import '../models/task.dart';
 import '../models/user.dart';
 
 class NudgeUserPage extends StatelessWidget {
-  final User user;
+  final FlatUser user;
   final Future<List<Task>> allFlatTasks;
 
   const NudgeUserPage({
@@ -36,19 +36,24 @@ class NudgeUserPage extends StatelessWidget {
             if (tasks.isEmpty)
               return const Center(child: Text("No tasks found."));
             return ListView(
-              children: tasks.map((e) => ListTile(
-                title: Text(e.description),
-                subtitle: Text(e.isOneOff ? "One-off" : "Repeat"),
-                trailing: IconButton(
-                  icon: Icon(Icons.notifications_active),
-                  tooltip: 'Nudge',
-                  onPressed: () async {
-                    await FirebaseFirestore.instance.collection('Nudges').add({
-                      'userId': user.username,       // or user.username if that's your doc ID
-                      'taskId': e.taskId,
-                      'timestamp': Timestamp.now(),
-                      'read': false,
-                    });
+              children: tasks
+                  .map(
+                    (e) => ListTile(
+                      title: Text(e.description),
+                      subtitle: Text(e.isOneOff ? "One-off" : "Repeat"),
+                      trailing: IconButton(
+                        icon: Icon(Icons.notifications_active),
+                        tooltip: 'Nudge',
+                        onPressed: () async {
+                          await FirebaseFirestore.instance
+                              .collection('Nudges')
+                              .add({
+                                'userId': user
+                                    .username, // or user.username if that's your doc ID
+                                'taskId': e.taskId,
+                                'timestamp': Timestamp.now(),
+                                'read': false,
+                              });
 
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
@@ -69,4 +74,3 @@ class NudgeUserPage extends StatelessWidget {
     );
   }
 }
-

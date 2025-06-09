@@ -13,7 +13,7 @@ import 'package:intl/intl.dart';
 
 class TaskTile extends StatefulWidget {
   final Task task;
-  final User user;
+  final FlatUser user;
   final DocumentReference userRef;
   final VoidCallback onDone;
 
@@ -37,30 +37,29 @@ class _TaskTileState extends State<TaskTile> {
     super.initState();
     task = widget.task;
   }
-  
+
   IconData getChoreIcon(String key) {
-  switch (key.trim()) {
-    case 'Cleaning the kitchen':
-      return Icons.kitchen;
-    case 'Cleaning the bathroom':
-      return Icons.bathtub;
-    case 'Doing laundry':
-      return Icons.local_laundry_service;
-    case 'Doing the dishes':
-      return Icons.restaurant;
-    case 'Taking out recycling':
-      return Icons.recycling;
-    case 'Taking out the trash':
-      return Icons.delete;
-    default:
-      return Icons.task_alt; // fallback icon
+    switch (key.trim()) {
+      case 'Cleaning the kitchen':
+        return Icons.kitchen;
+      case 'Cleaning the bathroom':
+        return Icons.bathtub;
+      case 'Doing laundry':
+        return Icons.local_laundry_service;
+      case 'Doing the dishes':
+        return Icons.restaurant;
+      case 'Taking out recycling':
+        return Icons.recycling;
+      case 'Taking out the trash':
+        return Icons.delete;
+      default:
+        return Icons.task_alt; // fallback icon
     }
   }
 
   Future<void> _deleteTask() async {
-      await widget.task.taskRef.delete();
+    await widget.task.taskRef.delete();
   }
-
 
   Future<void> _claimTask() async {
     try {
@@ -181,11 +180,19 @@ class _TaskTileState extends State<TaskTile> {
           context: context,
           builder: (context) => FractionallySizedBox(
             heightFactor: 0.8,
-            child: ElevatedButton(onPressed: () {_deleteTask(); widget.onDone(); Navigator.pop(context);}, child: Text('Confirm Delete?'))
-          )
+            child: ElevatedButton(
+              onPressed: () {
+                _deleteTask();
+                widget.onDone();
+                Navigator.pop(context);
+              },
+              child: Text('Confirm Delete?'),
+            ),
+          ),
         );
       },
-      child: Text('Delete Task'));
+      child: Text('Delete Task'),
+    );
   }
 
   Widget editButton() {
@@ -238,7 +245,13 @@ class _TaskTileState extends State<TaskTile> {
                   Row(children: [claimButton(), editButton(), deleteButton()]),
 
                 if (task.assignedTo == widget.userRef)
-                  Row(children: [doneOneOffButton(), editButton(), deleteButton()]),
+                  Row(
+                    children: [
+                      doneOneOffButton(),
+                      editButton(),
+                      deleteButton(),
+                    ],
+                  ),
 
                 if (task.assignedTo != null &&
                     task.assignedTo != widget.userRef)
@@ -246,7 +259,7 @@ class _TaskTileState extends State<TaskTile> {
               ],
             ),
           ),
-// <<<<<<< edit_task
+          // <<<<<<< edit_task
         );
       },
     );
@@ -254,52 +267,59 @@ class _TaskTileState extends State<TaskTile> {
 
   Widget buildRepeatTile(BuildContext context) {
     return FutureBuilder(
-        future: getNameFromDocRef(task.assignedTo),
-        builder: (context, snapshot) {
-          return Card(
-            margin: EdgeInsets.all(12),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(getChoreIcon(task.description), color: const Color.fromARGB(255, 20, 0, 150), size: 28),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          task.description,
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+      future: getNameFromDocRef(task.assignedTo),
+      builder: (context, snapshot) {
+        return Card(
+          margin: EdgeInsets.all(12),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      getChoreIcon(task.description),
+                      color: const Color.fromARGB(255, 20, 0, 150),
+                      size: 28,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        task.description,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ],
-                  ),
-                  SizedBox(height: 10),
-                  
-                  Text("Frequency: ${formatDisplayFrequency(task.frequency)}"),
-                  if (task.lastDoneOn != null && task.lastDoneBy != null)
-                    FutureBuilder<String>(
-                      future: getNameFromDocRef(task.lastDoneBy),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return Text("Last done on: ${task.lastDoneOn} by ...");
-                        }
-                        return Text(
-                          "Last done on: ${task.lastDoneOn} by ${snapshot.data ?? "Unknown"}",
-                        );
-                      },
                     ),
-                  SizedBox(height: 20),
+                  ],
+                ),
+                SizedBox(height: 10),
 
-                if (task.assignedTo == widget.userRef) 
+                Text("Frequency: ${formatDisplayFrequency(task.frequency)}"),
+                if (task.lastDoneOn != null && task.lastDoneBy != null)
+                  FutureBuilder<String>(
+                    future: getNameFromDocRef(task.lastDoneBy),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Text("Last done on: ${task.lastDoneOn} by ...");
+                      }
+                      return Text(
+                        "Last done on: ${task.lastDoneOn} by ${snapshot.data ?? "Unknown"}",
+                      );
+                    },
+                  ),
+                SizedBox(height: 20),
+
+                if (task.assignedTo == widget.userRef)
                   Row(
                     children: [
                       doneRepeatButton(),
                       editButton(),
                       deleteButton(),
                     ],
-                  )
+                  ),
               ],
             ),
           ),
@@ -307,7 +327,7 @@ class _TaskTileState extends State<TaskTile> {
       },
     );
   }
-    
+
   @override
   Widget build(BuildContext context) {
     if (task.isOneOff == true) {
@@ -325,7 +345,7 @@ class _TaskTileState extends State<TaskTile> {
       return "Nobody";
     }
   }
-  
+
   formatDisplayFrequency(int frequency) {
     if (frequency == 1) {
       return 'Daily';

@@ -5,7 +5,8 @@ class AmendQuestionnaireScreen extends StatefulWidget {
   const AmendQuestionnaireScreen({super.key, required this.chores});
 
   @override
-  State<AmendQuestionnaireScreen> createState() => _AmendQuestionnaireScreenState();
+  State<AmendQuestionnaireScreen> createState() =>
+      _AmendQuestionnaireScreenState();
 }
 
 class _AmendQuestionnaireScreenState extends State<AmendQuestionnaireScreen> {
@@ -35,7 +36,7 @@ class _AmendQuestionnaireScreenState extends State<AmendQuestionnaireScreen> {
     super.initState();
     controllers = {
       for (var entry in widget.chores.entries)
-        entry.key: TextEditingController(text: entry.value.toString())
+        entry.key: TextEditingController(text: entry.value.toString()),
     };
   }
 
@@ -64,50 +65,61 @@ class _AmendQuestionnaireScreenState extends State<AmendQuestionnaireScreen> {
             const SizedBox(height: 24),
             Expanded(
               child: ListView(
-                children: controllers.entries.map((entry) => Card(
-                  margin: const EdgeInsets.symmetric(vertical: 10),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  elevation: 2,
-                  color: Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 18),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            getChoreDescription(entry.key.trim()),
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.teal,
-                            ),
+                children: controllers.entries
+                    .map(
+                      (entry) => Card(
+                        margin: const EdgeInsets.symmetric(vertical: 10),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        elevation: 2,
+                        color: Colors.white,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 18,
+                            horizontal: 18,
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  getChoreDescription(entry.key.trim()),
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.teal,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              SizedBox(
+                                width: 80,
+                                child: TextFormField(
+                                  controller: entry.value,
+                                  keyboardType: TextInputType.number,
+                                  decoration: InputDecoration(
+                                    labelText: 'Days',
+                                    labelStyle: TextStyle(
+                                      color: Colors.teal[700],
+                                    ),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(
+                                        color: Colors.teal,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(width: 16),
-                        SizedBox(
-                          width: 80,
-                          child: TextFormField(
-                            controller: entry.value,
-                            keyboardType: TextInputType.number,
-                            decoration: InputDecoration(
-                              labelText: 'Days',
-                              labelStyle: TextStyle(color: Colors.teal[700]),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(color: Colors.teal),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )).toList(),
+                      ),
+                    )
+                    .toList(),
               ),
             ),
             const SizedBox(height: 24),

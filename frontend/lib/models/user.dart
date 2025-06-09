@@ -1,13 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class User {
+class FlatUser {
   final DocumentReference userRef;
   final String username;
   final String name;
   final DocumentReference flat;
   final bool questionnaireDone;
 
-  User({
+  FlatUser({
     required this.userRef,
     required this.username,
     required this.name,
@@ -15,9 +15,9 @@ class User {
     required this.questionnaireDone,
   });
 
-  factory User.fromFirestore(DocumentSnapshot doc) {
+  factory FlatUser.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
-    return User(
+    return FlatUser(
       userRef: doc.reference,
       username: doc.id,
       name: data['name'] ?? '',

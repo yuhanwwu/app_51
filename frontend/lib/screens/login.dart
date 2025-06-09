@@ -8,8 +8,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LoginPage extends StatefulWidget {
   final Function(User) onLogin;
+  final void Function(String) onAddFlat;
 
-  const LoginPage({super.key, required this.onLogin});
+  const LoginPage({super.key, required this.onLogin, required this.onAddFlat});
+
+
+  // const LoginPage({super.key, required this.onLogin});
 
   @override
   _LoginPageState createState() => _LoginPageState();
@@ -154,18 +158,30 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                     SizedBox(height: 20),
+                      // TextButton.icon(
+                      //   onPressed: () {
+                      //     final inputUsername = _usernameController.text.trim();
+                      //     Navigator.push(
+                      //       context,
+                      //       MaterialPageRoute(
+                      //         builder: (context) => AddFlatPage(
+                      //           username: inputUsername,
+                      //           onLogin: widget.onLogin,
+                      //         ),
+                      //       ),
+                      //     );
+                      //   },
+                      //   icon: Icon(Icons.add_home),
+                      //   label: Text("Create a new flat to sign up"),
+                      //   style: TextButton.styleFrom(
+                      //     foregroundColor: AppColors.green,
+                      //     padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                      //   ),
+                      // ),
                       TextButton.icon(
                         onPressed: () {
                           final inputUsername = _usernameController.text.trim();
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => AddFlatPage(
-                                username: inputUsername,
-                                onLogin: widget.onLogin,
-                              ),
-                            ),
-                          );
+                          widget.onAddFlat(inputUsername); // Call to main.dart
                         },
                         icon: Icon(Icons.add_home),
                         label: Text("Create a new flat to sign up"),
@@ -174,6 +190,7 @@ class _LoginPageState extends State<LoginPage> {
                           padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                         ),
                       ),
+
 
                   ],
                 ),

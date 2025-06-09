@@ -6,6 +6,7 @@ import 'package:frontend/screens/home_page.dart';
 import 'package:frontend/screens/questionnaire.dart';
 import 'firebase_options.dart';
 import 'package:flutter/material.dart';
+import 'screens/add_flat.dart';
 import 'screens/login.dart';
 import 'models/user.dart';
 
@@ -16,7 +17,7 @@ void main() async {
   runApp(const MyApp());
 }
 
-enum AppPage { login, questionnaire, home }
+enum AppPage { login, questionnaire, home, addFlat }
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -29,6 +30,9 @@ class _MyAppState extends State<MyApp> {
   User? user;
   AppPage currentPage = AppPage.login;
   String? questionnaireUsername;
+  String? pendingUsernameForFlat;
+
+  
 
   Timer? _nudgeTimer;
   Timestamp? _lastCheckedNudge;
@@ -37,6 +41,14 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
   }
+
+  void onAddFlatRequest(String username) {
+  setState(() {
+    pendingUsernameForFlat = username;
+    currentPage = AppPage.addFlat;
+  });
+}
+
 
   void _startNudgePolling() {
     _nudgeTimer?.cancel();
@@ -122,7 +134,13 @@ class _MyAppState extends State<MyApp> {
     Widget page;
     switch (currentPage) {
       case AppPage.login:
-        page = LoginPage(onLogin: onLogin);
+        page = LoginPage(onLogin: onLogin, onAddFlat: onAddFlatRequest);
+        break;
+      case AppPage.addFlat:
+        page = AddFlatPage(
+          username: pendingUsernameForFlat!,
+          onLogin: onLogin,
+        );
         break;
       case AppPage.questionnaire:
         page = QuestionnairePage(

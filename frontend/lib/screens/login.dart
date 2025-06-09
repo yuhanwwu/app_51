@@ -74,24 +74,24 @@ class _LoginPageState extends State<LoginPage> {
       backgroundColor: AppColors.beige,
       appBar: AppBar(
         title: Text('Login'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.add_home),
-            tooltip: 'Add Flat',
-            onPressed: () {
-              final inputUsername = _usernameController.text.trim();
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => AddFlatPage(
-                    username: inputUsername,
-                    onLogin: widget.onLogin,
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
+        // actions: [
+        //   // IconButton(
+        //   //   icon: Icon(Icons.add_home),
+        //   //   tooltip: 'Add Flat',
+        //   //   onPressed: () {
+        //   //     final inputUsername = _usernameController.text.trim();
+        //   //     Navigator.push(
+        //   //       context,
+        //   //       MaterialPageRoute(
+        //   //         builder: (context) => AddFlatPage(
+        //   //           username: inputUsername,
+        //   //           onLogin: widget.onLogin,
+        //   //         ),
+        //   //       ),
+        //   //     );
+        //   //   },
+        //   // ),
+        // ],
       ),
       body: Padding(
         padding: EdgeInsets.all(20.0),
@@ -153,6 +153,28 @@ class _LoginPageState extends State<LoginPage> {
                           textAlign: TextAlign.center,
                         ),
                       ),
+                    SizedBox(height: 20),
+                      TextButton.icon(
+                        onPressed: () {
+                          final inputUsername = _usernameController.text.trim();
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AddFlatPage(
+                                username: inputUsername,
+                                onLogin: widget.onLogin,
+                              ),
+                            ),
+                          );
+                        },
+                        icon: Icon(Icons.add_home),
+                        label: Text("Create a new flat to sign up"),
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.green,
+                          padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                        ),
+                      ),
+
                   ],
                 ),
               ),

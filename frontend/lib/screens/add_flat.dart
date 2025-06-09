@@ -134,30 +134,45 @@ class _AddFlatPageState extends State<AddFlatPage> {
               ...flatmatesControllers.asMap().entries.map((entry) {
                 final index = entry.key;
                 final controllers = entry.value;
-                return Column(
-                  children: [
-                    TextFormField(
-                      controller: controllers['username'],
-                      decoration: InputDecoration(
-                        labelText: 'Flatmate ${index + 1} Username',
-                      ),
-                      validator: (value) => value!.isEmpty
-                          ? 'Enter a username for flatmate ${index + 1}'
-                          : null,
+                return Card(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  elevation: 3,
+                  margin: EdgeInsets.symmetric(vertical: 8),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Flatmate ${index + 1}',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(height: 10),
+                        TextFormField(
+                          controller: controllers['username'],
+                          decoration: InputDecoration(
+                            labelText: 'Username',
+                            border: OutlineInputBorder(),
+                          ),
+                          validator: (value) =>
+                              value!.isEmpty ? 'Enter a username' : null,
+                        ),
+                        SizedBox(height: 12),
+                        TextFormField(
+                          controller: controllers['name'],
+                          decoration: InputDecoration(
+                            labelText: 'Name',
+                            border: OutlineInputBorder(),
+                          ),
+                          validator: (value) =>
+                              value!.isEmpty ? 'Enter a name' : null,
+                        ),
+                      ],
                     ),
-                    TextFormField(
-                      controller: controllers['name'],
-                      decoration: InputDecoration(
-                        labelText: 'Flatmate ${index + 1} Name',
-                      ),
-                      validator: (value) => value!.isEmpty
-                          ? 'Enter a name for flatmate ${index + 1}'
-                          : null,
-                    ),
-                    SizedBox(height: 10),
-                  ],
+                  ),
                 );
               }),
+
               TextButton(
                 onPressed: addFlatmateField,
                 child: Text('Add another flatmate'),

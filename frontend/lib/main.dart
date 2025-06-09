@@ -2,7 +2,8 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:frontend/screens/home_page.dart';
+import 'package:frontend/screens/noticeboard.dart';
+import 'package:frontend/screens/task_page.dart';
 import 'package:frontend/screens/questionnaire.dart';
 import 'firebase_options.dart';
 import 'package:flutter/material.dart';
@@ -29,6 +30,7 @@ class _MyAppState extends State<MyApp> {
   User? user;
   AppPage currentPage = AppPage.login;
   String? questionnaireUsername;
+  DocumentReference? flatRef;
 
   Timer? _nudgeTimer;
   Timestamp? _lastCheckedNudge;
@@ -95,6 +97,7 @@ class _MyAppState extends State<MyApp> {
 
     final data = doc.data() as Map<String, dynamic>;
     final questionnaireDone = data['questionnaireDone'] == true;
+    flatRef = data['flat'] as DocumentReference;
 
     if (!questionnaireDone) {
       setState(() {
@@ -131,7 +134,7 @@ class _MyAppState extends State<MyApp> {
         );
         break;
       case AppPage.home:
-        page = HomePage(user: user!);
+        page = NoticeboardPage(user: user!, flatRef: flatRef!);
         break;
     }
     return MaterialApp(

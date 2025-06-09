@@ -11,16 +11,16 @@ import 'add_task.dart';
 import 'nudge_user.dart';
 import '../customWidgets/task_tile.dart';
 
-class HomePage extends StatefulWidget {
+class TaskPage extends StatefulWidget {
   final User user;
-  // const HomePage({super.key, required this.user});
-  const HomePage({Key? key, required this.user}) : super(key: key);
+  // const TaskPage({super.key, required this.user});
+  const TaskPage({Key? key, required this.user}) : super(key: key);
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<TaskPage> createState() => _TaskPageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _TaskPageState extends State<TaskPage> {
   late final DocumentReference flatDoc;
   late final String username;
   late final String name;

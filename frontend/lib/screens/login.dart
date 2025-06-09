@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/noticeboard.dart';
+import 'package:universal_html/html.dart';
 import '../models/user.dart';
 import 'add_flat.dart';
 import '../constants/colors.dart';
-import 'home_page.dart';
+import 'task_page.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -167,10 +169,12 @@ class _LoginPageState extends State<LoginPage> {
             OutlinedButton(
               onPressed: () async {
                 final user = (await fetchUser('xt'))!;
+                final userDoc = await FirebaseFirestore.instance.collection('Users').doc('xt').get();
+                final flatRef = userDoc['flat'] as DocumentReference;
                 _usernameController.text = 'xt';
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => HomePage(user: user)),
+                  MaterialPageRoute(builder: (context) => NoticeboardPage(user: user, flatRef: flatRef)),
                 );
               },
               style: OutlinedButton.styleFrom(

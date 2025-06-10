@@ -21,6 +21,10 @@ jobs:
     container: ghcr.io/cirruslabs/flutter:stable
     steps:
       - uses: actions/checkout@v4
+        with:
+          # This is the crucial change: Use the input branch for checkout
+          ref: ${{ github.event.inputs.branch_to_deploy || github.ref_name }}
+
 
       - name: Build Flutter Web
         run: |
@@ -43,6 +47,8 @@ jobs:
     container: ghcr.io/cirruslabs/flutter:stable
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch_to_deploy || github.ref_name }}
       - name: Run Flutter Tests
         run: |
           cd frontend

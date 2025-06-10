@@ -16,7 +16,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_popup_card/flutter_popup_card.dart';
 import '../constants/colors.dart';
 
-
 class HomePage extends StatefulWidget {
   final FlatUser user;
   final VoidCallback onLogout;
@@ -40,6 +39,7 @@ class _HomePageState extends State<HomePage> {
   late Future<List<Task>> _repeatTasks;
   late Future<List<Task>> _allFlatTasks;
   late Future<List<Task>> _unclaimedTasks;
+  late final Query userNudges;
 
   @override
   void initState() {
@@ -50,10 +50,16 @@ class _HomePageState extends State<HomePage> {
     name = widget.user.name;
     user = widget.user;
     questionnaireDone = widget.user.questionnaireDone;
-    _loadEverything();
+    loadEverything();
+    userNudges = FirebaseFirestore.instance
+        .collection('Nudges')
+        .where('userId', isEqualTo: username);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      showNudgeNotifCard(userNudges);
+    });
   }
 
-  void _loadEverything() async {
+  void loadEverything() async {
     _loadTasks();
     flat = await _loadFlat();
   }
@@ -66,8 +72,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<Flat> _loadFlat() async {
-      DocumentSnapshot flatSnap = await flatDoc.get();
-      return Flat.fromFirestore(flatSnap);
+    DocumentSnapshot flatSnap = await flatDoc.get();
+    return Flat.fromFirestore(flatSnap);
   }
 
   void _loadTasks() async {
@@ -79,48 +85,91 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  Future<void> showRoutineCard(BuildContext context, flat) {
-  return showPopupCard(
-    context: context,
-    builder: (context) => FractionallySizedBox(
-      heightFactor: 0.5,
-      widthFactor: 0.5,
-      child: PopupCard(
-      elevation: 8,
-      color: AppColors.beige,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Container(
-          child: 
-          getChoreAndFreqCol(flat),
+  Future<void> showRoutineCard(BuildContext context, Flat flat) {
+    return showPopupCard(
+      context: context,
+      builder: (context) => FractionallySizedBox(
+        heightFactor: 0.5,
+        widthFactor: 0.5,
+        child: PopupCard(
+          elevation: 8,
+          color: AppColors.beige,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
           ),
+          child: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Container(child: getChoreAndFreqCol(flat)),
+          ),
+        ),
       ),
-    ),
-    ),
-    //offset: const Offset(-16, 70),
-    alignment: Alignment.center,
-    useSafeArea: true,
-    dimBackground: true,
-  );
-}
+      //offset: const Offset(-16, 70),
+      alignment: Alignment.center,
+      useSafeArea: true,
+      dimBackground: true,
+    );
+  }
 
-Widget getChoreAndFreqCol(Flat flat) {
-  return Column(
-    mainAxisAlignment: MainAxisAlignment.spaceEvenly, // horizontal alignment
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-    Text('Cleaning the bathroom: ${flat.bathroom.toString()}'),
-    Text('Doing the dishes: ${flat.dishes.toString()}'),
-    Text('Cleaning the kitchen: ${flat.kitchen.toString()}'),
-    Text('Doing laundry: ${flat.laundry.toString()}'),
-    Text('Taking out recycling: ${flat.recycling.toString()}'),
-    Text('Taking out the rubbish: ${flat.rubbish.toString()}'),
-  ],);
-}
+  Widget getChoreAndFreqCol(Flat flat) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly, // horizontal alignment
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Cleaning the bathroom: ${flat.bathroom.toString()}'),
+        Text('Doing the dishes: ${flat.dishes.toString()}'),
+        Text('Cleaning the kitchen: ${flat.kitchen.toString()}'),
+        Text('Doing laundry: ${flat.laundry.toString()}'),
+        Text('Taking out recycling: ${flat.recycling.toString()}'),
+        Text('Taking out the rubbish: ${flat.rubbish.toString()}'),
+      ],
+    );
+  }
 
+  Future<void> showNudgeNotifCard(Query query) async {
+    try {
+      QuerySnapshot snapshot = await query
+          .where("read", isEqualTo: false)
+          .get();
+      int notifications = snapshot.docs.length;
+      if (notifications > 0) {
+        showPopupCard(
+          context: context,
+          builder: (context) => FractionallySizedBox(
+            heightFactor: 0.5,
+            widthFactor: 0.5,
+            child: PopupCard(
+              elevation: 8,
+              color: AppColors.beige,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Stack(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Text(
+                      "You have ${notifications == 1 ? '1 notification' : '$notifications notifications'}",
+                    ),
+                  ),
+                  Positioned(
+                    // Close button
+                    top: 8,
+                    right: 8,
+                    child: IconButton(
+                      icon: Icon(Icons.close, size: 20),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      print("Error fetching notifications: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -129,29 +178,19 @@ Widget getChoreAndFreqCol(Flat flat) {
         title: Text('Welcome, $name'),
         actions: [
           TextButton(
-    onPressed: () {
-      logout(); // Your logout function, no doubt.
-    },
-    child: Text(
-      'Log Out',
-      style: TextStyle(color: Colors.black), // Text color must be visible!
-    ),
-  ),
-  TextButton(
-    onPressed: () {
-      showRoutineCard(context, flat); // Your logout function, no doubt.
-    },
-    child: Text(
-      'Show Routine',
-      style: TextStyle(color: Colors.black), // Text color must be visible!
-    ),
-  ),
+            onPressed: () {
+              logout();
+            },
+            child: Text('Log Out', style: TextStyle(color: Colors.black)),
+          ),
+          TextButton(
+            onPressed: () {
+              showRoutineCard(context, flat);
+            },
+            child: Text('Show Routine', style: TextStyle(color: Colors.black)),
+          ),
           StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection('Nudges')
-                .where('userId', isEqualTo: username)
-                .where('read', isEqualTo: false)
-                .snapshots(),
+            stream: userNudges.where('read', isEqualTo: false).snapshots(),
             builder: (context, snapshot) {
               int unreadCount = 0;
               if (snapshot.hasData) {
@@ -200,23 +239,21 @@ Widget getChoreAndFreqCol(Flat flat) {
               );
             },
           ),
-        IconButton(
-                    icon: Icon(Icons.refresh),
-                    tooltip: 'Refresh page',
-                    onPressed: () {
-                      _loadTasks();
-                    },
-                  ),
+          IconButton(
+            icon: Icon(Icons.refresh),
+            tooltip: 'Refresh page',
+            onPressed: () {
+              _loadTasks();
+            },
+          ),
         ],
       ),
       body: Column(
         children: [
           Expanded(
             child: Row(
-              mainAxisAlignment:
-                  MainAxisAlignment.spaceEvenly, // horizontal alignment
-              crossAxisAlignment:
-                  CrossAxisAlignment.center, // vertical alignment
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Expanded(
                   child: Column(

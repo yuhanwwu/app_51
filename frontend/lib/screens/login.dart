@@ -174,7 +174,7 @@ class _LoginPageState extends State<LoginPage> {
                 _usernameController.text = 'xt';
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => NoticeboardPage(user: user, flatRef: flatRef)),
+                  MaterialPageRoute(builder: (context) => NoticeboardPage(user: user, flatRef: flatRef, userRef: user.userRef,)),
                 );
               },
               style: OutlinedButton.styleFrom(

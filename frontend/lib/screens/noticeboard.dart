@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:frontend/customWidgets/task_tile.dart';
+import 'package:frontend/models/task.dart';
 import 'package:frontend/models/user.dart';
 import 'package:frontend/screens/task_page.dart';
 import '../models/sticky_note.dart';
@@ -7,7 +9,8 @@ import '../models/sticky_note.dart';
 class NoticeboardPage extends StatefulWidget {
   final User user;
   final DocumentReference flatRef;
-  const NoticeboardPage({super.key, required this.user, required this.flatRef});
+  final DocumentReference userRef;
+  const NoticeboardPage({super.key, required this.user, required this.flatRef, required this.userRef});
 
 
   @override
@@ -31,17 +34,6 @@ class _NoticeboardPageState extends State<NoticeboardPage> {
     final flatDoc = await widget.flatRef.get();
     setState(() {
       flatName = flatDoc['name'];
-    });
-  }
-
-  void _addNote() async {
-    final userDoc = await userRef.get();
-    final flatRef = userDoc['flat'];
-    await notesRef.add({
-      'content': 'New Note',
-      'position': [100.0, 100.0],
-      'flatRef': flatRef,
-      'createdBy': widget.user.username,
     });
   }
 
@@ -70,8 +62,22 @@ class _NoticeboardPageState extends State<NoticeboardPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _addNote,
-        child: const Icon(Icons.add)),
+        onPressed: () async {
+          showModalBottomSheet(
+            context: context,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            builder: (context) => _AddNoteSheet(
+              flatRef: widget.flatRef,
+              userRef: userRef,
+              user: widget.user,
+              notesRef: notesRef,
+            ),
+          );
+        },
+        child: const Icon(Icons.add),
+      ),
       body: 
       StreamBuilder<QuerySnapshot>(
         stream: notesRef.where('flatRef', isEqualTo: widget.flatRef).snapshots(),
@@ -82,9 +88,9 @@ class _NoticeboardPageState extends State<NoticeboardPage> {
           return Stack(
             children: [
               ...notes.map((note) {
-                return AnimatedPositioned(
-                  duration: const Duration(milliseconds: 200),
-                  curve: Curves.easeInOut,
+                return Positioned(
+                  // duration: const Duration(milliseconds: 200),
+                  // curve: Curves.easeInOut,
                   left: note.position[0],
                   top: note.position[1],
                   child: DraggableNote(
@@ -92,6 +98,7 @@ class _NoticeboardPageState extends State<NoticeboardPage> {
                     onDragEnd: (offset) {
                       _updateNotePosition(note.id, [offset.dx, offset.dy]);
                     },
+                    userRef: userRef,
                   ),
                 );
               }).toList(),
@@ -130,6 +137,7 @@ class DraggableNote extends StatefulWidget {
   final void Function(Offset) onDragEnd;
   final VoidCallback? onDragStarted;
   final VoidCallback? onDragCompleted;
+  final DocumentReference userRef;
 
   const DraggableNote({
     super.key,
@@ -137,6 +145,7 @@ class DraggableNote extends StatefulWidget {
     required this.onDragEnd,
     this.onDragStarted,
     this.onDragCompleted,
+    required this.userRef,
   });
 
   @override
@@ -184,7 +193,83 @@ class _DraggableNoteState extends State<DraggableNote> {
     );
   }
 
-  Widget _noteWidget() {
+Widget _noteWidget() {
+  final canEdit = widget.userRef.id == widget.note.createdBy.id;
+
+  // If this is a task note and has tasks, show the task list
+  if (widget.note.tasks.isNotEmpty) {
+    return FutureBuilder<DocumentSnapshot>(
+      future: widget.note.createdBy.get(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return Center(child: CircularProgressIndicator());
+        }
+        final userData = snapshot.data!.data() as Map<String, dynamic>?;
+        final username = userData?['username'] ?? snapshot.data!.id ?? 'unknown';
+        final isCurrentUser = widget.userRef.id == widget.note.createdBy.id;
+
+        return Container(
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: isCurrentUser ? Colors.green : Colors.red,
+              width: 3,
+            ),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          constraints: BoxConstraints(
+            maxWidth: 320,
+            maxHeight: 220,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isCurrentUser ? Colors.green[100] : Colors.red[100],
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(12),
+                    topRight: Radius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  'by $username',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: isCurrentUser ? Colors.green[900] : Colors.red[900],
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Scrollbar(
+                  child: ListView(
+                    shrinkWrap: true,
+                    children: widget.note.tasks.map((taskRef) => FutureBuilder<DocumentSnapshot>(
+                      future: taskRef.get(),
+                      builder: (context, taskSnapshot) {
+                        if (!taskSnapshot.hasData) {
+                          return CircularProgressIndicator();
+                        }
+                        return TaskTile(
+                          task: Task.fromFirestore(taskSnapshot.data!),
+                          user: User.fromFirestore(snapshot.data!),
+                          userRef: widget.note.createdBy,
+                          canEdit: canEdit,
+                          onDone: () {},
+                        );
+                      },
+                    )).toList(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // Otherwise, show a simple text note
   return Material(
     elevation: 4,
     color: Colors.yellow[200],
@@ -198,13 +283,176 @@ class _DraggableNoteState extends State<DraggableNote> {
         children: [
           Text(widget.note.content),
           const Spacer(),
-          Text(
-            'by ${widget.note.createdBy}',
-            style: const TextStyle(fontSize: 10, color: Colors.grey),
-          ),
+          FutureBuilder<DocumentSnapshot>(
+            future: widget.note.createdBy.get(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) return Text('by ...');
+              final userData = snapshot.data!.data() as Map<String, dynamic>?;
+              final username = userData?['username'] ?? snapshot.data!.id ?? 'unknown';
+              return Text(
+                'by $username',
+                style: const TextStyle(fontSize: 10, color: Colors.grey),
+              );
+            },
+          )
         ],
       ),
     ),
   );
 }
 }
+
+class _AddNoteSheet extends StatefulWidget {
+  final DocumentReference flatRef;
+  final User user;
+  final CollectionReference notesRef;
+  final DocumentReference userRef; 
+
+  const _AddNoteSheet({
+    required this.flatRef,
+    required this.user,
+    required this.notesRef,
+    required this.userRef,
+  });
+
+  @override
+  State<_AddNoteSheet> createState() => _AddNoteSheetState();
+}
+
+class _AddNoteSheetState extends State<_AddNoteSheet> {
+  String _noteText = '';
+  bool _isAddingText = true;
+  List<Task> _selectedTasks = [];
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ChoiceChip(
+                label: Text('Text Note'),
+                selected: _isAddingText,
+                onSelected: (val) => setState(() => _isAddingText = true),
+              ),
+              SizedBox(width: 12),
+              ChoiceChip(
+                label: Text('Task Note'),
+                selected: !_isAddingText,
+                onSelected: (val) => setState(() => _isAddingText = false),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          if (_isAddingText)
+            Column(
+              children: [
+                TextField(
+                  decoration: InputDecoration(labelText: 'Sticky Note Text'),
+                  onChanged: (val) => _noteText = val,
+                ),
+                const SizedBox(height: 12),
+                ElevatedButton(
+                  onPressed: () async {
+                    if (_noteText.trim().isEmpty) return;
+                    await widget.notesRef.add({
+                      'content': _noteText.trim(),
+                      'position': [100.0, 100.0],
+                      'flatRef': widget.flatRef,
+                      'createdBy': widget.userRef, //FirebaseFirestore.instance.collection('Users').doc(widget.user.username),
+                      'type': 'text',
+                      'tasks': [],
+                    });
+                    Navigator.pop(context);
+                  },
+                  child: Text('Add Text Note'),
+                ),
+              ],
+            )
+          else
+            FutureBuilder<QuerySnapshot>(
+              future: FirebaseFirestore.instance
+                  .collection('Tasks')
+                  .where('assignedFlat', isEqualTo: widget.flatRef)
+                  .get(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) return CircularProgressIndicator();
+                final tasks = snapshot.data!.docs
+                    .map((doc) => Task.fromFirestore(doc))
+                    .toList();
+                return Column(
+                  children: [
+                    SizedBox(
+                      height: 310,
+                      child: ListView.builder(
+                        itemCount: tasks.length,
+                        itemBuilder: (context, index) {
+                          final task = tasks[index];
+                          final isSelected = _selectedTasks.contains(task);
+                          return AnimatedContainer(
+                            duration: Duration(milliseconds: 200),
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: isSelected ? Colors.green : Colors.transparent,
+                                width: 2,
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Card(
+                              elevation: isSelected ? 4 : 1,
+                              color: isSelected ? Colors.green[50] : null,
+                              child: CheckboxListTile(
+                                title: Text(task.description),
+                                subtitle: Text(task.isOneOff ? "One-off" : "Repeat"),
+                                value: isSelected,
+                                onChanged: (selected) {
+                                  setState(() {
+                                    if (selected == true) {
+                                      _selectedTasks.add(task);
+                                    } else {
+                                      _selectedTasks.remove(task);
+                                    }
+                                  });
+                                },
+                                selected: isSelected,
+                                controlAffinity: ListTileControlAffinity.leading,
+                                secondary: isSelected
+                                    ? Icon(Icons.check_circle, color: Colors.green)
+                                    : Icon(Icons.radio_button_unchecked, color: Colors.grey),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: _selectedTasks.isEmpty
+                          ? null
+                          : () async {
+                              await widget.notesRef.add({
+                                'content': '', // or a summary
+                                'position': [100.0, 100.0],
+                                'flatRef': widget.flatRef,
+                                'createdBy': widget.userRef,
+                                'type': 'task',
+                                'tasks': _selectedTasks.map((t) => t.taskRef).toList(),
+                              });
+                              Navigator.pop(context);
+                            },
+                      child: Text('Add Selected Tasks to Note'),
+                    ),
+                  ],
+                );
+    },
+  ),
+        ],
+),
+    ),
+    );
+  }
+  }

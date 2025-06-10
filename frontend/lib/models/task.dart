@@ -3,45 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 // //TODO maybe tasks only come up when they are freq no. days after last done?
 
 class Task {
-  // final String description;
-  // final bool isOneOff;
-  // final bool? priority; // only for one-off tasks
-  // final String? lastdoneon; // only for repeat tasks
-  // final int? frequency; // only for repeat tasks
-  // final String assignedto; // added for user assignment
-
-  // Task({
-  //   required this.description,
-  //   this.priority,
-  //   this.lastdoneon,
-  //   required this.isOneOff,
-  //   this.frequency,
-  //   required this.assignedto,
-  // });
-
-  // factory Task.fromJson(Map<String, dynamic> json, {required bool isOneOff}) {
-  //   return Task(
-  //     description: json['description'] ?? '',
-  //     isOneOff: isOneOff,
-  //     priority: isOneOff ? json['priority'] as bool? : null,
-  //     lastdoneon: isOneOff ? null : json['lastdoneon'] as String?,
-  //     frequency: isOneOff ? null : json['frequency'] as int?,
-  //     assignedto: json['assignedto'] ?? '',
-  //   );
-  // }
-
-  // factory Task.fromFirestore(DocumentSnapshot doc, {required bool isOneOff}) {
-  // // final data = doc.data() as Map<String, dynamic>;
-  // return Task(
-  //   description: data['description'] ?? '',
-  //   isOneOff: isOneOff,
-  //   priority: isOneOff ? data['priority'] as bool? : null,
-  //   lastdoneon: isOneOff ? null : data['lastdoneon'] as String?,
-  //   frequency: isOneOff ? null : data['frequency'] as int?,
-  //   assignedto: data['assignedto'] ?? '',
-  // );
-  // }
-
   //needed for all tasks
   final DocumentReference taskRef;
   final String description;
@@ -61,6 +22,8 @@ class Task {
   final DocumentReference? lastDoneBy; //? for repeat
   final bool isPersonal; //false for one off
 
+  // final DocumentReference noteId;
+
   Task({
     required this.taskRef,
     required this.description,
@@ -75,6 +38,7 @@ class Task {
     this.lastDoneOn,
     this.lastDoneBy,
     required this.isPersonal,
+    // required this.noteId,
   });
 
   factory Task.fromFirestore(DocumentSnapshot doc) {
@@ -97,6 +61,54 @@ class Task {
       lastDoneOn: isOneOff ? null : data['lastDoneOn'] as String?,
       lastDoneBy: isOneOff ? null : data['lastDoneBy'] as DocumentReference?,
       isPersonal: isOneOff ? false : data['isPersonal'] as bool,
+      // noteId: data['noteId'],
     );
   }
+
+  Map<String, dynamic> toMap() {
+  return {
+    'taskId' : taskId, 
+    'description': description,
+    'isOneOff': isOneOff,
+    'assignedFlat': assignedFlat,
+    'assignedTo': assignedTo,
+    'done': done,
+    'setDate': setDate,
+    'priority': priority,
+    'frequency': frequency,
+    'lastDoneOn': lastDoneOn,
+    'lastDoneBy': lastDoneBy,
+    'isPersonal': isPersonal,
+    // 'noteId': noteId,
+  };
+}
+
+factory Task.fromMap(Map<String, dynamic> map) {
+  return Task (
+    taskRef: map['taskRef'] as DocumentReference? ?? 
+      FirebaseFirestore.instance.collection('Tasks').doc(map['taskId'] ?? ''), // fallback if not present
+    description: map['description'] ?? '',
+    isOneOff: map['isOneOff'] ?? false,
+    taskId: map['taskId'],
+    assignedFlat: map['assignedFlat'],
+    assignedTo: map['assignedTo'],
+    done: map['done'] ?? false,
+    setDate: map['setDate'],
+    priority: map['priority'],
+    frequency: map['frequency'],
+    lastDoneOn: map['lastDoneOn'],
+    lastDoneBy: map['lastDoneBy'],
+    isPersonal: map['isPersonal'] ?? false,
+    // noteId: map['noteId'],
+    // add other fields as needed
+  );
+}
+
+@override
+bool operator ==(Object other) =>
+    identical(this, other) ||
+    other is Task && runtimeType == other.runtimeType && taskId == other.taskId;
+
+@override
+int get hashCode => taskId.hashCode;
 }

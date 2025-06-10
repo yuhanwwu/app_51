@@ -1,4 +1,4 @@
-import 'dart:async';
+ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -97,7 +97,8 @@ class _MyAppState extends State<MyApp> {
 
     final data = doc.data() as Map<String, dynamic>;
     final questionnaireDone = data['questionnaireDone'] == true;
-    flatRef = data['flat'] as DocumentReference;
+    flatRef = data['flat'] as DocumentReference; 
+    // userRef = data['userRef'] as DocumentReference;
 
     if (!questionnaireDone) {
       setState(() {
@@ -134,7 +135,7 @@ class _MyAppState extends State<MyApp> {
         );
         break;
       case AppPage.home:
-        page = NoticeboardPage(user: user!, flatRef: flatRef!);
+        page = NoticeboardPage(user: user!, flatRef: flatRef!, userRef: user!.userRef);
         break;
     }
     return MaterialApp(

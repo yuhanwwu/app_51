@@ -10,8 +10,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class LoginPage extends StatefulWidget {
   final Function(FlatUser) onLogin;
   final VoidCallback onLogout;
+  final void Function(String) onAddFlat;
 
-  const LoginPage({super.key, required this.onLogin, required this.onLogout});
+  const LoginPage({super.key, required this.onLogin, required this.onAddFlat, required this.onLogout});
+
 
   @override
   _LoginPageState createState() => _LoginPageState();
@@ -209,6 +211,41 @@ class _LoginPageState extends State<LoginPage> {
                           textAlign: TextAlign.center,
                         ),
                       ),
+                    SizedBox(height: 20),
+                      // TextButton.icon(
+                      //   onPressed: () {
+                      //     final inputUsername = _usernameController.text.trim();
+                      //     Navigator.push(
+                      //       context,
+                      //       MaterialPageRoute(
+                      //         builder: (context) => AddFlatPage(
+                      //           username: inputUsername,
+                      //           onLogin: widget.onLogin,
+                      //         ),
+                      //       ),
+                      //     );
+                      //   },
+                      //   icon: Icon(Icons.add_home),
+                      //   label: Text("Create a new flat to sign up"),
+                      //   style: TextButton.styleFrom(
+                      //     foregroundColor: AppColors.green,
+                      //     padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                      //   ),
+                      // ),
+                      TextButton.icon(
+                        onPressed: () {
+                          final inputUsername = _usernameController.text.trim();
+                          widget.onAddFlat(inputUsername); // Call to main.dart
+                        },
+                        icon: Icon(Icons.add_home),
+                        label: Text("Create a new flat to sign up"),
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.green,
+                          padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                        ),
+                      ),
+
+
                   ],
                 ),
               ),

@@ -111,6 +111,13 @@ class _HomePageState extends State<HomePage> {
               );
             },
           ),
+        IconButton(
+                    icon: Icon(Icons.refresh),
+                    tooltip: 'Refresh page',
+                    onPressed: () {
+                      _loadTasks();
+                    },
+                  ),
         ],
       ),
       body: Column(

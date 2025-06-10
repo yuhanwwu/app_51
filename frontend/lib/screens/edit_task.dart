@@ -6,7 +6,7 @@ import '../models/user.dart';
 import '../models/task.dart';
 
 class EditTaskPage extends StatefulWidget {
-  final User curUser;
+  final FlatUser curUser;
   final VoidCallback onTaskSubmitted;
   final Task task;
 

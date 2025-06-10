@@ -10,9 +10,14 @@ import 'questionnaire.dart';
 
 class AddFlatPage extends StatefulWidget {
   final String username;
-  final Function(User) onLogin;
-  // final Function(String username) onFlatCreated;
-  const AddFlatPage({super.key, required this.username, required this.onLogin,});
+  final Function(FlatUser) onLogin;
+  final VoidCallback onLogout;
+  const AddFlatPage({
+    super.key,
+    required this.username,
+    required this.onLogin,
+    required this.onLogout,
+  });
 
   @override
   _AddFlatPageState createState() => _AddFlatPageState();
@@ -109,26 +114,20 @@ class _AddFlatPageState extends State<AddFlatPage> {
       }),
     );
 
+    html.window.location.reload();
     final yourUsername = flatmates.first['username']!;
     final userDoc = await FirebaseFirestore.instance
         .collection('Users')
         .doc(yourUsername)
         .get();
-    final user = User.fromFirestore(userDoc);
+    final user = FlatUser.fromFirestore(userDoc);
     widget.onLogin(user);
-
     // Navigator.pushReplacement(
     //   context,
     //   MaterialPageRoute(
-    //     builder: (_) => QuestionnairePage(
-    //       username: yourUsername,
-    //     ),
+    //     builder: (context) => LoginPage(onLogin: widget.onLogin),
     //   ),
     // );
-    // widget.onFlatCreated(yourUsername);
-
-    
-
   }
 
   @override

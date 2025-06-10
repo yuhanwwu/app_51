@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import '../models/user.dart';
 
 class TaskInputScreen extends StatefulWidget {
-  final User curUser;
+  final FlatUser curUser;
   final DocumentReference userRef;
   final VoidCallback onTaskSubmitted;
 

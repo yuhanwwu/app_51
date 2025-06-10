@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frontend/screens/flat_tasks.dart';
+import 'package:frontend/screens/login.dart';
 import 'package:intl/intl.dart';
 import 'package:frontend/screens/notifications_page.dart';
 import '../models/task.dart';
@@ -10,11 +11,18 @@ import '../models/flat.dart';
 import 'add_task.dart';
 import 'nudge_user.dart';
 import '../customWidgets/task_tile.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_popup_card/flutter_popup_card.dart';
+import '../constants/colors.dart';
+
 
 class HomePage extends StatefulWidget {
-  final User user;
+  final FlatUser user;
+  final VoidCallback onLogout;
   // const HomePage({super.key, required this.user});
-  const HomePage({Key? key, required this.user}) : super(key: key);
+  const HomePage({Key? key, required this.user, required this.onLogout})
+    : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -24,9 +32,10 @@ class _HomePageState extends State<HomePage> {
   late final DocumentReference flatDoc;
   late final String username;
   late final String name;
-  late final User user;
+  late final FlatUser user;
   late final DocumentReference userRef;
   late final bool questionnaireDone;
+  late final Flat flat;
   late Future<List<Task>> _userOneOffTasks;
   late Future<List<Task>> _repeatTasks;
   late Future<List<Task>> _allFlatTasks;
@@ -41,7 +50,24 @@ class _HomePageState extends State<HomePage> {
     name = widget.user.name;
     user = widget.user;
     questionnaireDone = widget.user.questionnaireDone;
+    _loadEverything();
+  }
+
+  void _loadEverything() async {
     _loadTasks();
+    flat = await _loadFlat();
+  }
+
+  Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('loggedInUsername');
+    await FirebaseAuth.instance.signOut();
+    widget.onLogout(); // Call the parent callback
+  }
+
+  Future<Flat> _loadFlat() async {
+      DocumentSnapshot flatSnap = await flatDoc.get();
+      return Flat.fromFirestore(flatSnap);
   }
 
   void _loadTasks() async {
@@ -53,11 +79,73 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  Future<void> showRoutineCard(BuildContext context, flat) {
+  return showPopupCard(
+    context: context,
+    builder: (context) => FractionallySizedBox(
+      heightFactor: 0.5,
+      widthFactor: 0.5,
+      child: PopupCard(
+      elevation: 8,
+      color: AppColors.beige,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Container(
+          child: 
+          getChoreAndFreqCol(flat),
+          ),
+      ),
+    ),
+    ),
+    //offset: const Offset(-16, 70),
+    alignment: Alignment.center,
+    useSafeArea: true,
+    dimBackground: true,
+  );
+}
+
+Widget getChoreAndFreqCol(Flat flat) {
+  return Column(
+    mainAxisAlignment: MainAxisAlignment.spaceEvenly, // horizontal alignment
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+    Text('Cleaning the bathroom: ${flat.bathroom.toString()}'),
+    Text('Doing the dishes: ${flat.dishes.toString()}'),
+    Text('Cleaning the kitchen: ${flat.kitchen.toString()}'),
+    Text('Doing laundry: ${flat.laundry.toString()}'),
+    Text('Taking out recycling: ${flat.recycling.toString()}'),
+    Text('Taking out the rubbish: ${flat.rubbish.toString()}'),
+  ],);
+}
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Welcome, $name'),
+      appBar: AppBar(
+        title: Text('Welcome, $name'),
         actions: [
+          TextButton(
+    onPressed: () {
+      logout(); // Your logout function, no doubt.
+    },
+    child: Text(
+      'Log Out',
+      style: TextStyle(color: Colors.black), // Text color must be visible!
+    ),
+  ),
+  TextButton(
+    onPressed: () {
+      showRoutineCard(context, flat); // Your logout function, no doubt.
+    },
+    child: Text(
+      'Show Routine',
+      style: TextStyle(color: Colors.black), // Text color must be visible!
+    ),
+  ),
           StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
                 .collection('Nudges')
@@ -78,7 +166,8 @@ class _HomePageState extends State<HomePage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => NotificationsPage(username: username),
+                          builder: (context) =>
+                              NotificationsPage(username: username),
                         ),
                       );
                     },
@@ -262,26 +351,40 @@ class _HomePageState extends State<HomePage> {
                             TextButton(
                               onPressed: () async {
                                 final allTasks = await _allFlatTasks;
-                                final othersRepeatTasks = allTasks.where((t) =>
-                                    !t.isOneOff &&
-                                    t.assignedTo != null &&
-                                    t.assignedTo != userRef).toList();
+                                final othersRepeatTasks = allTasks
+                                    .where(
+                                      (t) =>
+                                          !t.isOneOff &&
+                                          t.assignedTo != null &&
+                                          t.assignedTo != userRef,
+                                    )
+                                    .toList();
 
                                 showModalBottomSheet(
                                   context: context,
                                   isScrollControlled: true,
                                   backgroundColor: Colors.white,
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                                    borderRadius: BorderRadius.vertical(
+                                      top: Radius.circular(20),
+                                    ),
                                   ),
                                   builder: (context) => FractionallySizedBox(
                                     heightFactor: 0.8,
                                     child: Scaffold(
-                                      appBar: AppBar(title: Text("Others' Repeat Tasks")),
+                                      appBar: AppBar(
+                                        title: Text("Others' Repeat Tasks"),
+                                      ),
                                       body: othersRepeatTasks.isEmpty
-                                          ? Center(child: Text("No repeat tasks assigned to others."))
+                                          ? Center(
+                                              child: Text(
+                                                "No repeat tasks assigned to others.",
+                                              ),
+                                            )
                                           : ListView(
-                                              children: othersRepeatTasks.map((task) {
+                                              children: othersRepeatTasks.map((
+                                                task,
+                                              ) {
                                                 return TaskTile(
                                                   task: task,
                                                   user: user,
@@ -468,21 +571,31 @@ class _HomePageState extends State<HomePage> {
               },
               child: Text('View Flatmates\' Tasks'),
             ),
+            logoutButton(),
           ],
         ),
       ),
     );
   }
 
-  Future<List<User>> fetchAllUsers(DocumentReference flat) async {
-    List<User> allUsers = [];
+  Widget logoutButton() {
+    return ElevatedButton(
+      onPressed: () async {
+        logout();
+      },
+      child: Text('Logout'),
+    );
+  }
+
+  Future<List<FlatUser>> fetchAllUsers(DocumentReference flat) async {
+    List<FlatUser> allUsers = [];
     final queryRef = FirebaseFirestore.instance
         .collection('Users')
         .where('flat', isEqualTo: flat);
     final querySnap = await queryRef.get();
     if (querySnap.docs.isNotEmpty) {
       allUsers = querySnap.docs.map((doc) {
-        return User.fromFirestore(doc);
+        return FlatUser.fromFirestore(doc);
       }).toList();
     }
     return allUsers;
@@ -533,18 +646,20 @@ class _HomePageState extends State<HomePage> {
   Future<List<Task>> fetchRepeatTasks(Future<List<Task>> allFlatTasks) async {
     final tasks = await allFlatTasks;
     final now = DateFormat('yyyy-MM-dd').format(DateTime.now());
-    return tasks.where((t) => !t.isOneOff).toList()
-    ..sort((a, b) {
+    return tasks.where((t) => !t.isOneOff).toList()..sort((a, b) {
       DateTime parseDate(String? dateStr) {
         try {
-          return dateStr != null ? DateFormat('yyyy-MM-dd').parse(dateStr) : DateTime(2000);
+          return dateStr != null
+              ? DateFormat('yyyy-MM-dd').parse(dateStr)
+              : DateTime(2000);
         } catch (_) {
           return DateTime(2000);
         }
       }
+
       DateTime aLastDone = a.lastDoneOn != null
-        ? DateFormat('yyyy-MM-dd').parse(a.lastDoneOn!)
-        : parseDate(a.setDate);
+          ? DateFormat('yyyy-MM-dd').parse(a.lastDoneOn!)
+          : parseDate(a.setDate);
       DateTime bLastDone = b.lastDoneOn != null
           ? DateFormat('yyyy-MM-dd').parse(b.lastDoneOn!)
           : parseDate(b.setDate);

@@ -9,6 +9,7 @@ class Flat {
   final int laundry;
   final int recycling;
   final int rubbish;
+  final int dishes;
 
   Flat({
     required this.id,
@@ -19,6 +20,7 @@ class Flat {
     required this.laundry,
     required this.recycling,
     required this.rubbish,
+    required this.dishes,
   });
 
   //   factory User.fromJson(Map<String, dynamic> json) {
@@ -39,6 +41,7 @@ class Flat {
       laundry: data['laundry'] ?? 0,
       recycling: data['recycling'] ?? 0,
       rubbish: data['rubbish'] ?? 0,
+      dishes: data['dishes'] ?? 0,
     );
   }
 }

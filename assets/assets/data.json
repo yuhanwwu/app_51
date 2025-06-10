@@ -1,0 +1,53 @@
+{
+  "users": [
+    {
+      "username": "alice",
+      "name": "Alice Anderson",
+      "flat": "Flat 1A"
+    },
+    {
+      "username": "bob",
+      "name": "Bob Brown",
+      "flat": "Flat 1A"
+    },
+    {
+      "username": "charlie",
+      "name": "Charlie Chaplin",
+      "flat": "Flat 2B"
+    }
+  ],
+  "repeat_tasks": [
+    {
+      "id": 1,
+      "description": "Take out the trash",
+      "assignedto": "alice",
+      "frequency": 3,
+      "lastdoneon": "2024-05-25T10:00:00Z",
+      "lastdoneby": "bob"
+    },
+    {
+      "id": 2,
+      "description": "Clean the kitchen",
+      "assignedto": "bob",
+      "frequency": 7,
+      "lastdoneon": null,
+      "lastdoneby": null
+    }
+  ],
+  "one_off_tasks": [
+    {
+      "id": 1,
+      "description": "Fix the leaking tap",
+      "assignedto": "charlie",
+      "setdate": "2024-05-28T09:30:00Z",
+      "priority": true
+    },
+    {
+      "id": 2,
+      "description": "Buy light bulbs",
+      "assignedto": "alice",
+      "setdate": "2024-05-27T14:00:00Z",
+      "priority": false
+    }
+  ]
+}

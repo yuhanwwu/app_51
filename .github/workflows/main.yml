@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - master
+  workflow_dispatch: # Add this section for manual triggering
+    inputs:
+      branch_to_deploy:
+        description: 'Branch to deploy to GitHub Pages'
+        required: true
+        default: 'master' # Set a default to make regular manual deploys easier
 
 permissions:
   contents: write
@@ -62,6 +68,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # This step will also need to checkout the correct branch for pages to be properly deployed
+          # Although peaceiris/actions-gh-pages@v3 often handles this, it's good practice
+          ref: ${{ github.event.inputs.branch_to_deploy || github.ref_name }}
 
       - name: Download artifact
         uses: actions/download-artifact@v4
@@ -73,4 +83,4 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public
+          publish_dir: ./publicmas

@@ -3,7 +3,8 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:frontend/screens/home_page.dart';
+import 'package:frontend/screens/noticeboard.dart';
+import 'package:frontend/screens/task_page.dart';
 import 'package:frontend/screens/questionnaire.dart';
 import 'firebase_options.dart';
 import 'package:flutter/material.dart';
@@ -36,10 +37,12 @@ class _MyAppState extends State<MyApp> {
   AppPage currentPage = AppPage.login;
   String? questionnaireUsername;
   String? pendingUsernameForFlat;
+  DocumentReference? flatRef;
+
   Timer? _nudgeTimer;
   Timestamp? _lastCheckedNudge;
 
-@override
+  @override
   void initState() {
     super.initState();
     _restoreUserSession();
@@ -63,6 +66,7 @@ class _MyAppState extends State<MyApp> {
       if (doc.exists) {
         final userData = FlatUser.fromFirestore(doc);
         final data = doc.data()!;
+        flatRef = data['flat'] as DocumentReference;
         final questionnaireDone = data['questionnaireDone'] == true;
 
         setState(() {
@@ -85,7 +89,10 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  void onLogout() {
+  void onLogout() async {
+    await FirebaseAuth.instance.signOut();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('loggedInUsername');
     setState(() {
       user = null;
       currentPage = AppPage.login;
@@ -93,12 +100,11 @@ class _MyAppState extends State<MyApp> {
   }
 
   void onAddFlatRequest(String username) {
-  setState(() {
-    pendingUsernameForFlat = username;
-    currentPage = AppPage.addFlat;
-  });
-}
-
+    setState(() {
+      pendingUsernameForFlat = username;
+      currentPage = AppPage.addFlat;
+    });
+  }
 
   void _startNudgePolling() {
     _nudgeTimer?.cancel();
@@ -160,6 +166,8 @@ class _MyAppState extends State<MyApp> {
 
     final data = doc.data() as Map<String, dynamic>;
     final questionnaireDone = data['questionnaireDone'] == true;
+    flatRef = data['flat'] as DocumentReference;
+    // userRef = data['userRef'] as DocumentReference;
 
     if (!questionnaireDone) {
       setState(() {
@@ -187,7 +195,11 @@ class _MyAppState extends State<MyApp> {
     Widget page;
     switch (currentPage) {
       case AppPage.login:
-        page = LoginPage(onLogin: onLogin, onAddFlat: onAddFlatRequest, onLogout: onLogout,);
+        page = LoginPage(
+          onLogin: onLogin,
+          onAddFlat: onAddFlatRequest,
+          onLogout: onLogout,
+        );
         break;
       case AppPage.addFlat:
         page = AddFlatPage(
@@ -203,7 +215,12 @@ class _MyAppState extends State<MyApp> {
         );
         break;
       case AppPage.home:
-        page = HomePage(user: user!, onLogout: onLogout);
+        page = NoticeboardPage(
+          user: user!,
+          flatRef: flatRef!,
+          userRef: user!.userRef,
+          onLogout: onLogout,
+        );
         break;
     }
     return MaterialApp(

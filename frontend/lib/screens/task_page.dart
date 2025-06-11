@@ -15,20 +15,20 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_popup_card/flutter_popup_card.dart';
 import '../constants/colors.dart';
+import '../main.dart';
 
-
-class HomePage extends StatefulWidget {
+class TaskPage extends StatefulWidget {
   final FlatUser user;
   final VoidCallback onLogout;
   // const HomePage({super.key, required this.user});
-  const HomePage({Key? key, required this.user, required this.onLogout})
+  const TaskPage({Key? key, required this.user, required this.onLogout})
     : super(key: key);
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<TaskPage> createState() => _TaskPageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _TaskPageState extends State<TaskPage> {
   late final DocumentReference flatDoc;
   late final String username;
   late final String name;
@@ -62,12 +62,17 @@ class _HomePageState extends State<HomePage> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('loggedInUsername');
     await FirebaseAuth.instance.signOut();
-    widget.onLogout(); // Call the parent callback
+    widget.onLogout();
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const MyApp()),
+      (route) => false,
+    );
   }
 
   Future<Flat> _loadFlat() async {
-      DocumentSnapshot flatSnap = await flatDoc.get();
-      return Flat.fromFirestore(flatSnap);
+    DocumentSnapshot flatSnap = await flatDoc.get();
+    return Flat.fromFirestore(flatSnap);
   }
 
   void _loadTasks() async {
@@ -80,47 +85,44 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> showRoutineCard(BuildContext context, flat) {
-  return showPopupCard(
-    context: context,
-    builder: (context) => FractionallySizedBox(
-      heightFactor: 0.5,
-      widthFactor: 0.5,
-      child: PopupCard(
-      elevation: 8,
-      color: AppColors.beige,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Container(
-          child: 
-          getChoreAndFreqCol(flat),
+    return showPopupCard(
+      context: context,
+      builder: (context) => FractionallySizedBox(
+        heightFactor: 0.5,
+        widthFactor: 0.5,
+        child: PopupCard(
+          elevation: 8,
+          color: AppColors.beige,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
           ),
+          child: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Container(child: getChoreAndFreqCol(flat)),
+          ),
+        ),
       ),
-    ),
-    ),
-    //offset: const Offset(-16, 70),
-    alignment: Alignment.center,
-    useSafeArea: true,
-    dimBackground: true,
-  );
-}
+      //offset: const Offset(-16, 70),
+      alignment: Alignment.center,
+      useSafeArea: true,
+      dimBackground: true,
+    );
+  }
 
-Widget getChoreAndFreqCol(Flat flat) {
-  return Column(
-    mainAxisAlignment: MainAxisAlignment.spaceEvenly, // horizontal alignment
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-    Text('Cleaning the bathroom: ${flat.bathroom.toString()}'),
-    Text('Doing the dishes: ${flat.dishes.toString()}'),
-    Text('Cleaning the kitchen: ${flat.kitchen.toString()}'),
-    Text('Doing laundry: ${flat.laundry.toString()}'),
-    Text('Taking out recycling: ${flat.recycling.toString()}'),
-    Text('Taking out the rubbish: ${flat.rubbish.toString()}'),
-  ],);
-}
-
+  Widget getChoreAndFreqCol(Flat flat) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly, // horizontal alignment
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Cleaning the bathroom: ${flat.bathroom.toString()}'),
+        Text('Doing the dishes: ${flat.dishes.toString()}'),
+        Text('Cleaning the kitchen: ${flat.kitchen.toString()}'),
+        Text('Doing laundry: ${flat.laundry.toString()}'),
+        Text('Taking out recycling: ${flat.recycling.toString()}'),
+        Text('Taking out the rubbish: ${flat.rubbish.toString()}'),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -128,24 +130,13 @@ Widget getChoreAndFreqCol(Flat flat) {
       appBar: AppBar(
         title: Text('Welcome, $name'),
         actions: [
+          logoutButton(),
           TextButton(
-    onPressed: () {
-      logout(); // Your logout function, no doubt.
-    },
-    child: Text(
-      'Log Out',
-      style: TextStyle(color: Colors.black), // Text color must be visible!
-    ),
-  ),
-  TextButton(
-    onPressed: () {
-      showRoutineCard(context, flat); // Your logout function, no doubt.
-    },
-    child: Text(
-      'Show Routine',
-      style: TextStyle(color: Colors.black), // Text color must be visible!
-    ),
-  ),
+            onPressed: () {
+              showRoutineCard(context, flat);
+            },
+            child: Text('Show Routine', style: TextStyle(color: Colors.black)),
+          ),
           StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
                 .collection('Nudges')
@@ -200,13 +191,13 @@ Widget getChoreAndFreqCol(Flat flat) {
               );
             },
           ),
-        IconButton(
-                    icon: Icon(Icons.refresh),
-                    tooltip: 'Refresh page',
-                    onPressed: () {
-                      _loadTasks();
-                    },
-                  ),
+          IconButton(
+            icon: Icon(Icons.refresh),
+            tooltip: 'Refresh page',
+            onPressed: () {
+              _loadTasks();
+            },
+          ),
         ],
       ),
       body: Column(
@@ -571,7 +562,7 @@ Widget getChoreAndFreqCol(Flat flat) {
               },
               child: Text('View Flatmates\' Tasks'),
             ),
-            logoutButton(),
+            
           ],
         ),
       ),
@@ -579,11 +570,12 @@ Widget getChoreAndFreqCol(Flat flat) {
   }
 
   Widget logoutButton() {
-    return ElevatedButton(
+    return IconButton(
+      icon: Icon(Icons.logout),
+      tooltip: 'Log Out',
       onPressed: () async {
         logout();
       },
-      child: Text('Logout'),
     );
   }
 

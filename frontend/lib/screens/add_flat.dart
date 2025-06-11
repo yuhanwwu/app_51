@@ -5,7 +5,7 @@ import 'package:frontend/screens/login.dart';
 import 'package:universal_html/html.dart' as html;
 
 import '../main.dart';
-import 'home_page.dart';
+import 'task_page.dart';
 import 'questionnaire.dart';
 
 class AddFlatPage extends StatefulWidget {
@@ -154,7 +154,9 @@ class _AddFlatPageState extends State<AddFlatPage> {
                 final isUser = index == 0;
 
                 return Card(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   elevation: 3,
                   margin: EdgeInsets.symmetric(vertical: 8),
                   child: Padding(
@@ -164,13 +166,18 @@ class _AddFlatPageState extends State<AddFlatPage> {
                       children: [
                         Text(
                           isUser ? 'You' : 'Flatmate $index',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         SizedBox(height: 10),
                         TextFormField(
                           controller: controllers['username'],
                           decoration: InputDecoration(
-                            labelText: isUser ? 'Your Username' : 'Flatmate $index Username',
+                            labelText: isUser
+                                ? 'Your Username'
+                                : 'Flatmate $index Username',
                             border: OutlineInputBorder(),
                           ),
                           validator: (value) =>
@@ -180,7 +187,9 @@ class _AddFlatPageState extends State<AddFlatPage> {
                         TextFormField(
                           controller: controllers['name'],
                           decoration: InputDecoration(
-                            labelText: isUser ? 'Your Name' : 'Flatmate $index Name',
+                            labelText: isUser
+                                ? 'Your Name'
+                                : 'Flatmate $index Name',
                             border: OutlineInputBorder(),
                           ),
                           validator: (value) =>
@@ -191,7 +200,6 @@ class _AddFlatPageState extends State<AddFlatPage> {
                   ),
                 );
               }),
-
 
               TextButton(
                 onPressed: addFlatmateField,

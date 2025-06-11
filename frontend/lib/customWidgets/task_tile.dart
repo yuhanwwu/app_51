@@ -10,6 +10,8 @@ import '../screens/home_page.dart';
 import 'package:flutter/material.dart';
 // import 'models/task.dart'; // your Task class
 import 'package:intl/intl.dart';
+import 'package:lottie/lottie.dart';
+
 
 class TaskTile extends StatefulWidget {
   final Task task;
@@ -31,6 +33,8 @@ class TaskTile extends StatefulWidget {
 
 class _TaskTileState extends State<TaskTile> {
   late Task task;
+  bool _isVisible = true;
+  bool _showSuccess = false;
 
   @override
   void initState() {
@@ -116,6 +120,8 @@ class _TaskTileState extends State<TaskTile> {
           .update(updateData);
 
       setState(() {
+      //  _isVisible = false;
+        _showSuccess = true;
         task = Task(
           taskRef: task.taskRef,
           description: task.description,
@@ -132,6 +138,13 @@ class _TaskTileState extends State<TaskTile> {
           isPersonal: task.isOneOff ? false : task.isPersonal,
         );
       });
+      await Future.delayed(Duration(milliseconds: 1500));
+      setState(() {
+        _isVisible = false;
+      });
+      await Future.delayed(Duration(milliseconds: 300));
+
+
     } catch (e) {
       ScaffoldMessenger.of(
         context,
@@ -329,13 +342,44 @@ class _TaskTileState extends State<TaskTile> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    if (task.isOneOff == true) {
-      return buildOneOffTile(context);
-    } else {
-      return buildRepeatTile(context);
-    }
-  }
+Widget build(BuildContext context) {
+  return AnimatedSize(
+    duration: Duration(milliseconds: 300),
+    curve: Curves.easeInOut,
+    child: AnimatedOpacity(
+      opacity: _isVisible ? 1 : 0,
+      duration: Duration(milliseconds: 300),
+      child: _isVisible
+          ? Stack(
+              alignment: Alignment.center,
+              children: [
+                task.isOneOff
+                    ? buildOneOffTile(context)
+                    : buildRepeatTile(context),
+                if (_showSuccess)
+                  Positioned.fill(
+                    child: Container(
+                      color: Colors.white.withAlpha(204), // 80% opacity
+                      alignment: Alignment.center,
+                      child: SizedBox(
+                        height: 150,
+                        child: Lottie.asset(
+                          'assets/animations/success.json',
+                          repeat: false,
+                        ),
+                      ),
+                    ),
+                  ),
+
+
+              ],
+            )
+          : SizedBox.shrink(),
+    ),
+  );
+}
+
+
 
   Future<String> getNameFromDocRef(DocumentReference? dref) async {
     if (dref != null) {
@@ -368,4 +412,6 @@ Future<List<DocumentReference>> fetchAllUserRefs(DocumentReference flat) async {
     allUsers = querySnap.docs.map((doc) => doc.reference).toList();
   }
   return allUsers;
+
+  
 }

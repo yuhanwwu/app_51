@@ -114,12 +114,12 @@ class _TaskPageState extends State<TaskPage> {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly, // horizontal alignment
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Cleaning the bathroom: ${flat.bathroom.toString()}'),
-        Text('Doing the dishes: ${flat.dishes.toString()}'),
-        Text('Cleaning the kitchen: ${flat.kitchen.toString()}'),
-        Text('Doing laundry: ${flat.laundry.toString()}'),
-        Text('Taking out recycling: ${flat.recycling.toString()}'),
-        Text('Taking out the rubbish: ${flat.rubbish.toString()}'),
+        Text('Cleaning the bathroom: Every ${flat.bathroom.toString()} day(s)'),
+        Text('Doing the dishes: Every ${flat.dishes.toString()} day(s)'),
+        Text('Cleaning the kitchen: Every ${flat.kitchen.toString()} day(s)'),
+        Text('Doing laundry: Every ${flat.laundry.toString()} day(s)'),
+        Text('Taking out recycling: Every ${flat.recycling.toString()} day(s)'),
+        Text('Taking out the rubbish: Every ${flat.rubbish.toString()} day(s)'),
       ],
     );
   }
@@ -665,7 +665,7 @@ class _TaskPageState extends State<TaskPage> {
     Future<List<Task>> allFlatTasks,
   ) async {
     final tasks = await allFlatTasks;
-    return tasks.where((t) => (t.assignedTo == null && t.isOneOff)).toList()
+    return tasks.where((t) => (t.assignedTo == null)).toList()
       ..sort((a, b) {
         final priorityCompare = (b.priority ? 1 : 0) - (a.priority ? 1 : 0);
         if (priorityCompare != 0) return priorityCompare;

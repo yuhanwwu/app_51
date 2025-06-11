@@ -45,23 +45,19 @@ class Task {
     final data = doc.data() as Map<String, dynamic>;
     final isOneOff = data['isOneOff'] as bool;
     return Task(
-      taskRef: doc.reference as DocumentReference,
+      taskRef: doc.reference,
       description: data['description'],
       isOneOff: data['isOneOff'] ?? false,
       taskId: doc.id,
       assignedFlat: data['assignedFlat'] as DocumentReference,
-      assignedTo: isOneOff
-          ? data['assignedTo'] as DocumentReference?
-          : data['assignedTo'] as DocumentReference,
+      assignedTo: data['assignedTo'] as DocumentReference?, 
       done: isOneOff ? data['done'] : null,
       setDate: data['setDate'],
       priority: isOneOff ? (data['priority'] as bool? ?? false) : false,
       frequency: isOneOff ? 0 : data['frequency'] as int,
-      // frequency: isOneOff ? 0 : (data['frequency'] as int? ?? 0),
       lastDoneOn: isOneOff ? null : data['lastDoneOn'] as String?,
       lastDoneBy: isOneOff ? null : data['lastDoneBy'] as DocumentReference?,
       isPersonal: isOneOff ? false : data['isPersonal'] as bool,
-      // noteId: data['noteId'],
     );
   }
 

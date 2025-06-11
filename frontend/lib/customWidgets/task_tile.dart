@@ -72,6 +72,9 @@ class _TaskTileState extends State<TaskTile> {
 
   Future<void> _claimTask() async {
     try {
+
+      final prevAssignedTo = task.assignedTo;
+
       await FirebaseFirestore.instance
           .collection('Tasks')
           .doc(task.taskId)
@@ -94,12 +97,47 @@ class _TaskTileState extends State<TaskTile> {
           isPersonal: task.isPersonal,
         );
       });
+
+      String prevName = "Someone";
+      String claimerName = widget.user.name;
+
+      if (prevAssignedTo != null && prevAssignedTo != widget.userRef) {
+        // Find a repeat task assigned to the claimer (widget.userRef)
+        final swapTaskQuery = await FirebaseFirestore.instance
+            .collection('Tasks')
+            .where('assignedFlat', isEqualTo: task.assignedFlat)
+            .where('assignedTo', isEqualTo: widget.userRef)
+            .where('isOneOff', isEqualTo: false)
+            .limit(1)
+            .get();
+
+        if (swapTaskQuery.docs.isNotEmpty) {
+          final swapTaskDoc = swapTaskQuery.docs.first;
+          // Assign the claimer's task to the previous assignee
+          await swapTaskDoc.reference.update({'assignedTo': prevAssignedTo});
+        }
+        // Fetch previous assignee's name
+        final prevUserSnap = await prevAssignedTo.get();
+        final prevUserData = prevUserSnap.data() as Map<String, dynamic>?;
+        prevName = prevUserData?['name'] ?? "Someone";
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Swap complete! $claimerName swapped with $prevName.')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Task claimed by $claimerName!')),
+        );
+      }
+
+      widget.onDone();
+
     } catch (e) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Error claiming task: $e')));
-    }
     widget.onDone();
+  }
   }
 
   Future<void> _markDone(DocumentReference nextUser) async {
@@ -234,6 +272,44 @@ class _TaskTileState extends State<TaskTile> {
     );
   }
 
+  Widget swapButton() {
+  return ElevatedButton(
+    onPressed: () async {
+      // Set assignedTo to null (put up for swap)
+      await FirebaseFirestore.instance
+          .collection('Tasks')
+          .doc(task.taskId)
+          .update({'assignedTo': null});
+      setState(() {
+        task = Task(
+          taskRef: task.taskRef,
+          description: task.description,
+          isOneOff: task.isOneOff,
+          taskId: task.taskId,
+          assignedFlat: task.assignedFlat,
+          assignedTo: null,
+          done: task.done,
+          setDate: task.setDate,
+          priority: task.priority,
+          frequency: task.frequency,
+          lastDoneOn: task.lastDoneOn,
+          lastDoneBy: task.lastDoneBy,
+          isPersonal: task.isPersonal,
+        );
+      });
+      widget.onDone();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Task is now available for swap!')),
+      );
+    },
+    style: ElevatedButton.styleFrom(
+      backgroundColor: Colors.orange[100],
+      foregroundColor: Colors.orange[900],
+    ),
+    child: Text('Request Swap'),
+  );
+}
+
   Widget buildOneOffTile(BuildContext context) {
     return FutureBuilder(
       future: getNameFromDocRef(task.assignedTo),
@@ -331,6 +407,7 @@ class _TaskTileState extends State<TaskTile> {
                   Row(
                     children: [
                       doneRepeatButton(),
+                      swapButton(), 
                       editButton(),
                       deleteButton(),
                     ],
@@ -537,7 +614,8 @@ Widget build(BuildContext context) {
                           child: Text('Claim'),
                         ),
                       if (task.assignedTo == widget.userRef && widget.canEdit)
-                        Checkbox(
+                        ...[
+                          Checkbox(
                           value: task.isOneOff && task.done!,
                           onChanged: (value) async {
                             DocumentReference next = widget.userRef;
@@ -551,7 +629,10 @@ Widget build(BuildContext context) {
                             }
                             await _markDone(next);
                           },
-                        ),
+                          ),
+                          if (!task.isOneOff)
+                            swapButton(),
+                        ],
                       if (widget.canEdit)
                         IconButton(
                           icon: Icon(Icons.more_vert),

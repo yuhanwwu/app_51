@@ -12,11 +12,14 @@ class AddFlatPage extends StatefulWidget {
   final String username;
   final Function(FlatUser) onLogin;
   final VoidCallback onLogout;
+  final VoidCallback onBacktoLogin;
+
   const AddFlatPage({
     super.key,
     required this.username,
     required this.onLogin,
     required this.onLogout,
+    required this.onBacktoLogin, 
   });
 
   @override
@@ -133,7 +136,12 @@ class _AddFlatPageState extends State<AddFlatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Add Flat")),
+      appBar: AppBar(title: Text("Add Flat"),
+      leading: IconButton(
+        icon: Icon(Icons.arrow_back),
+        onPressed: widget.onBacktoLogin, // This will return to the Login page
+      ),
+    ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(

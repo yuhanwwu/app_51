@@ -140,10 +140,10 @@ class _TaskTileState extends State<TaskTile> {
           isPersonal: task.isOneOff ? false : task.isPersonal,
         );
       });
-      // await Future.delayed(Duration(milliseconds: 1500));
-      // setState(() {
-      //   // _isVisible = false;
-      // });
+      await Future.delayed(Duration(milliseconds: 1500));
+      setState(() {
+        _isVisible = false;
+      });
       await Future.delayed(Duration(milliseconds: 300));
 
 
@@ -566,19 +566,20 @@ Widget build(BuildContext context) {
                       color: Colors.white.withAlpha(204), // 80% white overlay
                       alignment: Alignment.center,
                       child: SizedBox(
-                        height: 120,
+                        height: 500,
+                        width: 500, 
                         child: Lottie.asset(
                           'assets/animations/success.json',
                           repeat: false,
-                          onLoaded: (composition) {
-                            Future.delayed(composition.duration, () {
-                              setState(() {
-                                _showSuccess = false;
-                                _isVisible = false;
-                              });
-                              widget.onDone(); // callback to refresh UI
-                            });
-                          },
+                          // onLoaded: (composition) {
+                          //   Future.delayed(composition.duration, () {
+                          //     setState(() {
+                          //       _showSuccess = false;
+                          //       _isVisible = false;
+                          //     });
+                          //     widget.onDone(); // callback to refresh UI
+                          //   });
+                          // },
                         ),
                       ),
                     ),

@@ -20,9 +20,7 @@ import '../main.dart';
 class TaskPage extends StatefulWidget {
   final FlatUser user;
   final VoidCallback onLogout;
-  // const HomePage({super.key, required this.user});
-  const TaskPage({Key? key, required this.user, required this.onLogout})
-    : super(key: key);
+  const TaskPage({Key? key, required this.user, required this.onLogout}) : super(key: key);
 
   @override
   State<TaskPage> createState() => _TaskPageState();
@@ -36,9 +34,8 @@ class _TaskPageState extends State<TaskPage> {
   late final DocumentReference userRef;
   late final bool questionnaireDone;
   late final Flat flat;
-  late Future<List<Task>> _userOneOffTasks;
-  late Future<List<Task>> _repeatTasks;
   late Future<List<Task>> _allFlatTasks;
+  late Future<List<Task>> _userTasks;  // All tasks assigned to the user
   late Future<List<Task>> _unclaimedTasks;
 
   @override
@@ -78,8 +75,7 @@ class _TaskPageState extends State<TaskPage> {
   void _loadTasks() async {
     setState(() {
       _allFlatTasks = fetchAllFlatTasks(flatDoc);
-      _userOneOffTasks = fetchUserOneOffTasks(_allFlatTasks);
-      _repeatTasks = fetchRepeatTasks(_allFlatTasks);
+      _userTasks = fetchUserTasks(_allFlatTasks);
       _unclaimedTasks = fetchUnclaimedTasks(_allFlatTasks);
     });
   }
@@ -102,7 +98,6 @@ class _TaskPageState extends State<TaskPage> {
           ),
         ),
       ),
-      //offset: const Offset(-16, 70),
       alignment: Alignment.center,
       useSafeArea: true,
       dimBackground: true,
@@ -111,7 +106,7 @@ class _TaskPageState extends State<TaskPage> {
 
   Widget getChoreAndFreqCol(Flat flat) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly, // horizontal alignment
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Cleaning the bathroom: ${flat.bathroom.toString()}'),
@@ -124,557 +119,324 @@ class _TaskPageState extends State<TaskPage> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Welcome, $name'),
-        actions: [
-          logoutButton(),
-          TextButton(
-            onPressed: () {
-              showRoutineCard(context, flat);
-            },
-            child: Text('Show Routine', style: TextStyle(color: Colors.black)),
-          ),
-          StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection('Nudges')
-                .where('userId', isEqualTo: username)
-                .where('read', isEqualTo: false)
-                .snapshots(),
-            builder: (context, snapshot) {
-              int unreadCount = 0;
-              if (snapshot.hasData) {
-                unreadCount = snapshot.data!.docs.length;
-              }
-              return Stack(
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.notifications),
-                    tooltip: 'Notifications',
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              NotificationsPage(username: username),
-                        ),
-                      );
-                    },
-                  ),
-                  if (unreadCount > 0)
-                    Positioned(
-                      right: 8,
-                      top: 8,
-                      child: Container(
-                        padding: const EdgeInsets.all(2),
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        constraints: const BoxConstraints(
-                          minWidth: 16,
-                          minHeight: 16,
-                        ),
-                        child: Text(
-                          unreadCount.toString(),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
-                ],
-              );
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.refresh),
-            tooltip: 'Refresh page',
-            onPressed: () {
-              _loadTasks();
-            },
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: Row(
-              mainAxisAlignment:
-                  MainAxisAlignment.spaceEvenly, // horizontal alignment
-              crossAxisAlignment:
-                  CrossAxisAlignment.center, // vertical alignment
-              children: [
-                Expanded(
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "One-Off Tasks",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () async {
-                                final allTasks = await _allFlatTasks;
-                                final archivedTasks = allTasks
-                                    .where(
-                                      (t) =>
-                                          t.assignedTo == userRef &&
-                                          t.isOneOff &&
-                                          (t.done ?? false),
-                                    )
-                                    .toList();
-                                // ..sort((a, b) => b.setDate?.compareTo(a.setDate ?? DateTime(0)) ?? 0);
+  Future<List<Task>> fetchUserTasks(Future<List<Task>> allFlatTasks) async {
+    final tasks = await allFlatTasks;
+    // Filter all tasks assigned to the current user and not done
+    return tasks.where((t) => t.assignedTo == userRef && ((t.done ?? false) == false)).toList()
+      ..sort((a, b) {
+        // Prioritize by priority flag then setDate
+        final priorityCompare = (b.priority ? 1 : 0) - (a.priority ? 1 : 0);
+        if (priorityCompare != 0) return priorityCompare;
 
-                                showModalBottomSheet(
-                                  context: context,
-                                  isScrollControlled: true,
-                                  backgroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.vertical(
-                                      top: Radius.circular(20),
-                                    ),
-                                  ),
-                                  builder: (context) => FractionallySizedBox(
-                                    heightFactor: 0.8,
-                                    child: Scaffold(
-                                      appBar: AppBar(
-                                        title: Text('Archived One-Off Tasks'),
-                                      ),
-                                      body: archivedTasks.isEmpty
-                                          ? Center(
-                                              child: Text(
-                                                'No archived tasks found.',
-                                              ),
-                                            )
-                                          : ListView(
-                                              children: archivedTasks.map((
-                                                task,
-                                              ) {
-                                                return TaskTile(
-                                                  task: task,
-                                                  user: user,
-                                                  userRef: userRef,
-                                                  onDone: _loadTasks,
-                                                  // disableDone: true, // You can customize TaskTile to handle this
-                                                );
-                                              }).toList(),
-                                            ),
-                                    ),
-                                  ),
-                                );
-                              },
-                              child: Text("View Archive"),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Expanded(
-                        child: FutureBuilder<List<Task>>(
-                          future: _userOneOffTasks,
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return const Center(
-                                child: CircularProgressIndicator(),
-                              );
-                            } else if (snapshot.hasError) {
-                              return Center(
-                                child: Text("Error: ${snapshot.error}"),
-                              );
-                            } else if (snapshot.hasData) {
-                              final oneOffTasks = snapshot.data!;
-                              if (oneOffTasks.isEmpty) {
-                                return const Center(
-                                  child: Text("No one-off tasks left!"),
-                                );
-                              }
-                              return ListView(
-                                children: oneOffTasks
-                                    .map(
-                                      (e) => TaskTile(
-                                        task: e,
-                                        user: user,
-                                        userRef: userRef,
-                                        onDone: _loadTasks,
-                                      ),
-                                    )
-                                    .toList(),
-                              );
-                            } else {
-                              return const Center(
-                                child: Text("No tasks left!"),
-                              );
-                            }
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+        if (a.setDate == null && b.setDate == null) return 0;
+        if (a.setDate == null) return 1;
+        if (b.setDate == null) return -1;
 
-                Expanded(
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Repeat Tasks",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () async {
-                                final allTasks = await _allFlatTasks;
-                                final othersRepeatTasks = allTasks
-                                    .where(
-                                      (t) =>
-                                          !t.isOneOff &&
-                                          t.assignedTo != null &&
-                                          t.assignedTo != userRef,
-                                    )
-                                    .toList();
-
-                                showModalBottomSheet(
-                                  context: context,
-                                  isScrollControlled: true,
-                                  backgroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.vertical(
-                                      top: Radius.circular(20),
-                                    ),
-                                  ),
-                                  builder: (context) => FractionallySizedBox(
-                                    heightFactor: 0.8,
-                                    child: Scaffold(
-                                      appBar: AppBar(
-                                        title: Text("Others' Repeat Tasks"),
-                                      ),
-                                      body: othersRepeatTasks.isEmpty
-                                          ? Center(
-                                              child: Text(
-                                                "No repeat tasks assigned to others.",
-                                              ),
-                                            )
-                                          : ListView(
-                                              children: othersRepeatTasks.map((
-                                                task,
-                                              ) {
-                                                return TaskTile(
-                                                  task: task,
-                                                  user: user,
-                                                  userRef: userRef,
-                                                  onDone: _loadTasks,
-                                                  // You could add: disableDone: true
-                                                );
-                                              }).toList(),
-                                            ),
-                                    ),
-                                  ),
-                                );
-                              },
-                              child: Text("View Others' Tasks"),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      Expanded(
-                        child: FutureBuilder<List<Task>>(
-                          future: _repeatTasks,
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return const Center(
-                                child: CircularProgressIndicator(),
-                              );
-                            } else if (snapshot.hasError) {
-                              return Center(
-                                child: Text("Error: ${snapshot.error}"),
-                              );
-                            } else if (snapshot.hasData) {
-                              final repeatTasks = snapshot.data!;
-                              if (repeatTasks.isEmpty) {
-                                return const Center(
-                                  child: Text("No repeat tasks left!"),
-                                );
-                              }
-                              return ListView(
-                                children: repeatTasks
-                                    .where((e) => e.assignedTo == userRef)
-                                    .map(
-                                      (e) => TaskTile(
-                                        task: e,
-                                        user: user,
-                                        userRef: userRef,
-                                        onDone: _loadTasks,
-                                      ),
-                                    )
-                                    .toList(),
-                              );
-                            } else {
-                              return const Center(
-                                child: Text("No tasks left!"),
-                              );
-                            }
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    "Unclaimed Tasks",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                ),
-                Expanded(
-                  child: FutureBuilder<List<Task>>(
-                    future: _unclaimedTasks,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      } else if (snapshot.hasError) {
-                        return Center(child: Text("Error: ${snapshot.error}"));
-                      } else if (snapshot.hasData) {
-                        final repeatTasks = snapshot.data!;
-                        if (repeatTasks.isEmpty) {
-                          return const Center(
-                            child: Text("No unclaimed tasks left!"),
-                          );
-                        }
-                        return ListView(
-                          children: repeatTasks
-                              .map(
-                                (e) => TaskTile(
-                                  task: e,
-                                  user: user,
-                                  userRef: userRef,
-                                  onDone: _loadTasks,
-                                ),
-                              )
-                              .toList(),
-                        );
-                      } else {
-                        return const Center(
-                          child: Text("No unclaimed tasks left!"),
-                        );
-                      }
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-      bottomNavigationBar: Container(
-        color: Colors.grey[200],
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  backgroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(20),
-                    ),
-                  ),
-                  builder: (context) => FractionallySizedBox(
-                    heightFactor: 0.8,
-                    child: TaskInputScreen(
-                      curUser: user,
-                      userRef: userRef,
-                      onTaskSubmitted: _loadTasks,
-                    ),
-                  ),
-                );
-              },
-              child: Text('Add Task'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                final users = await fetchAllUsers(
-                  flatDoc,
-                ); // You need to define this function
-                showModalBottomSheet(
-                  context: context,
-                  backgroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(20),
-                    ),
-                  ),
-                  builder: (context) => ListView(
-                    shrinkWrap: true,
-                    children: users
-                        .where((u) => u.username != user.username)
-                        .map(
-                          (u) => ListTile(
-                            title: Text(u.name),
-                            onTap: () {
-                              Navigator.pop(context); // Close the sheet
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => NudgeUserPage(
-                                    user: u,
-                                    allFlatTasks: _allFlatTasks,
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        )
-                        .toList(),
-                  ),
-                );
-              },
-              child: Text('View Flatmates\' Tasks'),
-            ),
-            
-          ],
-        ),
-      ),
-    );
+        return a.setDate!.compareTo(b.setDate!);
+      });
   }
 
-  Widget logoutButton() {
-    return IconButton(
-      icon: Icon(Icons.logout),
-      tooltip: 'Log Out',
-      onPressed: () async {
-        logout();
-      },
-    );
-  }
+  Future<List<Task>> fetchUnclaimedTasks(Future<List<Task>> allFlatTasks) async {
+    final tasks = await allFlatTasks;
+    return tasks.where((t) => t.assignedTo == null && t.isOneOff).toList()
+      ..sort((a, b) {
+        final priorityCompare = (b.priority ? 1 : 0) - (a.priority ? 1 : 0);
+        if (priorityCompare != 0) return priorityCompare;
 
-  Future<List<FlatUser>> fetchAllUsers(DocumentReference flat) async {
-    List<FlatUser> allUsers = [];
-    final queryRef = FirebaseFirestore.instance
-        .collection('Users')
-        .where('flat', isEqualTo: flat);
-    final querySnap = await queryRef.get();
-    if (querySnap.docs.isNotEmpty) {
-      allUsers = querySnap.docs.map((doc) {
-        return FlatUser.fromFirestore(doc);
-      }).toList();
-    }
-    return allUsers;
+        if (a.setDate == null && b.setDate == null) return 0;
+        if (a.setDate == null) return 1;
+        if (b.setDate == null) return -1;
+
+        return a.setDate!.compareTo(b.setDate!);
+      });
   }
 
   Future<List<Task>> fetchAllFlatTasks(DocumentReference flat) async {
     List<Task> allFlatTasks = [];
-
-    final queryRef = FirebaseFirestore.instance
-        .collection('Tasks')
-        .where("assignedFlat", isEqualTo: flat);
-
+    final queryRef = FirebaseFirestore.instance.collection('Tasks').where("assignedFlat", isEqualTo: flat);
     final querySnap = await queryRef.get();
-
     if (querySnap.docs.isNotEmpty) {
       allFlatTasks = querySnap.docs.map((doc) {
-        final data = doc.data();
         return Task.fromFirestore(doc);
       }).toList();
     }
     return allFlatTasks;
   }
 
-  Future<List<Task>> fetchUserOneOffTasks(
-    Future<List<Task>> allFlatTasks,
-  ) async {
-    final tasks = await allFlatTasks;
-    return tasks
-        .where(
-          (t) =>
-              (t.assignedTo == userRef) &&
-              (t.isOneOff) &&
-              ((t.done ?? false) ? false : true),
-        )
-        .toList()
-      ..sort((a, b) {
-        final priorityCompare = (b.priority ? 1 : 0) - (a.priority ? 1 : 0);
-        if (priorityCompare != 0) return priorityCompare;
-
-        if (a.setDate == null && b.setDate == null) return 0;
-        if (a.setDate == null) return 1; // 🐌 a comes after
-        if (b.setDate == null) return -1; // 🚀 a comes before
-
-        return a.setDate!.compareTo(b.setDate!);
-      });
+  Future<List<Task>> fetchArchivedTasks() async {
+    final allTasks = await _allFlatTasks;
+    return allTasks.where((t) =>
+      t.assignedTo == userRef &&
+      (t.isOneOff || !t.isOneOff) &&
+      (t.done ?? false)
+    ).toList();
   }
 
-  Future<List<Task>> fetchRepeatTasks(Future<List<Task>> allFlatTasks) async {
-    final tasks = await allFlatTasks;
-    final now = DateFormat('yyyy-MM-dd').format(DateTime.now());
-    return tasks.where((t) => !t.isOneOff).toList()..sort((a, b) {
-      DateTime parseDate(String? dateStr) {
-        try {
-          return dateStr != null
-              ? DateFormat('yyyy-MM-dd').parse(dateStr)
-              : DateTime(2000);
-        } catch (_) {
-          return DateTime(2000);
-        }
-      }
-
-      DateTime aLastDone = a.lastDoneOn != null
-          ? DateFormat('yyyy-MM-dd').parse(a.lastDoneOn!)
-          : parseDate(a.setDate);
-      DateTime bLastDone = b.lastDoneOn != null
-          ? DateFormat('yyyy-MM-dd').parse(b.lastDoneOn!)
-          : parseDate(b.setDate);
-      DateTime aExpected = aLastDone.add(Duration(days: a.frequency));
-      DateTime bExpected = bLastDone.add(Duration(days: b.frequency));
-      return aExpected.compareTo(bExpected);
-    });
+  Future<List<FlatUser>> fetchAllUsers(DocumentReference flat) async {
+    List<FlatUser> allUsers = [];
+    final queryRef = FirebaseFirestore.instance.collection('Users').where('flat', isEqualTo: flat);
+    final querySnap = await queryRef.get();
+    if (querySnap.docs.isNotEmpty) {
+      allUsers = querySnap.docs.map((doc) => FlatUser.fromFirestore(doc)).toList();
+    }
+    return allUsers;
   }
 
-  Future<List<Task>> fetchUnclaimedTasks(
-    Future<List<Task>> allFlatTasks,
-  ) async {
-    final tasks = await allFlatTasks;
-    return tasks.where((t) => (t.assignedTo == null && t.isOneOff)).toList()
-      ..sort((a, b) {
-        final priorityCompare = (b.priority ? 1 : 0) - (a.priority ? 1 : 0);
-        if (priorityCompare != 0) return priorityCompare;
+  void _showUnclaimedTasksModal() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => FractionallySizedBox(
+        heightFactor: 0.8,
+        child: FutureBuilder<List<Task>>(
+          future: _unclaimedTasks,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text("Error: ${snapshot.error}"));
+            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return Center(child: Text("No unclaimed tasks left!"));
+            } else {
+              final unclaimedTasks = snapshot.data!;
+              return ListView(
+                children: unclaimedTasks.map((task) {
+                  return TaskTile(
+                    task: task,
+                    user: user,
+                    userRef: userRef,
+                    onDone: _loadTasks,
+                  );
+                }).toList(),
+              );
+            }
+          },
+        ),
+      ),
+    );
+  }
 
-        if (a.setDate == null && b.setDate == null) return 0;
-        if (a.setDate == null) return 1; // 🐌 a comes after
-        if (b.setDate == null) return -1; // 🚀 a comes before
+  void _showArchivedTasksModal() async {
+    final archivedTasks = await fetchArchivedTasks();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => FractionallySizedBox(
+        heightFactor: 0.8,
+        child: Scaffold(
+          appBar: AppBar(title: Text('Archived Tasks')),
+          body: archivedTasks.isEmpty
+              ? Center(child: Text('No archived tasks found.'))
+              : ListView(
+                  children: archivedTasks.map((task) {
+                    return TaskTile(
+                      task: task,
+                      user: user,
+                      userRef: userRef,
+                      onDone: _loadTasks,
+                    );
+                  }).toList(),
+                ),
+        ),
+      ),
+    );
+  }
+  
 
-        return a.setDate!.compareTo(b.setDate!);
-      });
+  void _showOthersTasksModal() async {
+    final allTasks = await _allFlatTasks;
+    final othersTasks = allTasks.where((t) => t.assignedTo != null && t.assignedTo != userRef).toList();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => FractionallySizedBox(
+        heightFactor: 0.8,
+        child: Scaffold(
+          appBar: AppBar(title: Text("Others' Tasks")),
+          body: othersTasks.isEmpty
+              ? Center(child: Text("No tasks assigned to others."))
+              : ListView(
+                  children: othersTasks.map((task) {
+                    return TaskTile(
+                      task: task,
+                      user: user,
+                      userRef: userRef,
+                      onDone: _loadTasks,
+                    );
+                  }).toList(),
+                ),
+        ),
+      ),
+    );
+  }
+
+  void _showFlatmatesModal() async {
+    final users = await fetchAllUsers(flatDoc);
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => ListView(
+        shrinkWrap: true,
+        children: users.where((u) => u.username != user.username).map((u) {
+          return ListTile(
+            title: Text(u.name),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => NudgeUserPage(user: u, allFlatTasks: _allFlatTasks),
+                ),
+              );
+            },
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Welcome, $name'),
+      ),
+      body: Row(
+        children: [
+          Container(
+            width: 200,
+            color: Colors.grey[100],
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  const SizedBox(height: 16),
+                  ElevatedButton.icon(
+                    icon: Icon(Icons.add),
+                    label: Text('Add Task'),
+                    onPressed: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                        ),
+                        builder: (context) => FractionallySizedBox(
+                          heightFactor: 0.8,
+                          child: TaskInputScreen(
+                            curUser: user,
+                            userRef: userRef,
+                            onTaskSubmitted: _loadTasks,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  ElevatedButton.icon(
+                    icon: Icon(Icons.task_alt),
+                    label: Text("View Others' Tasks"),
+                    onPressed: _showOthersTasksModal,
+                  ),
+                  const SizedBox(height: 8),
+                  ElevatedButton.icon(
+                    icon: Icon(Icons.people),
+                    label: Text('View Flatmates\' Tasks'),
+                    onPressed: _showFlatmatesModal,
+                  ),
+                  const SizedBox(height: 8),
+                  ElevatedButton.icon(
+                    icon: Icon(Icons.inbox),
+                    label: Text('Unclaimed Tasks'),
+                    onPressed: _showUnclaimedTasksModal,
+                  ),
+                  const SizedBox(height: 8),
+                  ElevatedButton.icon(
+                    icon: Icon(Icons.archive),
+                    label: Text('View Archive'),
+                    onPressed: _showArchivedTasksModal,
+                  ),
+                  const SizedBox(height: 8),
+                  ElevatedButton.icon(
+                    icon: Icon(Icons.notifications),
+                    label: Text('Notifications'),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => NotificationsPage(username: username)),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  ElevatedButton.icon(
+                    icon: Icon(Icons.schedule),
+                    label: Text('Show Routine'),
+                    onPressed: () => showRoutineCard(context, flat),
+                  ),
+                  const SizedBox(height: 8),
+                  ElevatedButton.icon(
+                    icon: Icon(Icons.refresh),
+                    label: Text('Refresh'),
+                    onPressed: _loadTasks,
+                  ),
+                  const SizedBox(height: 16),
+                  Divider(),
+                  ListTile(
+                    leading: Icon(Icons.logout),
+                    title: Text('Logout'),
+                    onTap: logout,
+                  ),
+                  const SizedBox(height: 16),
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+            child: FutureBuilder<List<Task>>(
+              future: _userTasks,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text("Error: ${snapshot.error}"));
+                } else if (snapshot.hasData) {
+                  final tasks = snapshot.data!;
+                  if (tasks.isEmpty) {
+                    return Center(child: Text("No tasks assigned to you."));
+                  }
+                  return ListView(
+                    children: tasks.map((task) {
+                      return TaskTile(
+                        task: task,
+                        user: user,
+                        userRef: userRef,
+                        onDone: _loadTasks,
+                      );
+                    }).toList(),
+                  );
+                } else {
+                  return Center(child: Text("No tasks assigned to you."));
+                }
+              },
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

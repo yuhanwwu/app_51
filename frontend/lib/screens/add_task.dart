@@ -28,6 +28,7 @@ class _TaskInputScreenState extends State<TaskInputScreen> {
   bool _isOneOff = true;
   bool _priority = false;
   bool _isPersonal = true;
+  bool _claimTask = false;
 
   // Future<String> getUserFlat(String userId) async {
   //   final userDoc = await FirebaseFirestore.instance
@@ -49,7 +50,10 @@ class _TaskInputScreenState extends State<TaskInputScreen> {
       'description': description,
       'isOneOff': _isOneOff,
       'assignedFlat': assignedFlat,
-      'assignedTo': _isOneOff ? null : widget.userRef,
+      'assignedTo': _isOneOff 
+        ? (_claimTask ? widget.userRef : null)
+        : widget.userRef,
+        // null : widget.userRef,
       'done': _isOneOff ? false : null,
       'setDate': DateFormat('yyyy-MM-dd').format(DateTime.now()),
       'priority': _isOneOff ? _priority : false,
@@ -114,6 +118,16 @@ class _TaskInputScreenState extends State<TaskInputScreen> {
                   onChanged: (val) {
                     setState(() {
                       _priority = val;
+                    });
+                  },
+                ),
+              if (_isOneOff)
+                SwitchListTile(
+                  title: const Text('Claim this task'),
+                  value: _claimTask,
+                  onChanged: (val) {
+                    setState(() {
+                      _claimTask = val;
                     });
                   },
                 ),

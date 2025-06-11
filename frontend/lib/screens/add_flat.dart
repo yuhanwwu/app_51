@@ -19,7 +19,7 @@ class AddFlatPage extends StatefulWidget {
     required this.username,
     required this.onLogin,
     required this.onLogout,
-    required this.onBacktoLogin, 
+    required this.onBacktoLogin,
   });
 
   @override
@@ -136,12 +136,13 @@ class _AddFlatPageState extends State<AddFlatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Add Flat"),
-      leading: IconButton(
-        icon: Icon(Icons.arrow_back),
-        onPressed: widget.onBacktoLogin, // This will return to the Login page
+      appBar: AppBar(
+        title: Text("Add Flat"),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: widget.onBacktoLogin, // This will return to the Login page
+        ),
       ),
-    ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(

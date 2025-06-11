@@ -50,10 +50,10 @@ class _TaskInputScreenState extends State<TaskInputScreen> {
       'description': description,
       'isOneOff': _isOneOff,
       'assignedFlat': assignedFlat,
-      'assignedTo': _isOneOff 
-        ? (_claimTask ? widget.userRef : null)
-        : widget.userRef,
-        // null : widget.userRef,
+      'assignedTo': _isOneOff
+          ? (_claimTask ? widget.userRef : null)
+          : widget.userRef,
+      // null : widget.userRef,
       'done': _isOneOff ? false : null,
       'setDate': DateFormat('yyyy-MM-dd').format(DateTime.now()),
       'priority': _isOneOff ? _priority : false,

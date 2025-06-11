@@ -20,7 +20,8 @@ import '../main.dart';
 class TaskPage extends StatefulWidget {
   final FlatUser user;
   final VoidCallback onLogout;
-  const TaskPage({Key? key, required this.user, required this.onLogout}) : super(key: key);
+  const TaskPage({Key? key, required this.user, required this.onLogout})
+    : super(key: key);
 
   @override
   State<TaskPage> createState() => _TaskPageState();
@@ -35,7 +36,7 @@ class _TaskPageState extends State<TaskPage> {
   late final bool questionnaireDone;
   late final Flat flat;
   late Future<List<Task>> _allFlatTasks;
-  late Future<List<Task>> _userTasks;  // All tasks assigned to the user
+  late Future<List<Task>> _userTasks; // All tasks assigned to the user
   late Future<List<Task>> _unclaimedTasks;
 
   @override
@@ -88,7 +89,7 @@ class _TaskPageState extends State<TaskPage> {
         widthFactor: 0.5,
         child: PopupCard(
           elevation: 8,
-          color: AppColors.beige,
+          color: AppColors.background,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -122,7 +123,9 @@ class _TaskPageState extends State<TaskPage> {
   Future<List<Task>> fetchUserTasks(Future<List<Task>> allFlatTasks) async {
     final tasks = await allFlatTasks;
     // Filter all tasks assigned to the current user and not done
-    return tasks.where((t) => t.assignedTo == userRef && ((t.done ?? false) == false)).toList()
+    return tasks
+        .where((t) => t.assignedTo == userRef && ((t.done ?? false) == false))
+        .toList()
       ..sort((a, b) {
         // Prioritize by priority flag then setDate
         final priorityCompare = (b.priority ? 1 : 0) - (a.priority ? 1 : 0);
@@ -136,7 +139,9 @@ class _TaskPageState extends State<TaskPage> {
       });
   }
 
-  Future<List<Task>> fetchUnclaimedTasks(Future<List<Task>> allFlatTasks) async {
+  Future<List<Task>> fetchUnclaimedTasks(
+    Future<List<Task>> allFlatTasks,
+  ) async {
     final tasks = await allFlatTasks;
     return tasks.where((t) => t.assignedTo == null && t.isOneOff).toList()
       ..sort((a, b) {
@@ -153,7 +158,9 @@ class _TaskPageState extends State<TaskPage> {
 
   Future<List<Task>> fetchAllFlatTasks(DocumentReference flat) async {
     List<Task> allFlatTasks = [];
-    final queryRef = FirebaseFirestore.instance.collection('Tasks').where("assignedFlat", isEqualTo: flat);
+    final queryRef = FirebaseFirestore.instance
+        .collection('Tasks')
+        .where("assignedFlat", isEqualTo: flat);
     final querySnap = await queryRef.get();
     if (querySnap.docs.isNotEmpty) {
       allFlatTasks = querySnap.docs.map((doc) {
@@ -165,19 +172,26 @@ class _TaskPageState extends State<TaskPage> {
 
   Future<List<Task>> fetchArchivedTasks() async {
     final allTasks = await _allFlatTasks;
-    return allTasks.where((t) =>
-      t.assignedTo == userRef &&
-      (t.isOneOff || !t.isOneOff) &&
-      (t.done ?? false)
-    ).toList();
+    return allTasks
+        .where(
+          (t) =>
+              t.assignedTo == userRef &&
+              (t.isOneOff || !t.isOneOff) &&
+              (t.done ?? false),
+        )
+        .toList();
   }
 
   Future<List<FlatUser>> fetchAllUsers(DocumentReference flat) async {
     List<FlatUser> allUsers = [];
-    final queryRef = FirebaseFirestore.instance.collection('Users').where('flat', isEqualTo: flat);
+    final queryRef = FirebaseFirestore.instance
+        .collection('Users')
+        .where('flat', isEqualTo: flat);
     final querySnap = await queryRef.get();
     if (querySnap.docs.isNotEmpty) {
-      allUsers = querySnap.docs.map((doc) => FlatUser.fromFirestore(doc)).toList();
+      allUsers = querySnap.docs
+          .map((doc) => FlatUser.fromFirestore(doc))
+          .toList();
     }
     return allUsers;
   }
@@ -186,7 +200,7 @@ class _TaskPageState extends State<TaskPage> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.background,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -225,7 +239,7 @@ class _TaskPageState extends State<TaskPage> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.background,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -249,15 +263,16 @@ class _TaskPageState extends State<TaskPage> {
       ),
     );
   }
-  
 
   void _showOthersTasksModal() async {
     final allTasks = await _allFlatTasks;
-    final othersTasks = allTasks.where((t) => t.assignedTo != null && t.assignedTo != userRef).toList();
+    final othersTasks = allTasks
+        .where((t) => t.assignedTo != null && t.assignedTo != userRef)
+        .toList();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.background,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -286,7 +301,7 @@ class _TaskPageState extends State<TaskPage> {
     final users = await fetchAllUsers(flatDoc);
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.background,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -300,7 +315,8 @@ class _TaskPageState extends State<TaskPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => NudgeUserPage(user: u, allFlatTasks: _allFlatTasks),
+                  builder: (context) =>
+                      NudgeUserPage(user: u, allFlatTasks: _allFlatTasks),
                 ),
               );
             },
@@ -310,99 +326,147 @@ class _TaskPageState extends State<TaskPage> {
     );
   }
 
+  Widget sidebarAddTaskButton() {
+    return FractionallySizedBox(
+      widthFactor: 1,
+      child: ElevatedButton.icon(
+        icon: Icon(Icons.add),
+        label: Text('Add Task'),
+        onPressed: () {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: AppColors.background,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            builder: (context) => FractionallySizedBox(
+              heightFactor: 0.8,
+              child: TaskInputScreen(
+                curUser: user,
+                userRef: userRef,
+                onTaskSubmitted: _loadTasks,
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Welcome, $name'),
-      ),
+      appBar: AppBar(title: Text('Welcome, $name')),
       body: Row(
         children: [
-          Container(
-            width: 200,
-            color: Colors.grey[100],
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  const SizedBox(height: 16),
-                  ElevatedButton.icon(
-                    icon: Icon(Icons.add),
-                    label: Text('Add Task'),
-                    onPressed: () {
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        backgroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                        ),
-                        builder: (context) => FractionallySizedBox(
-                          heightFactor: 0.8,
-                          child: TaskInputScreen(
-                            curUser: user,
-                            userRef: userRef,
-                            onTaskSubmitted: _loadTasks,
-                          ),
-                        ),
-                      );
-                    },
+          Padding(
+            padding: EdgeInsetsGeometry.all(10),
+            child: Container(
+              width: 200,
+              decoration: BoxDecoration(
+                color: AppColors.accent.withAlpha(70),
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.secondary,
+                    offset: Offset(0, 0),
+                    blurRadius: 4.0,
+                    spreadRadius: 1.0,
                   ),
-                  const SizedBox(height: 8),
-                  ElevatedButton.icon(
-                    icon: Icon(Icons.task_alt),
-                    label: Text("View Others' Tasks"),
-                    onPressed: _showOthersTasksModal,
-                  ),
-                  const SizedBox(height: 8),
-                  ElevatedButton.icon(
-                    icon: Icon(Icons.people),
-                    label: Text('View Flatmates\' Tasks'),
-                    onPressed: _showFlatmatesModal,
-                  ),
-                  const SizedBox(height: 8),
-                  ElevatedButton.icon(
-                    icon: Icon(Icons.inbox),
-                    label: Text('Unclaimed Tasks'),
-                    onPressed: _showUnclaimedTasksModal,
-                  ),
-                  const SizedBox(height: 8),
-                  ElevatedButton.icon(
-                    icon: Icon(Icons.archive),
-                    label: Text('View Archive'),
-                    onPressed: _showArchivedTasksModal,
-                  ),
-                  const SizedBox(height: 8),
-                  ElevatedButton.icon(
-                    icon: Icon(Icons.notifications),
-                    label: Text('Notifications'),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => NotificationsPage(username: username)),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 8),
-                  ElevatedButton.icon(
-                    icon: Icon(Icons.schedule),
-                    label: Text('Show Routine'),
-                    onPressed: () => showRoutineCard(context, flat),
-                  ),
-                  const SizedBox(height: 8),
-                  ElevatedButton.icon(
-                    icon: Icon(Icons.refresh),
-                    label: Text('Refresh'),
-                    onPressed: _loadTasks,
-                  ),
-                  const SizedBox(height: 16),
-                  Divider(),
-                  ListTile(
-                    leading: Icon(Icons.logout),
-                    title: Text('Logout'),
-                    onTap: logout,
-                  ),
-                  const SizedBox(height: 16),
                 ],
+              ),
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 10),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 16),
+                      sidebarAddTaskButton(),
+                      const SizedBox(height: 8),
+                      FractionallySizedBox(
+                        widthFactor: 1,
+                        child: ElevatedButton.icon(
+                          icon: Icon(Icons.task_alt),
+                          label: Text("View Others' Tasks"),
+                          onPressed: _showOthersTasksModal,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      FractionallySizedBox(
+                        widthFactor: 1,
+                        child: ElevatedButton.icon(
+                          icon: Icon(Icons.people),
+                          label: Text('View Flatmates\' Tasks'),
+                          onPressed: _showFlatmatesModal,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      FractionallySizedBox(
+                        widthFactor: 1,
+                        child: ElevatedButton.icon(
+                          icon: Icon(Icons.inbox),
+                          label: Text('Unclaimed Tasks'),
+                          onPressed: _showUnclaimedTasksModal,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      FractionallySizedBox(
+                        widthFactor: 1,
+                        child: ElevatedButton.icon(
+                          icon: Icon(Icons.archive),
+                          label: Text('View Archive'),
+                          onPressed: _showArchivedTasksModal,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      FractionallySizedBox(
+                        widthFactor: 1,
+                        child: ElevatedButton.icon(
+                          icon: Icon(Icons.notifications),
+                          label: Text('Notifications'),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    NotificationsPage(username: username),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      FractionallySizedBox(
+                        widthFactor: 1,
+                        child: ElevatedButton.icon(
+                          icon: Icon(Icons.schedule),
+                          label: Text('Show Routine'),
+                          onPressed: () => showRoutineCard(context, flat),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      FractionallySizedBox(
+                        widthFactor: 1,
+                        child: ElevatedButton.icon(
+                          icon: Icon(Icons.refresh),
+                          label: Text('Refresh'),
+                          onPressed: _loadTasks,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Divider(),
+                      ListTile(
+                        leading: Icon(Icons.logout),
+                        title: Text('Logout'),
+                        onTap: logout,
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),

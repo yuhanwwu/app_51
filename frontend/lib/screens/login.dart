@@ -135,9 +135,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-      ),
+      appBar: AppBar(backgroundColor: AppColors.background),
       body: Padding(
         padding: EdgeInsets.all(20.0),
         child: Center(
@@ -149,118 +147,135 @@ class _LoginPageState extends State<LoginPage> {
                 color: AppColors.accent.withAlpha(0),
                 borderRadius: BorderRadius.circular(30),
                 boxShadow: [
-      BoxShadow(
-        color: AppColors.secondary,
-        offset: Offset(0, 0),
-        blurRadius: 7.0,
-        spreadRadius: 10.0,
-      ),
-    ],
+                  BoxShadow(
+                    color: AppColors.secondary,
+                    offset: Offset(0, 0),
+                    blurRadius: 7.0,
+                    spreadRadius: 10.0,
+                  ),
+                ],
               ),
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
                 child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    'Welcome to Homely',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.text),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: 40),
-                  Container(
-                    width: 0.5,
-                    child: FractionallySizedBox(
-                      widthFactor: 1,
-                      child: Column(
-                        children: [
-                          TextField(
-                            controller: _usernameController,
-                            decoration: InputDecoration(
-                              floatingLabelBehavior: FloatingLabelBehavior.never,
-                              labelText: 'Username',
-                              filled: true,
-                              fillColor: AppColors.white,
-                              border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.primary)),
-                              prefixIcon: Icon(Icons.person),
-                              enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: AppColors.primary)),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: AppColors.primary)
-                              ),
-
-                            ),
-                            
-                          ),
-                          SizedBox(height: 20),
-                          FractionallySizedBox(
-                            widthFactor: 1,
-                            child: ElevatedButton(
-                              onPressed: _isLoading
-                                  ? null
-                                  : () async {
-                                      final user = await login();
-                                      if (user != null) {
-                                        widget.onLogin(
-                                          user,
-                                        ); // Let main.dart handle navigation!
-                                      }
-                                    },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.white,
-                                foregroundColor: AppColors.black,
-                                padding: EdgeInsets.symmetric(vertical: 15),
-                              ),
-                              child: _isLoading
-                                  ? CircularProgressIndicator(
-                                      color: AppColors.green,
-                                    )
-                                  : Text(
-                                      "Log in",
-                                      style: TextStyle(fontSize: 16),
-                                    ),
-                            ),
-                          ),
-                          if (error.isNotEmpty)
-                            Padding(
-                              padding: EdgeInsets.only(top: 20),
-                              child: Text(
-                                error,
-                                style: TextStyle(color: Colors.red),
-                                textAlign: TextAlign.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      'Welcome to Homely',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.text,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 40),
+                    Container(
+                      width: 0.5,
+                      child: FractionallySizedBox(
+                        widthFactor: 1,
+                        child: Column(
+                          children: [
+                            TextField(
+                              controller: _usernameController,
+                              decoration: InputDecoration(
+                                floatingLabelBehavior:
+                                    FloatingLabelBehavior.never,
+                                labelText: 'Username',
+                                filled: true,
+                                fillColor: AppColors.white,
+                                border: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                                prefixIcon: Icon(Icons.person),
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: AppColors.primary,
+                                  ),
+                                ),
                               ),
                             ),
-                          SizedBox(height: 20),
-                          TextButton.icon(
-                            onPressed: () {
-                              final inputUsername = _usernameController.text
-                                  .trim();
-                              widget.onAddFlat(
-                                inputUsername,
-                              ); // Call to main.dart
-                            },
-                            icon: Icon(Icons.add_home),
-                            label: Text("Create a new flat to sign up", style: TextStyle(color: AppColors.text)),
-                            style: TextButton.styleFrom(
-                              foregroundColor: AppColors.text,
-                              padding: EdgeInsets.symmetric(
-                                vertical: 12,
-                                horizontal: 16,
+                            SizedBox(height: 20),
+                            FractionallySizedBox(
+                              widthFactor: 1,
+                              child: ElevatedButton(
+                                onPressed: _isLoading
+                                    ? null
+                                    : () async {
+                                        final user = await login();
+                                        if (user != null) {
+                                          widget.onLogin(
+                                            user,
+                                          ); // Let main.dart handle navigation!
+                                        }
+                                      },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.white,
+                                  foregroundColor: AppColors.black,
+                                  padding: EdgeInsets.symmetric(vertical: 15),
+                                ),
+                                child: _isLoading
+                                    ? CircularProgressIndicator(
+                                        color: AppColors.green,
+                                      )
+                                    : Text(
+                                        "Log in",
+                                        style: TextStyle(fontSize: 16),
+                                      ),
                               ),
                             ),
-                          ),
-                        ],
+                            if (error.isNotEmpty)
+                              Padding(
+                                padding: EdgeInsets.only(top: 20),
+                                child: Text(
+                                  error,
+                                  style: TextStyle(color: Colors.red),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            SizedBox(height: 20),
+                            TextButton.icon(
+                              onPressed: () {
+                                final inputUsername = _usernameController.text
+                                    .trim();
+                                widget.onAddFlat(
+                                  inputUsername,
+                                ); // Call to main.dart
+                              },
+                              icon: Icon(Icons.add_home),
+                              label: Text(
+                                "Create a new flat to sign up",
+                                style: TextStyle(color: AppColors.text),
+                              ),
+                              style: TextButton.styleFrom(
+                                foregroundColor: AppColors.text,
+                                padding: EdgeInsets.symmetric(
+                                  vertical: 12,
+                                  horizontal: 16,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  SizedBox(height: 20),
-                ],
+                    SizedBox(height: 20),
+                  ],
+                ),
               ),
             ),
           ),
         ),
       ),
-    ),);
+    );
   }
 
   @override

@@ -233,7 +233,18 @@ class _MyAppState extends State<MyApp> {
       title: 'Task Manager',
       theme: ThemeData(
         primaryColor: AppColors.primary,
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(foregroundColor: AppColors.text),
         ),
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(color: AppColors.text),
+          bodyMedium: TextStyle(color: AppColors.text),
+          labelLarge: TextStyle(color: AppColors.accent),
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(foregroundColor: AppColors.accent),
+        ),
+      ),
       home: page,
     );
   }

@@ -15,7 +15,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 
-
 class TaskTile extends StatefulWidget {
   final Task task;
   final FlatUser user;
@@ -122,7 +121,7 @@ class _TaskTileState extends State<TaskTile> {
           .update(updateData);
 
       setState(() {
-      //  _isVisible = false;
+        //  _isVisible = false;
         _showSuccess = true;
         task = Task(
           taskRef: task.taskRef,
@@ -145,8 +144,6 @@ class _TaskTileState extends State<TaskTile> {
         _isVisible = false;
       });
       await Future.delayed(Duration(milliseconds: 300));
-
-
     } catch (e) {
       ScaffoldMessenger.of(
         context,
@@ -505,92 +502,91 @@ class _TaskTileState extends State<TaskTile> {
   }
 
   @override
-
-Widget build(BuildContext context) {
-  return AnimatedSize(
-    duration: Duration(milliseconds: 300),
-    curve: Curves.easeInOut,
-    child: AnimatedOpacity(
-      opacity: _isVisible ? 1 : 0,
+  Widget build(BuildContext context) {
+    return AnimatedSize(
       duration: Duration(milliseconds: 300),
-      child: _isVisible
-          ? Stack(
-              alignment: Alignment.center,
-              children: [
-                ListTile(
-                  leading: Icon(getChoreIcon(task.description)),
-                  title: Text(
-                    task.description,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      decoration: task.isOneOff && task.done!
-                          ? TextDecoration.lineThrough
-                          : null,
+      curve: Curves.easeInOut,
+      child: AnimatedOpacity(
+        opacity: _isVisible ? 1 : 0,
+        duration: Duration(milliseconds: 300),
+        child: _isVisible
+            ? Stack(
+                alignment: Alignment.center,
+                children: [
+                  ListTile(
+                    leading: Icon(getChoreIcon(task.description)),
+                    title: Text(
+                      task.description,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        decoration: task.isOneOff && task.done!
+                            ? TextDecoration.lineThrough
+                            : null,
+                      ),
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (task.assignedTo == null && widget.canEdit)
+                          TextButton(
+                            onPressed: _claimTask,
+                            child: Text('Claim'),
+                          ),
+                        if (task.assignedTo == widget.userRef && widget.canEdit)
+                          Checkbox(
+                            value: task.isOneOff && task.done!,
+                            onChanged: (value) async {
+                              DocumentReference next = widget.userRef;
+                              if (!task.isPersonal) {
+                                final users = await fetchAllUserRefs(
+                                  task.assignedFlat,
+                                );
+                                final nextIndex =
+                                    (users.indexOf(widget.userRef) + 1) %
+                                    users.length;
+                                next = users[nextIndex];
+                              }
+                              await _markDone(next);
+                            },
+                          ),
+                        if (widget.canEdit)
+                          IconButton(
+                            icon: Icon(Icons.more_vert),
+                            onPressed: () => _showDetailsPopup(context),
+                          ),
+                      ],
                     ),
                   ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (task.assignedTo == null && widget.canEdit)
-                        TextButton(
-                          onPressed: _claimTask,
-                          child: Text('Claim'),
-                        ),
-                      if (task.assignedTo == widget.userRef && widget.canEdit)
-                        Checkbox(
-                          value: task.isOneOff && task.done!,
-                          onChanged: (value) async {
-                            DocumentReference next = widget.userRef;
-                            if (!task.isPersonal) {
-                              final users =
-                                  await fetchAllUserRefs(task.assignedFlat);
-                              final nextIndex =
-                                  (users.indexOf(widget.userRef) + 1) %
-                                      users.length;
-                              next = users[nextIndex];
-                            }
-                            await _markDone(next);
-                          },
-                        ),
-                      if (widget.canEdit)
-                        IconButton(
-                          icon: Icon(Icons.more_vert),
-                          onPressed: () => _showDetailsPopup(context),
-                        ),
-                    ],
-                  ),
-                ),
-                if (_showSuccess)
-                  Positioned.fill(
-                    child: Container(
-                      color: Colors.white.withAlpha(204), // 80% white overlay
-                      alignment: Alignment.center,
-                      child: SizedBox(
-                        height: 500,
-                        width: 500, 
-                        child: Lottie.asset(
-                          'assets/animations/success.json',
-                          repeat: false,
-                          // onLoaded: (composition) {
-                          //   Future.delayed(composition.duration, () {
-                          //     setState(() {
-                          //       _showSuccess = false;
-                          //       _isVisible = false;
-                          //     });
-                          //     widget.onDone(); // callback to refresh UI
-                          //   });
-                          // },
+                  if (_showSuccess)
+                    Positioned.fill(
+                      child: Container(
+                        color: Colors.white.withAlpha(204), // 80% white overlay
+                        alignment: Alignment.center,
+                        child: SizedBox(
+                          height: 500,
+                          width: 500,
+                          child: Lottie.asset(
+                            'assets/animations/success.json',
+                            repeat: false,
+                            // onLoaded: (composition) {
+                            //   Future.delayed(composition.duration, () {
+                            //     setState(() {
+                            //       _showSuccess = false;
+                            //       _isVisible = false;
+                            //     });
+                            //     widget.onDone(); // callback to refresh UI
+                            //   });
+                            // },
+                          ),
                         ),
                       ),
                     ),
-                  ),
-              ],
-            )
-          : SizedBox.shrink(),
-    ),
-  );
-}
-
+                ],
+              )
+            : SizedBox.shrink(),
+      ),
+    );
+  }
 
   Future<String> getNameFromDocRef(DocumentReference? dref) async {
     if (dref != null) {
@@ -623,6 +619,4 @@ Future<List<DocumentReference>> fetchAllUserRefs(DocumentReference flat) async {
     allUsers = querySnap.docs.map((doc) => doc.reference).toList();
   }
   return allUsers;
-
-  
 }

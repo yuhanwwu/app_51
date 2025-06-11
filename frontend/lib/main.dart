@@ -220,12 +220,13 @@ class _MyAppState extends State<MyApp> {
         );
         break;
       case AppPage.home:
-        page = NoticeboardPage(
-          user: user!,
-          flatRef: flatRef!,
-          userRef: user!.userRef,
-          onLogout: onLogout,
-        );
+        page = TaskPage(user: user!, onLogout: onLogout);
+        // page = NoticeboardPage(
+        //   user: user!,
+        //   flatRef: flatRef!,
+        //   userRef: user!.userRef,
+        //   onLogout: onLogout,
+        // );
         break;
     }
     return MaterialApp(

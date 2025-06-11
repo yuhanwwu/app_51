@@ -9,6 +9,7 @@ import '../models/task.dart';
 import '../models/user.dart';
 import '../models/flat.dart';
 import 'add_task.dart';
+import 'noticeboard.dart';
 import 'nudge_user.dart';
 import '../customWidgets/task_tile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -395,6 +396,25 @@ class _TaskPageState extends State<TaskPage> {
                     onPressed: _loadTasks,
                   ),
                   const SizedBox(height: 16),
+                  const SizedBox(height: 8),
+                  ElevatedButton.icon(
+                    icon: Icon(Icons.sticky_note_2),
+                    label: Text('Noticeboard'),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => NoticeboardPage(
+                            user: user,
+                            flatRef: flatDoc,
+                            userRef: userRef,
+                            onLogout: widget.onLogout,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 8),
                   Divider(),
                   ListTile(
                     leading: Icon(Icons.logout),

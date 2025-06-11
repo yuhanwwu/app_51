@@ -82,19 +82,19 @@ class _NoticeboardPageState extends State<NoticeboardPage> {
         title: Text("${flatName ?? ''}'s Noticeboard"),
         actions: [
           logoutButton(),
-          IconButton(
-            icon: const Icon(Icons.assignment),
-            tooltip: 'Go to Tasks',
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      TaskPage(user: widget.user, onLogout: widget.onLogout),
-                ),
-              );
-            },
-          ),
+          // IconButton(
+          //   icon: const Icon(Icons.assignment),
+          //   tooltip: 'Go to Tasks',
+          //   onPressed: () {
+          //     Navigator.push(
+          //       context,
+          //       MaterialPageRoute(
+          //         builder: (context) =>
+          //             TaskPage(user: widget.user, onLogout: widget.onLogout),
+          //       ),
+          //     );
+          //   },
+          // ),
         ],
       ),
       floatingActionButton: FloatingActionButton(

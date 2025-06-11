@@ -137,25 +137,6 @@ class _LoginPageState extends State<LoginPage> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.background,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.add_home),
-            tooltip: 'Add Flat',
-            onPressed: () {
-              final inputUsername = _usernameController.text.trim();
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => AddFlatPage(
-                    username: inputUsername,
-                    onLogin: widget.onLogin,
-                    onLogout: widget.onLogout,
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
       ),
       body: Padding(
         padding: EdgeInsets.all(20.0),

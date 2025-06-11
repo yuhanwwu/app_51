@@ -134,9 +134,9 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.beige,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text('Login'),
+        backgroundColor: AppColors.background,
         actions: [
           IconButton(
             icon: Icon(Icons.add_home),
@@ -159,144 +159,120 @@ class _LoginPageState extends State<LoginPage> {
       ),
       body: Padding(
         padding: EdgeInsets.all(20.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Welcome to Flat Task Manager',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 40),
-            Container(
-              child: FractionallySizedBox(
-                widthFactor: 0.7,
-                child: Column(
-                  children: [
-                    TextField(
-                      controller: _usernameController,
-                      decoration: InputDecoration(
-                        labelText: 'Username',
-                        filled: true,
-                        fillColor: AppColors.white,
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.person),
-                      ),
-                    ),
-                    SizedBox(height: 20),
-                    FractionallySizedBox(
-                      widthFactor: 1,
-                      child: ElevatedButton(
-                        onPressed: _isLoading
-                            ? null
-                            : () async {
-                                final user = await login();
-                                if (user != null) {
-                                  widget.onLogin(
-                                    user,
-                                  ); // Let main.dart handle navigation!
-                                }
-                              },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.white,
-                          foregroundColor: AppColors.black,
-                          padding: EdgeInsets.symmetric(vertical: 15),
-                        ),
-                        child: _isLoading
-                            ? CircularProgressIndicator(color: AppColors.green)
-                            : Text("Log in", style: TextStyle(fontSize: 16)),
-                      ),
-                    ),
-                    if (error.isNotEmpty)
-                      Padding(
-                        padding: EdgeInsets.only(top: 20),
-                        child: Text(
-                          error,
-                          style: TextStyle(color: Colors.red),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    SizedBox(height: 20),
-                    // TextButton.icon(
-                    //   onPressed: () {
-                    //     final inputUsername = _usernameController.text.trim();
-                    //     Navigator.push(
-                    //       context,
-                    //       MaterialPageRoute(
-                    //         builder: (context) => AddFlatPage(
-                    //           username: inputUsername,
-                    //           onLogin: widget.onLogin,
-                    //         ),
-                    //       ),
-                    //     );
-                    //   },
-                    //   icon: Icon(Icons.add_home),
-                    //   label: Text("Create a new flat to sign up"),
-                    //   style: TextButton.styleFrom(
-                    //     foregroundColor: AppColors.green,
-                    //     padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                    //   ),
-                    // ),
-                    TextButton.icon(
-                      onPressed: () {
-                        final inputUsername = _usernameController.text.trim();
-                        widget.onAddFlat(inputUsername); // Call to main.dart
-                      },
-                      icon: Icon(Icons.add_home),
-                      label: Text("Create a new flat to sign up"),
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppColors.green,
-                        padding: EdgeInsets.symmetric(
-                          vertical: 12,
-                          horizontal: 16,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+        child: Center(
+          child: SizedBox(
+            width: 400,
+            height: 500,
+            child: Container(
+              decoration: BoxDecoration(
+                color: AppColors.accent.withAlpha(0),
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: [
+      BoxShadow(
+        color: AppColors.secondary,
+        offset: Offset(0, 0),
+        blurRadius: 7.0,
+        spreadRadius: 10.0,
+      ),
+    ],
               ),
-            ),
-            SizedBox(height: 20),
-            // Text(
-            //   'Available users: alice, bob, charlie',
-            //   style: TextStyle(color: Colors.grey, fontSize: 12),
-            //   textAlign: TextAlign.center,
-            // ),
-            SizedBox(height: 10),
-            OutlinedButton(
-              onPressed: () async {
-                final user = (await fetchUser('xt'))!;
-                final userDoc = await FirebaseFirestore.instance
-                    .collection('Users')
-                    .doc('xt')
-                    .get();
-                final flatRef = userDoc['flat'] as DocumentReference;
-                _usernameController.text = 'xt';
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => NoticeboardPage(
-                      user: user,
-                      flatRef: flatRef,
-                      userRef: user.userRef,
-                      onLogout: widget.onLogout,
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'Welcome to Homely',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.text),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 40),
+                  Container(
+                    width: 0.5,
+                    child: FractionallySizedBox(
+                      widthFactor: 1,
+                      child: Column(
+                        children: [
+                          TextField(
+                            controller: _usernameController,
+                            decoration: InputDecoration(
+                              labelText: 'Username',
+                              filled: true,
+                              fillColor: AppColors.white,
+                              border: OutlineInputBorder(),
+                              prefixIcon: Icon(Icons.person),
+                            ),
+                          ),
+                          SizedBox(height: 20),
+                          FractionallySizedBox(
+                            widthFactor: 1,
+                            child: ElevatedButton(
+                              onPressed: _isLoading
+                                  ? null
+                                  : () async {
+                                      final user = await login();
+                                      if (user != null) {
+                                        widget.onLogin(
+                                          user,
+                                        ); // Let main.dart handle navigation!
+                                      }
+                                    },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.white,
+                                foregroundColor: AppColors.black,
+                                padding: EdgeInsets.symmetric(vertical: 15),
+                              ),
+                              child: _isLoading
+                                  ? CircularProgressIndicator(
+                                      color: AppColors.green,
+                                    )
+                                  : Text(
+                                      "Log in",
+                                      style: TextStyle(fontSize: 16),
+                                    ),
+                            ),
+                          ),
+                          if (error.isNotEmpty)
+                            Padding(
+                              padding: EdgeInsets.only(top: 20),
+                              child: Text(
+                                error,
+                                style: TextStyle(color: Colors.red),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          SizedBox(height: 20),
+                          TextButton.icon(
+                            onPressed: () {
+                              final inputUsername = _usernameController.text
+                                  .trim();
+                              widget.onAddFlat(
+                                inputUsername,
+                              ); // Call to main.dart
+                            },
+                            icon: Icon(Icons.add_home),
+                            label: Text("Create a new flat to sign up", style: TextStyle(color: AppColors.text)),
+                            style: TextButton.styleFrom(
+                              foregroundColor: AppColors.text,
+                              padding: EdgeInsets.symmetric(
+                                vertical: 12,
+                                horizontal: 16,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                );
-              },
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.black,
-                backgroundColor: AppColors.lightGreen,
-                side: BorderSide(color: AppColors.green),
-                padding: EdgeInsets.symmetric(vertical: 15),
+                  SizedBox(height: 20),
+                ],
               ),
-              child: Text("DEV: Quick Login as xt"),
             ),
-          ],
+          ),
         ),
       ),
-    );
+    ),);
   }
 
   @override

@@ -562,7 +562,6 @@ class _TaskPageState extends State<TaskPage> {
               },
               child: Text('View Flatmates\' Tasks'),
             ),
-            
           ],
         ),
       ),

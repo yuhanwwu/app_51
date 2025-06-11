@@ -197,12 +197,19 @@ class _LoginPageState extends State<LoginPage> {
                           TextField(
                             controller: _usernameController,
                             decoration: InputDecoration(
+                              floatingLabelBehavior: FloatingLabelBehavior.never,
                               labelText: 'Username',
                               filled: true,
                               fillColor: AppColors.white,
-                              border: OutlineInputBorder(),
+                              border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.primary)),
                               prefixIcon: Icon(Icons.person),
+                              enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: AppColors.primary)),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: AppColors.primary)
+                              ),
+
                             ),
+                            
                           ),
                           SizedBox(height: 20),
                           FractionallySizedBox(

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:frontend/constants/colors.dart';
 import 'package:frontend/screens/noticeboard.dart';
 import 'package:frontend/screens/task_page.dart';
 import 'package:frontend/screens/questionnaire.dart';
@@ -225,7 +226,9 @@ class _MyAppState extends State<MyApp> {
     }
     return MaterialApp(
       title: 'Task Manager',
-      theme: ThemeData(primarySwatch: Colors.blue),
+      theme: ThemeData(
+        primaryColor: AppColors.primary,
+        ),
       home: page,
     );
   }

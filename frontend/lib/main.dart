@@ -206,6 +206,11 @@ class _MyAppState extends State<MyApp> {
           username: pendingUsernameForFlat!,
           onLogin: onLogin,
           onLogout: onLogout,
+          onBacktoLogin: () {
+            setState(() {
+              currentPage = AppPage.login;
+            });
+          },
         );
         break;
       case AppPage.questionnaire:

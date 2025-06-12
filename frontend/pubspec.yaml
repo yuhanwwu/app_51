@@ -69,6 +69,7 @@ flutter:
   assets:
     - assets/data.json
     - assets/animations/success.json
+    - assets/animations/success2.json
 
   # To add assets to your application, add an assets section, like this:
   # assets:

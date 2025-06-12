@@ -104,6 +104,7 @@ class _AddFlatPageState extends State<AddFlatPage> {
       // 'createdAt': FieldValue.serverTimestamp(),
     });
 
+
     await Future.wait(
       flatmates.map((flatmate) async {
         await FirebaseFirestore.instance
@@ -117,13 +118,22 @@ class _AddFlatPageState extends State<AddFlatPage> {
       }),
     );
 
-    html.window.location.reload();
+    // html.window.location.reload();
     final yourUsername = flatmates.first['username']!;
     final userDoc = await FirebaseFirestore.instance
         .collection('Users')
         .doc(yourUsername)
         .get();
     final user = FlatUser.fromFirestore(userDoc);
+    await FirebaseFirestore.instance.collection('Noticeboard').add({
+      'content': 'Welcome to your noticeboard!! \n Here you can post messages or to-do lists for all flatmates to see. \n Press the + button to add a new note, and drag it to the bin to delete it.',
+      'position': [616.5, 227],
+      'flatRef': flatRef,
+      'createdBy': user.userRef,
+      'type': 'text',
+      'tasks': [],
+    });
+    html.window.location.reload();
     widget.onLogin(user);
     // Navigator.pushReplacement(
     //   context,

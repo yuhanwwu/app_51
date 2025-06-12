@@ -214,16 +214,31 @@ class _DraggableNoteState extends State<DraggableNote> {
       feedback: Material(
         elevation: 8,
         color: Colors.transparent,
-        child: Container(
-          width: 160,
-          height: 120,
-          decoration: BoxDecoration(
-            color: Colors.yellow[200],
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 8)],
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minWidth: 120,
+            maxWidth: 240,
+            minHeight: 80,
+            maxHeight: 200,
           ),
-          padding: const EdgeInsets.all(12),
-          child: Text(widget.note.content),
+          child: IntrinsicWidth(
+            child: IntrinsicHeight(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.yellow[200],
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 8)],
+                ),
+                padding: const EdgeInsets.all(12),
+                child: Text(
+                  widget.note.content,
+                  softWrap: true,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 10,
+                ),
+              ),
+            ),
+          ),
         ),
       ),
       childWhenDragging: Opacity(opacity: 0.5, child: _noteWidget()),
@@ -321,29 +336,46 @@ class _DraggableNoteState extends State<DraggableNote> {
       elevation: 4,
       color: Colors.yellow[200],
       borderRadius: BorderRadius.circular(8),
-      child: Container(
-        width: 160,
-        height: 120,
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(widget.note.content),
-            const Spacer(),
-            FutureBuilder<DocumentSnapshot>(
-              future: widget.note.createdBy.get(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) return Text('by ...');
-                final userData = snapshot.data!.data() as Map<String, dynamic>?;
-                final username =
-                    userData?['username'] ?? snapshot.data!.id ?? 'unknown';
-                return Text(
-                  'by $username',
-                  style: const TextStyle(fontSize: 10, color: Colors.grey),
-                );
-              },
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minWidth: 120,
+          maxWidth: 240,
+          minHeight: 80,
+          maxHeight: 200,
+        ),
+        child: IntrinsicWidth(
+          child: IntrinsicHeight(
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Flexible(
+                    child: Text(
+                      widget.note.content,
+                      softWrap: true,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 10,
+                    ),
+                  ),
+                  const Spacer(),
+                  FutureBuilder<DocumentSnapshot>(
+                    future: widget.note.createdBy.get(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) return Text('by ...');
+                      final userData = snapshot.data!.data() as Map<String, dynamic>?;
+                      final username =
+                          userData?['username'] ?? snapshot.data!.id ?? 'unknown';
+                      return Text(
+                        'by $username',
+                        style: const TextStyle(fontSize: 10, color: Colors.grey),
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
-          ],
+          ),
         ),
       ),
     );

@@ -561,13 +561,32 @@ Widget build(BuildContext context) {
                   ),
                 ),
                 if (_showSuccess)
-                  Positioned.fill(
-                    child: Container(
-                      color: Colors.white.withAlpha(204), // 80% white overlay
-                      alignment: Alignment.center,
-                      child: SizedBox(
-                        height: 500,
-                        width: 500, 
+                //   Positioned.fill(
+                //     child: Container(
+                //       color: Colors.white.withAlpha(204), // 80% white overlay
+                //       alignment: Alignment.center,
+                //       child: SizedBox(
+                //         height: 300,
+                //         width: 300, 
+                //         child: Lottie.asset(
+                //           'assets/animations/success.json',
+                //           repeat: false,
+                //           // onLoaded: (composition) {
+                //           //   Future.delayed(composition.duration, () {
+                //           //     setState(() {
+                //           //       _showSuccess = false;
+                //           //       _isVisible = false;
+                //           //     });
+                //           //     widget.onDone(); // callback to refresh UI
+                //           //   });
+                //           // },
+                //         ),
+                //       ),
+                //     ),
+                //   )
+                SizedBox(
+                        height: 300,
+                        width: 300, 
                         child: Lottie.asset(
                           'assets/animations/success.json',
                           repeat: false,
@@ -581,9 +600,8 @@ Widget build(BuildContext context) {
                           //   });
                           // },
                         ),
-                      ),
-                    ),
-                  ),
+                      )
+                  ,
               ],
             )
           : SizedBox.shrink(),

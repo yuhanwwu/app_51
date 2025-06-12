@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:frontend/models/task.dart';
 
 class StickyNote {
   final String id;

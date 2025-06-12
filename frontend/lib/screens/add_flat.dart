@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:frontend/models/user.dart';
-import 'package:frontend/screens/login.dart';
 import 'package:universal_html/html.dart' as html;
 
-import '../main.dart';
-import 'task_page.dart';
-import 'questionnaire.dart';
 
 class AddFlatPage extends StatefulWidget {
   final String username;

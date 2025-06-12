@@ -21,8 +21,7 @@ class TaskPage extends StatefulWidget {
   final FlatUser user;
   final VoidCallback onLogout;
   // const HomePage({super.key, required this.user});
-  const TaskPage({Key? key, required this.user, required this.onLogout})
-    : super(key: key);
+  const TaskPage({super.key, required this.user, required this.onLogout});
 
   @override
   State<TaskPage> createState() => _TaskPageState();
@@ -820,11 +819,9 @@ class _TaskPageState extends State<TaskPage> {
         final priorityCompare = (b.priority ? 1 : 0) - (a.priority ? 1 : 0);
         if (priorityCompare != 0) return priorityCompare;
 
-        if (a.setDate == null && b.setDate == null) return 0;
-        if (a.setDate == null) return 1; // 🐌 a comes after
-        if (b.setDate == null) return -1; // 🚀 a comes before
+        if (a.setDate == null && b.setDate == null) return 0; // 🚀 a comes before
 
-        return a.setDate!.compareTo(b.setDate!);
+        return a.setDate.compareTo(b.setDate);
       });
   }
 
@@ -863,11 +860,9 @@ class _TaskPageState extends State<TaskPage> {
         final priorityCompare = (b.priority ? 1 : 0) - (a.priority ? 1 : 0);
         if (priorityCompare != 0) return priorityCompare;
 
-        if (a.setDate == null && b.setDate == null) return 0;
-        if (a.setDate == null) return 1; // 🐌 a comes after
-        if (b.setDate == null) return -1; // 🚀 a comes before
+        if (a.setDate == null && b.setDate == null) return 0; // 🚀 a comes before
 
-        return a.setDate!.compareTo(b.setDate!);
+        return a.setDate.compareTo(b.setDate);
       });
   }
 }

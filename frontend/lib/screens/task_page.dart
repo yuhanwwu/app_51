@@ -20,7 +20,7 @@ import '../main.dart';
 class TaskPage extends StatefulWidget {
   final FlatUser user;
   final VoidCallback onLogout;
-  const TaskPage({Key? key, required this.user, required this.onLogout}) : super(key: key);
+  const TaskPage({super.key, required this.user, required this.onLogout});
 
   @override
   State<TaskPage> createState() => _TaskPageState();
@@ -129,10 +129,8 @@ class _TaskPageState extends State<TaskPage> {
         if (priorityCompare != 0) return priorityCompare;
 
         if (a.setDate == null && b.setDate == null) return 0;
-        if (a.setDate == null) return 1;
-        if (b.setDate == null) return -1;
 
-        return a.setDate!.compareTo(b.setDate!);
+        return a.setDate.compareTo(b.setDate);
       });
   }
 
@@ -144,10 +142,8 @@ class _TaskPageState extends State<TaskPage> {
         if (priorityCompare != 0) return priorityCompare;
 
         if (a.setDate == null && b.setDate == null) return 0;
-        if (a.setDate == null) return 1;
-        if (b.setDate == null) return -1;
 
-        return a.setDate!.compareTo(b.setDate!);
+        return a.setDate.compareTo(b.setDate);
       });
   }
 

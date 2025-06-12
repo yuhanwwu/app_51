@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:frontend/screens/noticeboard.dart';
-import 'package:frontend/screens/task_page.dart';
 import 'package:frontend/screens/questionnaire.dart';
 import 'firebase_options.dart';
 import 'package:flutter/material.dart';

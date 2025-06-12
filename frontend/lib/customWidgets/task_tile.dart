@@ -102,10 +102,39 @@ class _TaskTileState extends State<TaskTile> {
     widget.onDone();
   }
 
-  Future<void> _markDone(DocumentReference nextUser) async {
-    final now = DateFormat('yyyy-MM-dd').format(DateTime.now());
+  Future<DocumentReference?> getFlatRefFromUser(DocumentReference userRef) async {
+  final userSnap = await userRef.get();
+  final userData = userSnap.data() as Map<String, dynamic>?;
+  return userData?['flat'] as DocumentReference?;
+}
 
-    final updateData = task.isOneOff
+  String getTaskTypeFromDesc(String desc) {
+    switch (desc) {
+      case 'Cleaning the bathroom': return 'bathroom';
+      case 'Doing the dishes': return 'dishes';
+      case 'Cleaning the kitchen': return 'kitchen';
+      case 'Doing laundry': return 'laundry'; 
+      case 'Taking out recycling': return 'recycling';
+      case 'Taking out the trash': return 'rubbish';
+      default: return desc;
+    }
+  }
+
+  Future<void> _markDone(DocumentReference nextUser) async {
+    final now = DateFormat('yyyy-MM-dd').format(DateTime.now());    
+    int updatedFrequency = task.frequency;
+
+    try {
+      final flatRef = await getFlatRefFromUser(nextUser);
+      final flatSnap = await flatRef!.get();
+      final flatData = flatSnap.data() as Map<String, dynamic>;
+      final taskType = getTaskTypeFromDesc(task.description.trim());
+      // 2. Get the frequency for this task's description
+      
+      updatedFrequency = flatData[taskType] as int;
+      
+
+      final updateData = task.isOneOff
         ? {'done': true}
         : (task.isPersonal
               ? {'lastDoneOn': now, 'lastDoneBy': widget.userRef}
@@ -113,9 +142,9 @@ class _TaskTileState extends State<TaskTile> {
                   'lastDoneOn': now,
                   'lastDoneBy': widget.userRef,
                   'assignedTo': nextUser,
+                  'frequency': updatedFrequency, 
                 });
 
-    try {
       await FirebaseFirestore.instance
           .collection('Tasks')
           .doc(task.taskId)
@@ -134,7 +163,7 @@ class _TaskTileState extends State<TaskTile> {
           done: task.isOneOff ? true : task.done,
           setDate: task.setDate,
           priority: task.priority,
-          frequency: task.frequency,
+          frequency: updatedFrequency,
           lastDoneOn: task.isOneOff ? null : now,
           lastDoneBy: task.isOneOff ? null : widget.userRef,
           isPersonal: task.isOneOff ? false : task.isPersonal,
@@ -250,7 +279,7 @@ class _TaskTileState extends State<TaskTile> {
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 10),
-                if (task.setDate != null) Text("Date created: ${task.setDate}"),
+                Text("Date created: ${task.setDate}"),
                 if (task.priority)
                   Text("High priority!!", style: TextStyle(color: Colors.red)),
                 // if (!task.isOneOff && task.lastDoneOn != null) Text("Last done on: ${task.lastDoneOn} by ${task.lastDoneBy ?? "Unknown"}"),
@@ -371,7 +400,7 @@ class _TaskTileState extends State<TaskTile> {
               SizedBox(height: 16),
 
               if (task.isOneOff) ...[
-                if (task.setDate != null) Text("Date created: ${task.setDate}"),
+                Text("Date created: ${task.setDate}"),
                 if (task.priority)
                   Text("High priority!!", style: TextStyle(color: Colors.red)),
               ] else ...[
@@ -396,10 +425,10 @@ class _TaskTileState extends State<TaskTile> {
               if (task.assignedTo == null)
                 ElevatedButton(
                   onPressed: _claimTask,
-                  child: Text('Claim Task'),
                   style: ElevatedButton.styleFrom(
                     minimumSize: Size(double.infinity, 50),
                   ),
+                  child: Text('Claim Task'),
                 ),
 
               // Mark as Done button
@@ -416,10 +445,10 @@ class _TaskTileState extends State<TaskTile> {
                     await _markDone(next);
                     Navigator.pop(context);
                   },
-                  child: Text('Mark as Done'),
                   style: ElevatedButton.styleFrom(
                     minimumSize: Size(double.infinity, 50),
                   ),
+                  child: Text('Mark as Done'),
                 ),
 
               SizedBox(height: 8),
@@ -449,11 +478,11 @@ class _TaskTileState extends State<TaskTile> {
                           ),
                         );
                       },
-                      child: Text('Edit Task'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.grey[200],
                         foregroundColor: Colors.black,
                       ),
+                      child: Text('Edit Task'),
                     ),
                   ),
                   SizedBox(width: 8),
@@ -488,11 +517,11 @@ class _TaskTileState extends State<TaskTile> {
                           ),
                         );
                       },
-                      child: Text('Delete Task'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red[100],
                         foregroundColor: Colors.red,
                       ),
+                      child: Text('Delete Task'),
                     ),
                   ),
                 ],

@@ -16,24 +16,13 @@ class _NotificationsPageState extends State<NotificationsPage> {
   void initState() {
     super.initState();
     _nudgesFuture = _fetchNudges();
-    markNudgesAsRead();
-  }
-
-  Future<void> markNudgesAsRead() async {
-    final query = await FirebaseFirestore.instance
-        .collection('Nudges')
-        .where('userId', isEqualTo: widget.username)
-        .where('read', isEqualTo: false)
-        .get();
-    for (var doc in query.docs) {
-      doc.reference.update({'read': true});
-    }
   }
 
   Future<List<QueryDocumentSnapshot>> _fetchNudges() async {
     final query = await FirebaseFirestore.instance
         .collection('Nudges')
         .where('userId', isEqualTo: widget.username)
+        .where('read', isEqualTo: false)
         .orderBy('timestamp', descending: true)
         .get();
     return query.docs;
@@ -52,7 +41,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
   }
 
   void _deleteNudge(String nudgeId) async {
-    await FirebaseFirestore.instance.collection('Nudges').doc(nudgeId).delete();
+    await FirebaseFirestore.instance.collection('Nudges').doc(nudgeId).update({'read': true});
     setState(() {
       _nudgesFuture = _fetchNudges();
     });

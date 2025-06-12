@@ -6,6 +6,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:frontend/constants/colors.dart';
 import 'package:frontend/screens/noticeboard.dart';
 import 'package:frontend/screens/questionnaire.dart';
+import 'package:frontend/screens/task_page.dart';
 import 'firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'screens/add_flat.dart';

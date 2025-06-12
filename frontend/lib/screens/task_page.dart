@@ -74,7 +74,7 @@ class _TaskPageState extends State<TaskPage> {
           ' • View Flatmates\' Tasks: View all tasks assigned to flatmates, and nudge them.\n'
           ' • Unclaimed Tasks: Pick up tasks that aren\'t assigned to anyone.\n'
           ' • View Archive: Check tasks you have completed.\n'
-          ' • Notifications: View notifications related to tasks.\n'
+          ' • Notifications: View if you have received any nudges related to tasks.\n'
           ' • Show Routine: View the cleaning schedule for your flat.\n'
           ' • Refresh: Reload the tasks to see any updates.\n'
           ' • Noticeboard: Post or view notices for your flat.\n'

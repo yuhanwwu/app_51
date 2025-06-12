@@ -161,15 +161,15 @@ class _TaskPageState extends State<TaskPage> {
 
   Widget getChoreAndFreqCol(Flat flat) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly, // horizontal alignment
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Cleaning the bathroom: ${flat.bathroom.toString()}'),
-        Text('Doing the dishes: ${flat.dishes.toString()}'),
-        Text('Cleaning the kitchen: ${flat.kitchen.toString()}'),
-        Text('Doing laundry: ${flat.laundry.toString()}'),
-        Text('Taking out recycling: ${flat.recycling.toString()}'),
-        Text('Taking out the rubbish: ${flat.rubbish.toString()}'),
+        Text('Cleaning the bathroom: Every ${flat.bathroom.toString()} day(s)'),
+        Text('Doing the dishes: Every ${flat.dishes.toString()} day(s)'),
+        Text('Cleaning the kitchen: Every ${flat.kitchen.toString()} day(s)'),
+        Text('Doing laundry: Every ${flat.laundry.toString()} day(s)'),
+        Text('Taking out recycling: Every ${flat.recycling.toString()} day(s)'),
+        Text('Taking out the rubbish: Every ${flat.rubbish.toString()} day(s)'),
       ],
     );
   }

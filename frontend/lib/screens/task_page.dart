@@ -315,7 +315,7 @@ class _TaskPageState extends State<TaskPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Welcome, $name'),
+        title: Text('Welcome $name, here are your tasks.'),
       ),
       body: Row(
         children: [

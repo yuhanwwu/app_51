@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -39,6 +40,7 @@ class _TaskTileState extends State<TaskTile> {
   late Task task;
   bool _isVisible = true;
   bool _showSuccess = false;
+  final AudioPlayer _audioPlayer = AudioPlayer();
 
   @override
   void initState() {
@@ -128,10 +130,7 @@ class _TaskTileState extends State<TaskTile> {
       final flatSnap = await flatRef!.get();
       final flatData = flatSnap.data() as Map<String, dynamic>;
       final taskType = getTaskTypeFromDesc(task.description.trim());
-      // 2. Get the frequency for this task's description
-      
       updatedFrequency = (flatData[taskType] ?? 0) as int;
-      
 
       final updateData = task.isOneOff
         ? {'done': true}
@@ -149,8 +148,10 @@ class _TaskTileState extends State<TaskTile> {
           .doc(task.taskId)
           .update(updateData);
 
+      // Play sound effect
+      await _audioPlayer.play(AssetSource('sounds/success.mp3'));
+
       setState(() {
-        //  _isVisible = false;
         _showSuccess = true;
         task = Task(
           taskRef: task.taskRef,
@@ -628,6 +629,12 @@ Widget build(BuildContext context) {
     } else {
       return 'Every $frequency days';
     }
+  }
+
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    super.dispose();
   }
 }
 

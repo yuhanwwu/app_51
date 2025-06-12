@@ -595,7 +595,7 @@ Widget build(BuildContext context) {
                         child: Align(
                           alignment: Alignment.center, // Centers the animation
                           child: Lottie.asset(
-                            'animations/success2.json',
+                            'assets/animations/success2.json',
                             repeat: false,
                             fit: BoxFit.contain, // Ensures the animation fits within its bounds
                           ),

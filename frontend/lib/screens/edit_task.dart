@@ -26,7 +26,7 @@ class _EditTaskPageState extends State<EditTaskPage> {
   late final TextEditingController _descriptionController;
   late final TextEditingController _frequencyController;
 
-  bool _isOneOff = true;
+  final bool _isOneOff = true;
   late bool _priority;
 
   @override
@@ -48,23 +48,23 @@ class _EditTaskPageState extends State<EditTaskPage> {
     final frequency = int.tryParse(_frequencyController.text.trim());
     // final assignedFlat = getUserFlat(widget.curUser);
     // final assignedFlat = widget.curUser.flat;
-    final _task = widget.task;
+    final task = widget.task;
 
     final taskData = {
       'description': description,
-      'isOneOff': _task.isOneOff,
-      'assignedFlat': _task.assignedFlat,
-      'assignedTo': _task.assignedTo,
-      'done': _task.done,
-      'setDate': _task.setDate,
+      'isOneOff': task.isOneOff,
+      'assignedFlat': task.assignedFlat,
+      'assignedTo': task.assignedTo,
+      'done': task.done,
+      'setDate': task.setDate,
       'priority': _priority,
       'frequency': frequency,
-      'lastDoneOn': _task.lastDoneOn,
-      'lastDoneBy': _task.lastDoneBy,
-      'isPersonal': _task.isPersonal,
+      'lastDoneOn': task.lastDoneOn,
+      'lastDoneBy': task.lastDoneBy,
+      'isPersonal': task.isPersonal,
     };
 
-    await _task.taskRef.set(taskData);
+    await task.taskRef.set(taskData);
     // print('Task successfully added!');
 
     widget.onTaskSubmitted();

@@ -119,8 +119,9 @@ class _NoticeboardPageState extends State<NoticeboardPage> {
             .where('flatRef', isEqualTo: widget.flatRef)
             .snapshots(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData)
+          if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
+          }
           final notes = snapshot.data!.docs
               .map((doc) => StickyNote.fromFirestore(doc))
               .toList();
@@ -141,7 +142,7 @@ class _NoticeboardPageState extends State<NoticeboardPage> {
                     userRef: userRef,
                   ),
                 );
-              }).toList(),
+              }),
               Positioned(
                 left: 32,
                 bottom: 32,
@@ -242,12 +243,12 @@ class _DraggableNoteState extends State<DraggableNote> {
         ),
       ),
       childWhenDragging: Opacity(opacity: 0.5, child: _noteWidget()),
-      child: _noteWidget(),
       onDragStarted: widget.onDragStarted,
       onDragEnd: (details) {
         widget.onDragEnd(details.offset);
         widget.onDragCompleted?.call();
       },
+      child: _noteWidget(),
     );
   }
 
@@ -401,7 +402,7 @@ class _AddNoteSheet extends StatefulWidget {
 class _AddNoteSheetState extends State<_AddNoteSheet> {
   String _noteText = '';
   bool _isAddingText = true;
-  List<Task> _selectedTasks = [];
+  final List<Task> _selectedTasks = [];
 
   @override
   Widget build(BuildContext context) {

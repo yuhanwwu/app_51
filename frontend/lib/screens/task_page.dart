@@ -186,10 +186,8 @@ class _TaskPageState extends State<TaskPage> {
         if (priorityCompare != 0) return priorityCompare;
 
         if (a.setDate == null && b.setDate == null) return 0;
-        if (a.setDate == null) return 1;
-        if (b.setDate == null) return -1;
 
-        return a.setDate!.compareTo(b.setDate!);
+        return a.setDate.compareTo(b.setDate);
       });
   }
 
@@ -203,10 +201,8 @@ class _TaskPageState extends State<TaskPage> {
         if (priorityCompare != 0) return priorityCompare;
 
         if (a.setDate == null && b.setDate == null) return 0;
-        if (a.setDate == null) return 1;
-        if (b.setDate == null) return -1;
 
-        return a.setDate!.compareTo(b.setDate!);
+        return a.setDate.compareTo(b.setDate);
       });
   }
 

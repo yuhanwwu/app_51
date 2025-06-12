@@ -3,9 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/screens/noticeboard.dart';
 // import 'package:universal_html/html.dart';
 import '../models/user.dart';
-import 'add_flat.dart';
 import '../constants/colors.dart';
-import 'task_page.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 

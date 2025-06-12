@@ -45,7 +45,7 @@ class Task {
     final data = doc.data() as Map<String, dynamic>;
     final isOneOff = data['isOneOff'] as bool;
     return Task(
-      taskRef: doc.reference as DocumentReference,
+      taskRef: doc.reference,
       description: data['description'],
       isOneOff: data['isOneOff'] ?? false,
       taskId: doc.id,

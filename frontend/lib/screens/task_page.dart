@@ -443,15 +443,15 @@ class _TaskPageState extends State<TaskPage> {
                     children: [
                       const SizedBox(height: 16),
                       sidebarAddTaskButton(),
-                      const SizedBox(height: 8),
-                      FractionallySizedBox(
-                        widthFactor: 1,
-                        child: ElevatedButton.icon(
-                          icon: Icon(Icons.task_alt),
-                          label: Text("View Others' Tasks"),
-                          onPressed: _showOthersTasksModal,
-                        ),
-                      ),
+                      // const SizedBox(height: 8),
+                      // FractionallySizedBox(
+                      //   widthFactor: 1,
+                      //   child: ElevatedButton.icon(
+                      //     icon: Icon(Icons.task_alt),
+                      //     label: Text("View Others' Tasks"),
+                      //     onPressed: _showOthersTasksModal,
+                      //   ),
+                      // ),
                       const SizedBox(height: 8),
                       FractionallySizedBox(
                         widthFactor: 1,

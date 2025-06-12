@@ -93892,7 +93892,8 @@ return A.r(J.aDF(a1),$async$lA)
 case 7:m=a5
 l=t.P.a(J.a3t(m))
 k=o.xn(B.c.cN(o.d.b))
-h=A.ca(J.bd(l,k))
+a1=J.bd(l,k)
+h=A.ca(a1==null?0:a1)
 a.a=h
 a1=o.d
 if(a1.c)g=A.ah(["done",!0],t.N,t.y)

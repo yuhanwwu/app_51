@@ -561,6 +561,37 @@ Widget build(BuildContext context) {
                   ),
                 ),
                 if (_showSuccess)
+                //  Container(
+                //       color: Colors.white.withAlpha(204), // Optional overlay color
+                //       alignment: Alignment.center,
+                //       child: ClipRect( // Clips the animation to its bounding box
+                //         child: Align(
+                //           alignment: Alignment.center, // Centers the animation
+                //           child: Lottie.asset(
+                //             'animations/success2.json',
+                //             repeat: false,
+                //             fit: BoxFit.fill, // Ensures the animation fits within its bounds
+                //           ),
+                //         ),
+                //       ),
+                //     ),
+                  Positioned.fill(
+                    child: Container(
+                      color: Colors.white.withAlpha(204), // Optional overlay color
+                      alignment: Alignment.center,
+                      child: ClipRect( // Clips the animation to its bounding box
+                        child: Align(
+                          alignment: Alignment.center, // Centers the animation
+                          child: Lottie.asset(
+                            'animations/success2.json',
+                            repeat: false,
+                            fit: BoxFit.contain, // Ensures the animation fits within its bounds
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                // if (_showSuccess)
                 //   Positioned.fill(
                 //     child: Container(
                 //       color: Colors.white.withAlpha(204), // 80% white overlay
@@ -571,6 +602,7 @@ Widget build(BuildContext context) {
                 //         child: Lottie.asset(
                 //           'assets/animations/success.json',
                 //           repeat: false,
+                //           fit: BoxFit.cover
                 //           // onLoaded: (composition) {
                 //           //   Future.delayed(composition.duration, () {
                 //           //     setState(() {
@@ -584,24 +616,6 @@ Widget build(BuildContext context) {
                 //       ),
                 //     ),
                 //   )
-                SizedBox(
-                        height: 300,
-                        width: 300, 
-                        child: Lottie.asset(
-                          'assets/animations/success.json',
-                          repeat: false,
-                          // onLoaded: (composition) {
-                          //   Future.delayed(composition.duration, () {
-                          //     setState(() {
-                          //       _showSuccess = false;
-                          //       _isVisible = false;
-                          //     });
-                          //     widget.onDone(); // callback to refresh UI
-                          //   });
-                          // },
-                        ),
-                      )
-                  ,
               ],
             )
           : SizedBox.shrink(),

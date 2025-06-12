@@ -130,7 +130,7 @@ class _TaskTileState extends State<TaskTile> {
       final taskType = getTaskTypeFromDesc(task.description.trim());
       // 2. Get the frequency for this task's description
       
-      updatedFrequency = flatData[taskType] as int;
+      updatedFrequency = (flatData[taskType] ?? 0) as int;
       
 
       final updateData = task.isOneOff

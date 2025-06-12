@@ -42,6 +42,7 @@ class _TaskPageState extends State<TaskPage> {
   late Future<List<Task>> _userTasks; // All tasks assigned to the user
   late Future<List<Task>> _unclaimedTasks;
   int _helpButtonPressCount = 0; // Add this field to your _TaskPageState
+  int _unreadNotifications = 0;
 
   @override
   void initState() {
@@ -54,6 +55,7 @@ class _TaskPageState extends State<TaskPage> {
     questionnaireDone = widget.user.questionnaireDone;
     _loadEverything();
     _showTutorialIfFirstTime();
+    _fetchUnreadNotifications();
   }
   
   // Move your tutorial dialog code into a separate method for reuse:
@@ -132,6 +134,17 @@ class _TaskPageState extends State<TaskPage> {
       _allFlatTasks = fetchAllFlatTasks(flatDoc);
       _userTasks = fetchUserTasks(_allFlatTasks);
       _unclaimedTasks = fetchUnclaimedTasks(_allFlatTasks);
+    });
+  }
+
+  Future<void> _fetchUnreadNotifications() async {
+    final query = await FirebaseFirestore.instance
+        .collection('Nudges')
+        .where('userId', isEqualTo: username)
+        .where('read', isEqualTo: false)
+        .get();
+    setState(() {
+      _unreadNotifications = query.docs.length;
     });
   }
 
@@ -483,16 +496,45 @@ class _TaskPageState extends State<TaskPage> {
                       FractionallySizedBox(
                         widthFactor: 1,
                         child: ElevatedButton.icon(
-                          icon: Icon(Icons.notifications),
+                          icon: Stack(
+                            children: [
+                              Icon(Icons.notifications),
+                              if (_unreadNotifications > 0)
+                                Positioned(
+                                  right: 0,
+                                  top: 0,
+                                  child: Container(
+                                    padding: EdgeInsets.all(2),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red,
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    constraints: BoxConstraints(
+                                      minWidth: 16,
+                                      minHeight: 16,
+                                    ),
+                                    child: Text(
+                                      '$_unreadNotifications',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
                           label: Text('Notifications'),
-                          onPressed: () {
-                            Navigator.push(
+                          onPressed: () async {
+                            await Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) =>
-                                    NotificationsPage(username: username),
+                                builder: (_) => NotificationsPage(username: username),
                               ),
                             );
+                            _fetchUnreadNotifications(); // Refresh count after returning
                           },
                         ),
                       ),

@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:frontend/models/user.dart';
 import 'package:frontend/screens/amend_questionnaire.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 Future<Map<String, int>> fetchChorePlan(String plan) async {
   DocumentSnapshot doc = await FirebaseFirestore.instance
@@ -44,6 +45,7 @@ class QuestionnairePage extends StatefulWidget {
 class _QuestionnairePageState extends State<QuestionnairePage> {
   int? _expandedIndex;
   bool isSubmitting = false;
+  int _helpButtonPressCount = 0;
 
   String getChoreDescription(String key) {
     switch (key.trim()) {
@@ -87,12 +89,63 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _showTutorialIfFirstTime();
+  }
+
+  Future<void> _showTutorialIfFirstTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    final hasSeenTutorial = prefs.getBool('hasSeenQuestionnaireTutorial_${widget.username}') ?? false;
+    if (!hasSeenTutorial) {
+      await _showTutorialDialog();
+      await prefs.setBool('hasSeenQuestionnaireTutorial_${widget.username}', true);
+    }
+  }
+
+  Future<void> _showTutorialDialog() async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = 'questionnaireHelpButtonPressCount_${widget.username}';
+    _helpButtonPressCount = (prefs.getInt(key) ?? 0) + 1;
+    await prefs.setInt(key, _helpButtonPressCount);
+
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('How to Set Up Your Routine'),
+        content: Text(
+          "Welcome to the flat questionnaire!\n\n"
+          "• Choose the vibe that best matches your living habits.\n"
+          "• You can then review and adjust the suggested chore frequencies.\n"
+          "• This will help set up your flat's cleaning routine and assign repeat tasks, by averaging you and your flatmates' preferences (anonymously).\n"
+          "• Don't worry, you can change routine frequencies later!.\n\n"
+          "Click the help icon in the top right corner to see this tutorial again.\n\n"
+          "$_helpButtonPressCount",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Got it!'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Set Up Your Routine'),
         backgroundColor: Colors.teal[400],
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.help_outline),
+            tooltip: 'Show Tutorial',
+            onPressed: _showTutorialDialog,
+          ),
+        ],
       ),
       body: Container(
         color: Colors.teal[50],

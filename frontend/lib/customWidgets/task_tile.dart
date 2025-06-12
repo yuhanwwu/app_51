@@ -15,7 +15,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 
-
 class TaskTile extends StatefulWidget {
   final Task task;
   final FlatUser user;
@@ -122,7 +121,7 @@ class _TaskTileState extends State<TaskTile> {
           .update(updateData);
 
       setState(() {
-      //  _isVisible = false;
+        //  _isVisible = false;
         _showSuccess = true;
         task = Task(
           taskRef: task.taskRef,
@@ -145,8 +144,6 @@ class _TaskTileState extends State<TaskTile> {
         _isVisible = false;
       });
       await Future.delayed(Duration(milliseconds: 300));
-
-
     } catch (e) {
       ScaffoldMessenger.of(
         context,
@@ -655,6 +652,4 @@ Future<List<DocumentReference>> fetchAllUserRefs(DocumentReference flat) async {
     allUsers = querySnap.docs.map((doc) => doc.reference).toList();
   }
   return allUsers;
-
-  
 }

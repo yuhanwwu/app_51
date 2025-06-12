@@ -219,7 +219,7 @@ class _DraggableNoteState extends State<DraggableNote> {
             minWidth: 120,
             maxWidth: 240,
             minHeight: 80,
-            maxHeight: 200,
+            maxHeight: 350,
           ),
           child: IntrinsicWidth(
             child: IntrinsicHeight(
@@ -234,7 +234,7 @@ class _DraggableNoteState extends State<DraggableNote> {
                   widget.note.content,
                   softWrap: true,
                   overflow: TextOverflow.ellipsis,
-                  maxLines: 10,
+                  maxLines: 20,
                 ),
               ),
             ),
@@ -341,7 +341,7 @@ class _DraggableNoteState extends State<DraggableNote> {
           minWidth: 120,
           maxWidth: 240,
           minHeight: 80,
-          maxHeight: 200,
+          maxHeight: 350,
         ),
         child: IntrinsicWidth(
           child: IntrinsicHeight(
@@ -349,16 +349,15 @@ class _DraggableNoteState extends State<DraggableNote> {
               padding: const EdgeInsets.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min, // <-- Add this line
                 children: [
-                  Flexible(
-                    child: Text(
-                      widget.note.content,
-                      softWrap: true,
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 10,
-                    ),
+                  Text(
+                    widget.note.content,
+                    softWrap: true,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 20,
                   ),
-                  const Spacer(),
+                  const SizedBox(height: 8),
                   FutureBuilder<DocumentSnapshot>(
                     future: widget.note.createdBy.get(),
                     builder: (context, snapshot) {

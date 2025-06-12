@@ -80,7 +80,8 @@ class _TaskPageState extends State<TaskPage> {
     final allTasks = await fetchAllFlatTasks(flatDoc);
     setState(() {
       _allFlatTasks = fetchAllFlatTasks(flatDoc);
-      _userTasks = allTasks.where((t) => t.assignedTo == userRef && !(t.done ?? false))
+      _userTasks = allTasks
+          .where((t) => t.assignedTo == userRef && !(t.done ?? false))
           .toList();
       _userOneOffTasks = fetchUserOneOffTasks(_allFlatTasks);
       _repeatTasks = fetchRepeatTasks(_allFlatTasks);
@@ -109,12 +110,14 @@ class _TaskPageState extends State<TaskPage> {
               ? Center(child: Text("No unclaimed tasks."))
               : ListView(
                   children: unclaimed
-                      .map((task) => TaskTile(
-                            task: task,
-                            user: user,
-                            userRef: userRef,
-                            onDone: _loadEverything,
-                          ))
+                      .map(
+                        (task) => TaskTile(
+                          task: task,
+                          user: user,
+                          userRef: userRef,
+                          onDone: _loadEverything,
+                        ),
+                      )
                       .toList(),
                 ),
         ),
@@ -180,6 +183,7 @@ class _TaskPageState extends State<TaskPage> {
       dimBackground: true,
     );
   }
+
   void _showAddTaskScreen(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -212,21 +216,21 @@ class _TaskPageState extends State<TaskPage> {
         shrinkWrap: true,
         children: users
             .where((u) => u.username != user.username)
-            .map((u) => ListTile(
-                  title: Text(u.name),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => NudgeUserPage(
-                          user: u,
-                          allFlatTasks: _allFlatTasks,
-                        ),
-                      ),
-                    );
-                  },
-                ))
+            .map(
+              (u) => ListTile(
+                title: Text(u.name),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          NudgeUserPage(user: u, allFlatTasks: _allFlatTasks),
+                    ),
+                  );
+                },
+              ),
+            )
             .toList(),
       ),
     );
@@ -685,7 +689,7 @@ class _TaskPageState extends State<TaskPage> {
   //             },
   //             child: Text('View Flatmates\' Tasks'),
   //           ),
-            
+
   //         ],
   //       ),
   //     ),
@@ -744,12 +748,14 @@ class _TaskPageState extends State<TaskPage> {
                         ? Center(child: Text("No tasks assigned to you."))
                         : ListView(
                             children: _userTasks
-                                .map((task) => TaskTile(
-                                      task: task,
-                                      user: user,
-                                      userRef: userRef,
-                                      onDone: _loadEverything,
-                                    ))
+                                .map(
+                                  (task) => TaskTile(
+                                    task: task,
+                                    user: user,
+                                    userRef: userRef,
+                                    onDone: _loadEverything,
+                                  ),
+                                )
                                 .toList(),
                           ),
                   ),

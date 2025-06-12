@@ -95746,7 +95746,7 @@ s.as=s.Bc(s.z)},
 $S:0}
 A.aA0.prototype={
 $1(a){var s=null,r=A.e3(12),q=this.b
-return A.fJ(new A.R4(new A.bz(new A.aD(16,16,16,16),A.h_(s,A.fk(A.b([A.aA("Cleaning the bathroom: "+B.f.k(q.d),s,s,s,s,s,s,s),A.aA("Doing the dishes: "+B.f.k(q.x),s,s,s,s,s,s,s),A.aA("Cleaning the kitchen: "+B.f.k(q.e),s,s,s,s,s,s,s),A.aA("Doing laundry: "+B.f.k(q.f),s,s,s,s,s,s,s),A.aA("Taking out recycling: "+B.f.k(q.r),s,s,s,s,s,s,s),A.aA("Taking out the rubbish: "+B.f.k(q.w),s,s,s,s,s,s,s)],t.p),B.b7,B.l2,B.ah),B.z,s,s,s,s,s,s,s,s,s,s),s),8,B.cB,new A.c7(r,B.o),s),0.5,0.5)},
+return A.fJ(new A.R4(new A.bz(new A.aD(16,16,16,16),A.h_(s,A.fk(A.b([A.aA("Cleaning the bathroom: Every "+B.f.k(q.d)+" day(s)",s,s,s,s,s,s,s),A.aA("Doing the dishes: Every "+B.f.k(q.x)+" day(s)",s,s,s,s,s,s,s),A.aA("Cleaning the kitchen: Every "+B.f.k(q.e)+" day(s)",s,s,s,s,s,s,s),A.aA("Doing laundry: Every "+B.f.k(q.f)+" day(s)",s,s,s,s,s,s,s),A.aA("Taking out recycling: Every "+B.f.k(q.r)+" day(s)",s,s,s,s,s,s,s),A.aA("Taking out the rubbish: Every "+B.f.k(q.w)+" day(s)",s,s,s,s,s,s,s)],t.p),B.b7,B.l2,B.ah),B.z,s,s,s,s,s,s,s,s,s,s),s),8,B.cB,new A.c7(r,B.o),s),0.5,0.5)},
 $S:46}
 A.azX.prototype={
 $1(a){var s=this.a.w

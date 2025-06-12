@@ -562,7 +562,7 @@ Widget build(BuildContext context) {
                           onPressed: _claimTask,
                           child: Text('Claim'),
                         ),
-                      if (task.assignedTo == widget.userRef && widget.canEdit)
+                      if (task.assignedTo == widget.userRef && widget.canEdit && !(task.done ?? false))
                         Checkbox(
                           value: task.isOneOff && task.done!,
                           onChanged: (value) async {

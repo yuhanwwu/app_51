@@ -17,6 +17,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_popup_card/flutter_popup_card.dart';
 import '../constants/colors.dart';
 import '../main.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 class TaskPage extends StatefulWidget {
   final FlatUser user;
@@ -38,6 +40,7 @@ class _TaskPageState extends State<TaskPage> {
   late Future<List<Task>> _allFlatTasks;
   late Future<List<Task>> _userTasks;  // All tasks assigned to the user
   late Future<List<Task>> _unclaimedTasks;
+  int _helpButtonPressCount = 0; // Add this field to your _TaskPageState
 
   @override
   void initState() {
@@ -49,6 +52,56 @@ class _TaskPageState extends State<TaskPage> {
     user = widget.user;
     questionnaireDone = widget.user.questionnaireDone;
     _loadEverything();
+    _showTutorialIfFirstTime();
+  }
+  
+  // Move your tutorial dialog code into a separate method for reuse:
+  Future<void> _showTutorialDialog() async {
+    final prefs = await SharedPreferences.getInstance();
+    // Increment the counter
+    _helpButtonPressCount = (prefs.getInt('helpButtonPressCount_${user.username}') ?? 0) + 1;
+    await prefs.setInt('helpButtonPressCount_${user.username}', _helpButtonPressCount);
+
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Welcome to the Task Page!'),
+        content: Text(
+          'Here you can manage your tasks, view flatmates\' tasks, and more. '
+          'Use the buttons on the left to navigate. Here\'s what you can do: \n'
+          ' • Add Task: Create a new task for yourself or others.\n'
+          ' • View Flatmates\' Tasks: View all tasks assigned to flatmates, and nudge them.\n'
+          ' • Unclaimed Tasks: Pick up tasks that aren\'t assigned to anyone.\n'
+          ' • View Archive: Check tasks you have completed.\n'
+          ' • Notifications: View notifications related to tasks.\n'
+          ' • Show Routine: View the cleaning schedule for your flat.\n'
+          ' • Refresh: Reload the tasks to see any updates.\n'
+          ' • Noticeboard: Post or view notices for your flat.\n'
+          ' • Logout: Sign out of your account.\n'
+          'You can also click on tasks to mark them as done or to edit them/see more information. '
+          'Click on the help icon in the top right corner to see this tutorial again.'
+          '$_helpButtonPressCount',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text('Got it!'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showTutorialIfFirstTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    final hasSeenTutorial = prefs.getBool('hasSeenTaskTutorial_${user.username}') ?? false;
+
+    if (!hasSeenTutorial) {
+      await _showTutorialDialog();
+      await prefs.setBool('hasSeenTaskTutorial_${user.username}', true);
+    }
   }
 
   void _loadEverything() async {
@@ -316,6 +369,13 @@ class _TaskPageState extends State<TaskPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Welcome, $name'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.help_outline),
+            tooltip: 'Show Tutorial',
+            onPressed: _showTutorialDialog,
+          ),
+        ],
       ),
       body: Row(
         children: [
@@ -348,12 +408,12 @@ class _TaskPageState extends State<TaskPage> {
                       );
                     },
                   ),
-                  const SizedBox(height: 8),
-                  ElevatedButton.icon(
-                    icon: Icon(Icons.task_alt),
-                    label: Text("View Others' Tasks"),
-                    onPressed: _showOthersTasksModal,
-                  ),
+                  // const SizedBox(height: 8),
+                  // ElevatedButton.icon(
+                  //   icon: Icon(Icons.task_alt),
+                  //   label: Text("View Others' Tasks"),
+                  //   onPressed: _showOthersTasksModal,
+                  // ),
                   const SizedBox(height: 8),
                   ElevatedButton.icon(
                     icon: Icon(Icons.people),

@@ -332,6 +332,30 @@ class _DraggableNoteState extends State<DraggableNote> {
       );
     }
 
+    if (widget.note.type == 'image') {
+      // debugPrint("I'm getting here.");
+      return Material(
+        elevation: 4,
+        color: Colors.yellow[200],
+        borderRadius: BorderRadius.circular(8),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minWidth: 120,
+            maxWidth: 240,
+            minHeight: 80,
+            maxHeight: 350,
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.network(
+              // 'https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3NG5nMm9pdXhpbDZ3NmI1OTVnMHA0am91am85ZzN5YXIza21iNnAzNyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/26FLb8rHh0T5B576E/giphy.gif',
+              widget.note.content, // URL of the image
+              fit: BoxFit.cover, // Adjust how the image fits within the note
+            ),
+          ),
+        ),
+      );
+    }
     // Otherwise, show a simple text note
     return Material(
       elevation: 4,
@@ -402,6 +426,7 @@ class _AddNoteSheet extends StatefulWidget {
 class _AddNoteSheetState extends State<_AddNoteSheet> {
   String _noteText = '';
   bool _isAddingText = true;
+  bool _isAddingGif =  false;
   final List<Task> _selectedTasks = [];
 
   @override
@@ -423,9 +448,27 @@ class _AddNoteSheetState extends State<_AddNoteSheet> {
                 SizedBox(width: 12),
                 ChoiceChip(
                   label: Text('Task Note'),
-                  selected: !_isAddingText,
-                  onSelected: (val) => setState(() => _isAddingText = false),
+                  selected: !_isAddingText && !_isAddingGif,
+                  onSelected: (val) {
+                    setState(() {
+                      _isAddingText = false;
+                      _isAddingGif = false;
+                    });
+                  },
+                  // onSelected: (val) => setState(() => _isAddingText = false),
                 ),
+                SizedBox(width: 12),
+                ChoiceChip(
+                  label: Text('Add img/gif'),
+                  selected: !_isAddingText && _isAddingGif, 
+                  onSelected: (val) {
+                    setState(() {
+                      _isAddingText = false;
+                      _isAddingGif = true;
+                    });
+                  },
+                  // onSelected: (val) => setState(() => _isAddingText = false),
+                )
               ],
             ),
             const SizedBox(height: 16),
@@ -452,6 +495,33 @@ class _AddNoteSheetState extends State<_AddNoteSheet> {
                       Navigator.pop(context);
                     },
                     child: Text('Add Text Note'),
+                  ),
+                ],
+              )
+            else if (_isAddingGif)
+              Column(
+                children: [
+                  // Text('GIF/Image functionality is not implemented yet.'),
+                  TextField(
+                    decoration: InputDecoration(labelText: 'Gif img address'),
+                    onChanged: (val) => _noteText = val,
+                  ),
+                  const SizedBox(height: 12),
+                  ElevatedButton(
+                    onPressed: () async {
+                      if (_noteText.trim().isEmpty) return;
+                      await widget.notesRef.add({
+                        'content': _noteText.trim(),
+                        'position': [100.0, 100.0],
+                        'flatRef': widget.flatRef,
+                        'createdBy': widget
+                            .userRef, 
+                        'type': 'image',
+                        'tasks': [],
+                      });
+                      Navigator.pop(context);
+                    },
+                    child: Text('Add Image Note'),
                   ),
                 ],
               )

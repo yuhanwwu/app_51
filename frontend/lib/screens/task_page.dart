@@ -18,7 +18,7 @@ import 'package:flutter_popup_card/flutter_popup_card.dart';
 import '../constants/colors.dart';
 import '../main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'dart:async';
 
 class TaskPage extends StatefulWidget {
   final FlatUser user;
@@ -31,6 +31,7 @@ class TaskPage extends StatefulWidget {
 }
 
 class _TaskPageState extends State<TaskPage> {
+  Timer? _taskRefreshTimer;
   late final DocumentReference flatDoc;
   late final String username;
   late final String name;
@@ -56,14 +57,33 @@ class _TaskPageState extends State<TaskPage> {
     _loadEverything();
     _showTutorialIfFirstTime();
     _fetchUnreadNotifications();
+    _startAutoTaskRefresh();
   }
-  
+
+  // CHANGE REFRESH RATE HERE SECONDS
+  void _startAutoTaskRefresh() {
+    _taskRefreshTimer = Timer.periodic(
+      const Duration(seconds: 300),
+      (_) => _loadEverything(),
+    );
+  }
+
+  @override
+  void dispose() {
+    _taskRefreshTimer?.cancel();
+    super.dispose();
+  }
+
   // Move your tutorial dialog code into a separate method for reuse:
   Future<void> _showTutorialDialog() async {
     final prefs = await SharedPreferences.getInstance();
     // Increment the counter
-    _helpButtonPressCount = (prefs.getInt('helpButtonPressCount_${user.username}') ?? 0) + 1;
-    await prefs.setInt('helpButtonPressCount_${user.username}', _helpButtonPressCount);
+    _helpButtonPressCount =
+        (prefs.getInt('helpButtonPressCount_${user.username}') ?? 0) + 1;
+    await prefs.setInt(
+      'helpButtonPressCount_${user.username}',
+      _helpButtonPressCount,
+    );
 
     await showDialog(
       context: context,
@@ -99,7 +119,8 @@ class _TaskPageState extends State<TaskPage> {
 
   Future<void> _showTutorialIfFirstTime() async {
     final prefs = await SharedPreferences.getInstance();
-    final hasSeenTutorial = prefs.getBool('hasSeenTaskTutorial_${user.username}') ?? false;
+    final hasSeenTutorial =
+        prefs.getBool('hasSeenTaskTutorial_${user.username}') ?? false;
 
     if (!hasSeenTutorial) {
       await _showTutorialDialog();
@@ -109,6 +130,7 @@ class _TaskPageState extends State<TaskPage> {
 
   void _loadEverything() async {
     _loadTasks();
+    _fetchUnreadNotifications();
     flat = await _loadFlat();
   }
 
@@ -420,15 +442,17 @@ class _TaskPageState extends State<TaskPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Welcome, $name'),
-      actions: [
+      appBar: AppBar(
+        title: Text('Welcome, $name'),
+        actions: [
           IconButton(
             icon: Icon(Icons.help_outline),
             tooltip: 'Show Tutorial',
             onPressed: _showTutorialDialog,
           ),
-        ],),
-      
+        ],
+      ),
+
       body: Row(
         children: [
           Padding(
@@ -531,7 +555,8 @@ class _TaskPageState extends State<TaskPage> {
                             await Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => NotificationsPage(username: username),
+                                builder: (_) =>
+                                    NotificationsPage(username: username),
                               ),
                             );
                             _fetchUnreadNotifications(); // Refresh count after returning

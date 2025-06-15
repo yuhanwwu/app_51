@@ -42,6 +42,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   void _deleteNudge(String nudgeId) async {
     await FirebaseFirestore.instance.collection('Nudges').doc(nudgeId).update({'read': true});
+
     setState(() {
       _nudgesFuture = _fetchNudges();
     });

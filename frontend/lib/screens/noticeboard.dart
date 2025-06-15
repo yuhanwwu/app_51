@@ -97,7 +97,9 @@ class _NoticeboardPageState extends State<NoticeboardPage> {
           // ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: widget.user.role == 'guest'
+      ? null
+      : FloatingActionButton(
         onPressed: () async {
           showModalBottomSheet(
             context: context,
@@ -148,26 +150,32 @@ class _NoticeboardPageState extends State<NoticeboardPage> {
                 bottom: 32,
                 child: DragTarget<String>(
                   builder: (context, candidateData, rejectedData) {
-                    return AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      width: 64,
-                      height: 64,
-                      decoration: BoxDecoration(
-                        color: candidateData.isNotEmpty
-                            ? Colors.red[300]
-                            : Colors.grey[300],
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.delete,
-                        size: 40,
-                        color: Colors.black54,
-                      ),
-                    );
+                    if (widget.user.role != 'guest') {
+                      return AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        width: 64,
+                        height: 64,
+                        decoration: BoxDecoration(
+                          color: candidateData.isNotEmpty
+                              ? Colors.red[300]
+                              : Colors.grey[300],
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.delete,
+                          size: 40,
+                          color: Colors.black54,
+                        ),
+                      );
+                    }
+                    // Always return a widget
+                    return SizedBox.shrink();
                   },
                   onWillAcceptWithDetails: (noteId) => true,
                   onAcceptWithDetails: (details) async {
-                    await notesRef.doc(details.data).delete();
+                    if (widget.user.role != 'guest') {
+                      await notesRef.doc(details.data).delete();
+                    }
                   },
                 ),
               ),

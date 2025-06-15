@@ -114,6 +114,13 @@ class _AddFlatPageState extends State<AddFlatPage> {
       }),
     );
 
+    await FirebaseFirestore.instance.collection('Users').doc('${flatName}_guest').set({
+      'flat': flatRef,
+      'name': '${flatName}_guest',
+      'role': 'guest',
+      'questionnaireDone': true,
+    });
+
     // html.window.location.reload();
     final yourUsername = flatmates.first['username']!;
     final userDoc = await FirebaseFirestore.instance

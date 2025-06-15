@@ -6,6 +6,8 @@ class FlatUser {
   final String name;
   final DocumentReference flat;
   final bool questionnaireDone;
+  final String role; 
+  bool get isGuest => role == 'guest';
 
   FlatUser({
     required this.userRef,
@@ -13,8 +15,8 @@ class FlatUser {
     required this.name,
     required this.flat,
     required this.questionnaireDone,
+    required this.role,
   });
-
   factory FlatUser.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return FlatUser(
@@ -23,6 +25,8 @@ class FlatUser {
       name: data['name'] ?? '',
       flat: data['flat'],
       questionnaireDone: data['questionnaireDone'] ?? false,
+      role: data['role'] ?? '',
     );
   }
 }
+

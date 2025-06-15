@@ -104,33 +104,70 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
   }
 
   Future<void> _showTutorialDialog() async {
-    final prefs = await SharedPreferences.getInstance();
-    final key = 'questionnaireHelpButtonPressCount_${widget.username}';
-    _helpButtonPressCount = (prefs.getInt(key) ?? 0) + 1;
-    await prefs.setInt(key, _helpButtonPressCount);
+  final prefs = await SharedPreferences.getInstance();
+  final key = 'questionnaireHelpButtonPressCount_${widget.username}';
+  _helpButtonPressCount = (prefs.getInt(key) ?? 0) + 1;
+  await prefs.setInt(key, _helpButtonPressCount);
 
-    await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('How to Set Up Your Routine'),
-        content: Text(
-          "Welcome to the flat questionnaire!\n\n"
-          "• Choose the vibe that best matches your living habits.\n"
-          "• You can then review and adjust the suggested chore frequencies.\n"
-          "• This will help set up your flat's cleaning routine and assign repeat tasks, by averaging you and your flatmates' preferences (anonymously).\n"
-          "• Don't worry, you can change routine frequencies later!.\n\n"
-          "Click the help icon in the top right corner to see this tutorial again.\n\n"
-          "$_helpButtonPressCount",
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Got it!'),
-          ),
-        ],
+  await showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text(
+        'How to Set Up Your Routine',
+        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        textAlign: TextAlign.center,
       ),
-    );
-  }
+      content: SizedBox(
+        width: 800, // Makes the dialog wider
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Text(
+                "• Pick the vibe that fits your flat.",
+                style: TextStyle(fontSize: 18),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Text(
+                "• View the chore schedules which correspond to each vibe.",
+                style: TextStyle(fontSize: 18),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Text(
+                "• Answer honestly: your choice will help set up the flat's cleaning routine, by taking an average of everyones' response.",
+                style: TextStyle(fontSize: 18),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Text(
+                "• Don't worry, you can customise these frequencies in the next page!",
+                style: TextStyle(fontSize: 18),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              "Tap the help icon anytime for this guide.",
+              style: TextStyle(fontSize: 16, color: Colors.teal),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Got it!', style: TextStyle(fontSize: 18)),
+        ),
+      ],
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {

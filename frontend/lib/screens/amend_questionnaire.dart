@@ -40,44 +40,6 @@ class _AmendQuestionnaireScreenState extends State<AmendQuestionnaireScreen> {
       for (var entry in widget.chores.entries)
         entry.key: TextEditingController(text: entry.value.toString()),
     };
-    _showTutorialIfFirstTime();
-  }
-
-  Future<void> _showTutorialIfFirstTime() async {
-    final prefs = await SharedPreferences.getInstance();
-    final username = ModalRoute.of(context)?.settings.arguments as String? ?? '';
-    final hasSeenTutorial = prefs.getBool('hasSeenAmendQuestionnaireTutorial_$username') ?? false;
-    if (!hasSeenTutorial) {
-      await _showTutorialDialog(username);
-      await prefs.setBool('hasSeenAmendQuestionnaireTutorial_$username', true);
-    }
-  }
-
-  Future<void> _showTutorialDialog(String username) async {
-    final prefs = await SharedPreferences.getInstance();
-    final key = 'amendQuestionnaireHelpButtonPressCount_$username';
-    _helpButtonPressCount = (prefs.getInt(key) ?? 0) + 1;
-    await prefs.setInt(key, _helpButtonPressCount);
-
-    await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Amend Chore Frequencies'),
-        content: Text(
-          "Here you can adjust how often each chore should be done for your flat.\n\n"
-          "• Tap the number to change the frequency (in days).\n"
-          "• When you're happy, press 'Save' to confirm.\n\n"
-          "Click the help icon in the top right corner to see this tutorial again.\n\n"
-          "$_helpButtonPressCount",
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Got it!'),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -88,13 +50,6 @@ class _AmendQuestionnaireScreenState extends State<AmendQuestionnaireScreen> {
         title: const Text('Amend Chore Frequencies'),
         backgroundColor: Colors.teal[400],
         elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.help_outline),
-            tooltip: 'Show Tutorial',
-            onPressed: () => _showTutorialDialog(username),
-          ),
-        ],
       ),
       backgroundColor: Colors.teal[50],
       body: Padding(

@@ -7,8 +7,10 @@ import 'package:frontend/models/task.dart';
 import 'package:frontend/models/user.dart';
 import 'package:frontend/screens/task_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../customWidgets/routine_board.dart';
 import '../models/sticky_note.dart';
 import 'task_page.dart';
+import 'package:intl/intl.dart';
 
 class NoticeboardPage extends StatefulWidget {
   final FlatUser user;
@@ -32,6 +34,9 @@ class _NoticeboardPageState extends State<NoticeboardPage> {
   late DocumentReference userRef;
   String? flatName;
 
+  Offset routineBoardPosition = const Offset(40, 40);
+  String? routineBoardDocId;
+
   @override
   void initState() {
     super.initState();
@@ -40,6 +45,7 @@ class _NoticeboardPageState extends State<NoticeboardPage> {
         .collection('Users')
         .doc(widget.user.username);
     _loadFlatName();
+    _loadRoutineBoardPosition();
   }
 
   Future<void> _loadFlatName() async {
@@ -49,8 +55,43 @@ class _NoticeboardPageState extends State<NoticeboardPage> {
     });
   }
 
+  Future<void> _loadRoutineBoardPosition() async {
+    final query = await notesRef
+        .where('flatRef', isEqualTo: widget.flatRef)
+        .where('type', isEqualTo: 'routine')
+        .limit(1)
+        .get();
+    if (query.docs.isNotEmpty) {
+      final doc = query.docs.first;
+      routineBoardDocId = doc.id;
+      final pos = doc['position'];
+      setState(() {
+        routineBoardPosition = Offset(pos[0], pos[1]);
+      });
+    } else {
+      final docRef = await notesRef.add({
+        'type': 'routine',
+        'flatRef': widget.flatRef,
+        'createdBy': userRef,
+        'position': [routineBoardPosition.dx, routineBoardPosition.dy],
+      });
+      routineBoardDocId = docRef.id;
+    }
+  }
+
   void _updateNotePosition(String noteId, List<double> newPosition) {
     notesRef.doc(noteId).update({'position': newPosition});
+  }
+
+  Future<void> _updateRoutineBoardPosition(Offset newPos) async {
+    setState(() {
+      routineBoardPosition = newPos;
+    });
+    if (routineBoardDocId != null) {
+      await notesRef.doc(routineBoardDocId).update({
+        'position': [newPos.dx, newPos.dy],
+      });
+    }
   }
 
   Widget logoutButton() {
@@ -126,14 +167,43 @@ class _NoticeboardPageState extends State<NoticeboardPage> {
           }
           final notes = snapshot.data!.docs
               .map((doc) => StickyNote.fromFirestore(doc))
+              .where((note) => note.type != 'routine') // Exclude routine board
               .toList();
 
           return Stack(
             children: [
+              // 1. Routine board (separate, not in notes)
+              Positioned(
+                left: routineBoardPosition.dx,
+                top: routineBoardPosition.dy,
+                child: Draggable(
+                  feedback: Material(
+                    color: Colors.transparent,
+                    child: SizedBox(
+                      width: 600,
+                      child: RoutineBoardWidget(flatRef: widget.flatRef),
+                    ),
+                  ),
+                  childWhenDragging: Opacity(
+                    opacity: 0.5,
+                    child: SizedBox(
+                      width: 600,
+                      child: RoutineBoardWidget(flatRef: widget.flatRef),
+                    ),
+                  ),
+                  child: SizedBox(
+                    width: 600,
+                    child: RoutineBoardWidget(flatRef: widget.flatRef),
+                  ),
+                  onDragEnd: (details) {
+                    _updateRoutineBoardPosition(details.offset);
+                  },
+                ),
+              ),
+
+              // 2. Sticky notes (from Firestore)
               ...notes.map((note) {
                 return Positioned(
-                  // duration: const Duration(milliseconds: 200),
-                  // curve: Curves.easeInOut,
                   left: note.position[0],
                   top: note.position[1],
                   child: DraggableNote(
@@ -145,6 +215,8 @@ class _NoticeboardPageState extends State<NoticeboardPage> {
                   ),
                 );
               }),
+
+              // 3. Bin
               Positioned(
                 left: 32,
                 bottom: 32,
@@ -223,32 +295,7 @@ class _DraggableNoteState extends State<DraggableNote> {
       feedback: Material(
         elevation: 8,
         color: Colors.transparent,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            minWidth: 120,
-            maxWidth: 240,
-            minHeight: 80,
-            maxHeight: 350,
-          ),
-          child: IntrinsicWidth(
-            child: IntrinsicHeight(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.yellow[200],
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 8)],
-                ),
-                padding: const EdgeInsets.all(12),
-                child: Text(
-                  widget.note.content,
-                  softWrap: true,
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 20,
-                ),
-              ),
-            ),
-          ),
-        ),
+        child: _noteWidget(),
       ),
       childWhenDragging: Opacity(opacity: 0.5, child: _noteWidget()),
       onDragStarted: widget.onDragStarted,
@@ -256,8 +303,32 @@ class _DraggableNoteState extends State<DraggableNote> {
         widget.onDragEnd(details.offset);
         widget.onDragCompleted?.call();
       },
-      child: _noteWidget(),
-    );
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minWidth: 120,
+          maxWidth: 240,
+          minHeight: 80,
+          maxHeight: 350,
+        ),
+        child: IntrinsicWidth(
+          child: IntrinsicHeight(
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.yellow[200],
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 8)],
+              ),
+              padding: const EdgeInsets.all(12),
+              child: Text(
+                widget.note.content,
+                softWrap: true,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 20,
+              ),
+            ),
+          ),
+        ),
+      ));
   }
 
   Widget _noteWidget() {
@@ -409,8 +480,7 @@ class _DraggableNoteState extends State<DraggableNote> {
             ),
           ),
         ),
-      ),
-    );
+      ));
   }
 }
 
@@ -623,6 +693,144 @@ class _AddNoteSheetState extends State<_AddNoteSheet> {
                 },
               ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+
+// import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:flutter/material.dart' show StatelessWidget, Card, BuildContext, Widget, EdgeInsets, Colors, BorderRadius, RoundedRectangleBorder, CircularProgressIndicator, Center, SizedBox, CrossAxisAlignment, FontWeight, TextStyle, Text, TextAlign, Padding, Column, Expanded, Row, FutureBuilder;
+// import 'package:frontend/models/task.dart';
+// import 'package:intl/intl.dart';
+
+class RoutineBoardWidget extends StatelessWidget {
+  final DocumentReference flatRef;
+  const RoutineBoardWidget({super.key, required this.flatRef});
+
+  Future<Map<String, List<Task>>> _fetchRoutineTasks() async {
+    final now = DateTime.now();
+    final weekDays = List.generate(7, (i) => now.add(Duration(days: i)));
+
+    final query = await FirebaseFirestore.instance
+        .collection('Tasks')
+        .where('assignedFlat', isEqualTo: flatRef)
+        .where('isOneOff', isEqualTo: false)
+        .where('isPersonal', isEqualTo: false)
+        .get();
+
+    final tasks = query.docs.map((doc) => Task.fromFirestore(doc)).toList();
+
+    Map<String, List<Task>> weekTasks = {
+      for (var d in weekDays) DateFormat('yyyy-MM-dd').format(d): []
+    };
+
+    for (final task in tasks) {
+      DateTime lastDone = task.lastDoneOn != null
+          ? DateFormat('yyyy-MM-dd').parse(task.lastDoneOn!)
+          : DateFormat('yyyy-MM-dd').parse(task.setDate);
+      DateTime nextDue = lastDone.add(Duration(days: task.frequency));
+
+      if (nextDue.isBefore(weekDays[0])) {
+        // Overdue: show on today
+        weekTasks[DateFormat('yyyy-MM-dd').format(weekDays[0])]!.add(task);
+      } else if (nextDue.isAfter(weekDays[6])) {
+        // Due after this 7-day window: don't show
+        continue;
+      } else {
+        // Due in next 7 days: show on correct day
+        weekTasks[DateFormat('yyyy-MM-dd').format(nextDue)]!.add(task);
+      }
+    }
+    return weekTasks;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final weekDays = List.generate(7, (i) => now.add(Duration(days: i)));
+
+    return Card(
+      elevation: 8,
+      color: Colors.teal[50],
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: FutureBuilder<Map<String, List<Task>>>(
+          future: _fetchRoutineTasks(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return SizedBox(
+                  height: 200, child: Center(child: CircularProgressIndicator()));
+            }
+            final weekTasks = snapshot.data!;
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Routine: Next 7 Days",
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 20, color: Colors.teal[900])),
+                SizedBox(height: 8),
+                // Row(
+                //   crossAxisAlignment: CrossAxisAlignment.start,
+                //   children: weekDays.map((d) {
+                //     final dayStr = DateFormat('EEE\ndd/MM').format(d);
+                //     final dateKey = DateFormat('yyyy-MM-dd').format(d);
+                //     final tasks = weekTasks[dateKey] ?? [];
+                //     return Expanded(
+                //       child: Column(
+                //         children: [
+                //           Text(dayStr, textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold)),
+                //           ...tasks.map((t) => Padding(
+                //                 padding: const EdgeInsets.symmetric(vertical: 2.0),
+                //                 child: Text(
+                //                   t.description,
+                //                   style: TextStyle(fontSize: 12),
+                //                   textAlign: TextAlign.center,
+                //                 ),
+                //               )),
+                //         ],
+                //       ),
+                //     );
+                //   }).toList(),
+                // ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: List.generate(weekDays.length * 2 - 1, (i) {
+                    if (i.isOdd) {
+                      // Insert a divider between days
+                      return Container(
+                        width: 1,
+                        height: 120,
+                        color: Colors.grey[300],
+                        margin: const EdgeInsets.symmetric(horizontal: 2),
+                      );
+                    }
+                    final d = weekDays[i ~/ 2];
+                    final dayStr = DateFormat('EEE\ndd/MM').format(d);
+                    final dateKey = DateFormat('yyyy-MM-dd').format(d);
+                    final tasks = weekTasks[dateKey] ?? [];
+                    return Expanded(
+                      child: Column(
+                        children: [
+                          Text(dayStr, textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold)),
+                          ...tasks.map((t) => Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 2.0),
+                                child: Text(
+                                  t.description,
+                                  style: TextStyle(fontSize: 12),
+                                  textAlign: TextAlign.center,
+                                ),
+                              )),
+                        ],
+                      ),
+                    );
+                  }),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );

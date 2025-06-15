@@ -404,37 +404,46 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
         .doc(widget.username)
         .get();
 
-    final userRef = FirebaseFirestore.instance
-        .collection('Users')
-        .doc(widget.username);
-
     final userData = userDoc.data();
     final flatRef = userData!['flat']; // Should be a DocumentReference
     final now = DateTime.now();
     final setDate = DateFormat('yyyy-MM-dd').format(now);
 
+    // 2. Fetch all flatmates in this flat
+    final flatmatesQuery = await FirebaseFirestore.instance
+        .collection('Users')
+        .where('flat', isEqualTo: flatRef)
+        .get();
+    final flatmateDocs = flatmatesQuery.docs;
+    if (flatmateDocs.length < 2) {
+      throw Exception('Not enough flatmates to assign tasks.');
+    }
+    final flatmateRefs = flatmateDocs.map((doc) => doc.reference).toList();
+
     // fetch existing flat's chore preferences
     final flatSnapshot = await flatRef.get();
     final flatData = flatSnapshot.data() as Map<String, dynamic>;
 
-    // 3. For each chore, create a repeat task
+    // 3. For each chore, create a repeat task, alternating between the first two flatmates
+    int i = 0;
     for (final entry in plan.entries) {
       String description = getChoreDescription(entry.key.trim());
 
       final int existingSum =
           flatData[entry.key.trim()] * flatData['numOfCompletedQuestionnaires'];
-      // flatData['numOfCompletedQuestionnaires'] += 1;
       flatData[entry.key.trim()] =
           ((existingSum + entry.value) /
                   (flatData['numOfCompletedQuestionnaires'] + 1))
               .round();
 
       if (flatData['numOfCompletedQuestionnaires'] == 0) {
+        // Alternate assignment between the first two flatmates
+        final assignedTo = flatmateRefs[i % 2];
         await FirebaseFirestore.instance.collection('Tasks').add({
           'description': description,
           'isOneOff': false,
           'assignedFlat': flatRef,
-          'assignedTo': userRef,
+          'assignedTo': assignedTo,
           'done': null,
           'setDate': setDate,
           'priority': false,
@@ -443,6 +452,7 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
           'lastDoneBy': null,
           'isPersonal': false,
         });
+        i++;
       }
     }
 

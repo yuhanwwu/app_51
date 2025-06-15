@@ -392,7 +392,7 @@ class _TaskPageState extends State<TaskPage> {
       ),
       builder: (context) => ListView(
         shrinkWrap: true,
-        children: users.where((u) => u.username != user.username).map((u) {
+        children: users.where((u) => u.username != user.username).where((u) => u.username != '${flat.name}_guest').map((u) {
           return ListTile(
             title: Text(u.name),
             onTap: () {

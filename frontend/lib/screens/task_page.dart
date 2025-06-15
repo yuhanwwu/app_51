@@ -5,6 +5,7 @@ import 'package:frontend/screens/flat_tasks.dart';
 import 'package:frontend/screens/login.dart';
 import 'package:intl/intl.dart';
 import 'package:frontend/screens/notifications_page.dart';
+import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import '../models/task.dart';
 import '../models/user.dart';
 import '../models/flat.dart';
@@ -44,6 +45,10 @@ class _TaskPageState extends State<TaskPage> {
   late Future<List<Task>> _unclaimedTasks;
   int _helpButtonPressCount = 0; // Add this field to your _TaskPageState
   int _unreadNotifications = 0;
+  final GlobalKey sidebarKey = GlobalKey();
+  final GlobalKey moreMenuKey = GlobalKey();
+
+  List<TargetFocus> targets = [];
 
   @override
   void initState() {
@@ -55,9 +60,46 @@ class _TaskPageState extends State<TaskPage> {
     user = widget.user;
     questionnaireDone = widget.user.questionnaireDone;
     _loadEverything();
-    _showTutorialIfFirstTime();
+    initTargets();
+    // Show tutorial after first frame (optional: only first time)
+    WidgetsBinding.instance.addPostFrameCallback((_) => _showTutorialIfFirstTime());
     _fetchUnreadNotifications();
     _startAutoTaskRefresh();
+  }
+
+  void initTargets() {
+    targets = [
+      TargetFocus(
+        identify: "Sidebar",
+        keyTarget: sidebarKey,
+        contents: [
+          TargetContent(
+            align: ContentAlign.bottom,
+            child: Container(
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                "This is the task bar for actions.",
+                style: TextStyle(fontSize: 18, color: Colors.black),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ];
+  }
+
+  void showTutorial() {
+    TutorialCoachMark(
+      targets: targets,
+      colorShadow: Colors.black,
+      textSkip: "SKIP",
+      paddingFocus: 10,
+      opacityShadow: 0.8,
+    ).show(context: context);
   }
 
   // CHANGE REFRESH RATE HERE SECONDS
@@ -74,48 +116,6 @@ class _TaskPageState extends State<TaskPage> {
     super.dispose();
   }
 
-  // Move your tutorial dialog code into a separate method for reuse:
-  Future<void> _showTutorialDialog() async {
-    final prefs = await SharedPreferences.getInstance();
-    // Increment the counter
-    _helpButtonPressCount =
-        (prefs.getInt('helpButtonPressCount_${user.username}') ?? 0) + 1;
-    await prefs.setInt(
-      'helpButtonPressCount_${user.username}',
-      _helpButtonPressCount,
-    );
-
-    await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Welcome to the Task Page!'),
-        content: Text(
-          'Here you can manage your tasks, view flatmates\' tasks, and more. '
-          'Use the buttons on the left to navigate. Here\'s what you can do: \n'
-          ' • Add Task: Create a new task for yourself or others.\n'
-          ' • View Flatmates\' Tasks: View all tasks assigned to flatmates, and nudge them.\n'
-          ' • Unclaimed Tasks: Pick up tasks that aren\'t assigned to anyone.\n'
-          ' • View Archive: Check tasks you have completed.\n'
-          ' • Notifications: View if you have received any nudges related to tasks.\n'
-          ' • Show Routine: View the cleaning schedule for your flat.\n'
-          ' • Refresh: Reload the tasks to see any updates.\n'
-          ' • Noticeboard: Post or view notices for your flat.\n'
-          ' • Logout: Sign out of your account.\n'
-          'You can also click on tasks to mark them as done or to edit them/see more information. '
-          'Click on the help icon in the top right corner to see this tutorial again.'
-          '$_helpButtonPressCount',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: Text('Got it!'),
-          ),
-        ],
-      ),
-    );
-  }
 
   Future<void> _showTutorialIfFirstTime() async {
     final prefs = await SharedPreferences.getInstance();
@@ -123,7 +123,7 @@ class _TaskPageState extends State<TaskPage> {
         prefs.getBool('hasSeenTaskTutorial_${user.username}') ?? false;
 
     if (!hasSeenTutorial) {
-      await _showTutorialDialog();
+      showTutorial();
       await prefs.setBool('hasSeenTaskTutorial_${user.username}', true);
     }
   }
@@ -448,7 +448,7 @@ class _TaskPageState extends State<TaskPage> {
           IconButton(
             icon: Icon(Icons.help_outline),
             tooltip: 'Show Tutorial',
-            onPressed: _showTutorialDialog,
+            onPressed: showTutorial,
           ),
         ],
       ),
@@ -458,6 +458,7 @@ class _TaskPageState extends State<TaskPage> {
           Padding(
             padding: EdgeInsetsGeometry.all(10),
             child: Container(
+              key: sidebarKey, 
               width: 200,
               decoration: BoxDecoration(
                 color: AppColors.accent.withAlpha(70),
@@ -480,15 +481,6 @@ class _TaskPageState extends State<TaskPage> {
                     children: [
                       const SizedBox(height: 16),
                       sidebarAddTaskButton(),
-                      // const SizedBox(height: 8),
-                      // FractionallySizedBox(
-                      //   widthFactor: 1,
-                      //   child: ElevatedButton.icon(
-                      //     icon: Icon(Icons.task_alt),
-                      //     label: Text("View Others' Tasks"),
-                      //     onPressed: _showOthersTasksModal,
-                      //   ),
-                      // ),
                       const SizedBox(height: 8),
                       FractionallySizedBox(
                         widthFactor: 1,
@@ -627,15 +619,29 @@ class _TaskPageState extends State<TaskPage> {
                   if (tasks.isEmpty) {
                     return Center(child: Text("No tasks assigned to you."));
                   }
-                  return ListView(
-                    children: tasks.map((task) {
-                      return TaskTile(
-                        task: task,
-                        user: user,
-                        userRef: userRef,
-                        onDone: _loadTasks,
-                      );
-                    }).toList(),
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text(
+                          "Your Tasks",
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      Expanded(
+                        child: ListView(
+                          children: tasks.map((task) {
+                            return TaskTile(
+                              task: task,
+                              user: user,
+                              userRef: userRef,
+                              onDone: _loadTasks,
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ],
                   );
                 } else {
                   return Center(child: Text("No tasks assigned to you."));

@@ -24,7 +24,7 @@ void main() async {
   runApp(const MyApp());
 }
 
-enum AppPage { login, questionnaire, home, addFlat }
+enum AppPage { login, questionnaire, home, addFlat, noticeboard }
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -72,10 +72,14 @@ class _MyAppState extends State<MyApp> {
 
         setState(() {
           user = userData;
+          if (userData.role == 'guest') {
+            currentPage = AppPage.noticeboard;
+          } else {
           currentPage = questionnaireDone
               ? AppPage.home
               : AppPage.questionnaire;
           questionnaireUsername = savedUsername;
+          }
         });
 
         _startNudgePolling();
@@ -170,6 +174,14 @@ class _MyAppState extends State<MyApp> {
     flatRef = data['flat'] as DocumentReference;
     // userRef = data['userRef'] as DocumentReference;
 
+    if (user!.role == 'guest') {
+      setState(() {
+        currentPage = AppPage.noticeboard;
+      });
+      _startNudgePolling();
+      return;
+    }
+
     if (!questionnaireDone) {
       setState(() {
         currentPage = AppPage.questionnaire;
@@ -195,6 +207,14 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     Widget page;
     switch (currentPage) {
+      case AppPage.noticeboard:
+      page = NoticeboardPage(
+        user: user!,
+        flatRef: flatRef!,
+        userRef: user!.userRef,
+        onLogout: onLogout,
+      );
+      break;
       case AppPage.login:
         page = LoginPage(
           onLogin: onLogin,

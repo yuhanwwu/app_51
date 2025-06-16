@@ -251,7 +251,7 @@ class _MyAppState extends State<MyApp> {
         break;
     }
     return MaterialApp(
-      title: 'Task Manager',
+      title: 'Homely',
       theme: ThemeData(
         primaryColor: AppColors.primary,
         elevatedButtonTheme: ElevatedButtonThemeData(

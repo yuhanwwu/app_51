@@ -302,34 +302,52 @@ class _DraggableNoteState extends State<DraggableNote> {
         widget.onDragEnd(details.offset);
         widget.onDragCompleted?.call();
       },
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          minWidth: 120,
-          maxWidth: 240,
-          minHeight: 80,
-          maxHeight: 350,
-        ),
-        child: IntrinsicWidth(
-          child: IntrinsicHeight(
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.yellow[200],
-                borderRadius: BorderRadius.circular(8),
-                boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 8)],
-              ),
-              padding: const EdgeInsets.all(12),
-              child: Text(
-                widget.note.content,
-                softWrap: true,
-                overflow: TextOverflow.ellipsis,
-                maxLines: 20,
-              ),
-            ),
-          ),
-        ),
-      ));
+      child: _noteWidget(), // <-- Always show the full note widget!
+    );
   }
 
+  // @override
+  // Widget build(BuildContext context) {
+  //   return Draggable<String>(
+  //     data: widget.note.id,
+  //     feedback: Material(
+  //       elevation: 8,
+  //       color: Colors.transparent,
+  //       child: _noteWidget(),
+  //     ),
+  //     childWhenDragging: Opacity(opacity: 0.5, child: _noteWidget()),
+  //     onDragStarted: widget.onDragStarted,
+  //     onDragEnd: (details) {
+  //       widget.onDragEnd(details.offset);
+  //       widget.onDragCompleted?.call();
+  //     },
+  //     child: ConstrainedBox(
+  //       constraints: BoxConstraints(
+  //         minWidth: 120,
+  //         maxWidth: 240,
+  //         minHeight: 80,
+  //         maxHeight: 350,
+  //       ),
+  //       child: IntrinsicWidth(
+  //         child: IntrinsicHeight(
+  //           child: Container(
+  //             decoration: BoxDecoration(
+  //               color: Colors.yellow[200],
+  //               borderRadius: BorderRadius.circular(8),
+  //               boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 8)],
+  //             ),
+  //             padding: const EdgeInsets.all(12),
+  //             child: Text(
+  //               widget.note.content,
+  //               softWrap: true,
+  //               overflow: TextOverflow.ellipsis,
+  //               maxLines: 20,
+  //             ),
+  //           ),
+  //         ),
+  //       ),
+  //     ));
+  
   Widget _noteWidget() {
     final canEdit = widget.userRef.id == widget.note.createdBy.id;
 

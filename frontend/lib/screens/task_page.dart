@@ -5,7 +5,6 @@ import 'package:frontend/screens/flat_tasks.dart';
 import 'package:frontend/screens/login.dart';
 import 'package:intl/intl.dart';
 import 'package:frontend/screens/notifications_page.dart';
-import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import '../models/task.dart';
 import '../models/user.dart';
 import '../models/flat.dart';
@@ -47,8 +46,6 @@ class _TaskPageState extends State<TaskPage> {
   final GlobalKey sidebarKey = GlobalKey();
   final GlobalKey moreMenuKey = GlobalKey();
 
-  List<TargetFocus> targets = [];
-
   @override
   void initState() {
     super.initState();
@@ -59,46 +56,8 @@ class _TaskPageState extends State<TaskPage> {
     user = widget.user;
     questionnaireDone = widget.user.questionnaireDone;
     _loadEverything();
-    initTargets();
-    // Show tutorial after first frame (optional: only first time)
-    WidgetsBinding.instance.addPostFrameCallback((_) => _showTutorialIfFirstTime());
     _fetchUnreadNotifications();
     _startAutoTaskRefresh();
-  }
-
-  void initTargets() {
-    targets = [
-      TargetFocus(
-        identify: "Sidebar",
-        keyTarget: sidebarKey,
-        contents: [
-          TargetContent(
-            align: ContentAlign.bottom,
-            child: Container(
-              padding: EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                "This is the task bar for actions.",
-                style: TextStyle(fontSize: 18, color: Colors.black),
-              ),
-            ),
-          ),
-        ],
-      ),
-    ];
-  }
-
-  void showTutorial() {
-    TutorialCoachMark(
-      targets: targets,
-      colorShadow: Colors.black,
-      textSkip: "SKIP",
-      paddingFocus: 10,
-      opacityShadow: 0.8,
-    ).show(context: context);
   }
 
   // CHANGE REFRESH RATE HERE SECONDS
@@ -113,18 +72,6 @@ class _TaskPageState extends State<TaskPage> {
   void dispose() {
     _taskRefreshTimer?.cancel();
     super.dispose();
-  }
-
-
-  Future<void> _showTutorialIfFirstTime() async {
-    final prefs = await SharedPreferences.getInstance();
-    final hasSeenTutorial =
-        prefs.getBool('hasSeenTaskTutorial_${user.username}') ?? false;
-
-    if (!hasSeenTutorial) {
-      showTutorial();
-      await prefs.setBool('hasSeenTaskTutorial_${user.username}', true);
-    }
   }
 
   void _loadEverything() async {
@@ -183,7 +130,21 @@ class _TaskPageState extends State<TaskPage> {
           ),
           child: Padding(
             padding: EdgeInsets.all(16.0),
-            child: Container(child: getChoreAndFreqCol(flat)),
+            child: FutureBuilder<DocumentSnapshot>(
+            future: flatDoc.get(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return Center(child: Text('Error loading routine.'));
+              } else if (!snapshot.hasData || !snapshot.data!.exists) {
+                return Center(child: Text('Routine not found.'));
+              } else {
+                final flat = Flat.fromFirestore(snapshot.data!);
+                return getChoreAndFreqCol(flat);
+              }
+            },
+          ),
           ),
         ),
       ),
@@ -443,13 +404,6 @@ class _TaskPageState extends State<TaskPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Welcome, $name'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.help_outline),
-            tooltip: 'Show Tutorial',
-            onPressed: showTutorial,
-          ),
-        ],
       ),
 
       body: Row(
@@ -479,13 +433,47 @@ class _TaskPageState extends State<TaskPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 16),
+                      FractionallySizedBox(
+                        widthFactor: 1,
+                        child: OutlinedButton.icon(
+                          icon: Icon(Icons.sticky_note_2, color: Color.fromARGB(255, 0, 0, 0)),
+                          label: Text(
+                            'Flat Noticeboard',
+                            style: TextStyle(
+                              color: Color.fromARGB(255, 11, 132, 0),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(color: Color.fromARGB(255, 11, 132, 0), width: 2),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            backgroundColor: Colors.white,
+                          ),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => NoticeboardPage(
+                                  user: user,
+                                  flatRef: flatDoc,
+                                  userRef: userRef,
+                                  onLogout: widget.onLogout,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 16),
                       sidebarAddTaskButton(),
                       const SizedBox(height: 8),
                       FractionallySizedBox(
                         widthFactor: 1,
                         child: ElevatedButton.icon(
                           icon: Icon(Icons.people),
-                          label: Text('View Flatmates\' Tasks'),
+                          label: Text('Nudge Flatmates\' Tasks'),
                           onPressed: _showFlatmatesModal,
                         ),
                       ),
@@ -514,31 +502,44 @@ class _TaskPageState extends State<TaskPage> {
                           icon: Stack(
                             children: [
                               Icon(Icons.notifications),
-                              if (_unreadNotifications > 0)
-                                Positioned(
-                                  right: 0,
-                                  top: 0,
-                                  child: Container(
-                                    padding: EdgeInsets.all(2),
-                                    decoration: BoxDecoration(
-                                      color: Colors.red,
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    constraints: BoxConstraints(
-                                      minWidth: 16,
-                                      minHeight: 16,
-                                    ),
-                                    child: Text(
-                                      '$_unreadNotifications',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.bold,
+                              StreamBuilder<QuerySnapshot>(
+                                stream: FirebaseFirestore.instance
+                                    .collection('Nudges')
+                                    .where('userId', isEqualTo: username)
+                                    .where('read', isEqualTo: false)
+                                    .snapshots(),
+                                builder: (context, snapshot) {
+                                  int unread = 0;
+                                  if (snapshot.hasData) {
+                                    unread = snapshot.data!.docs.length;
+                                  }
+                                  if (unread == 0) return SizedBox.shrink();
+                                  return Positioned(
+                                    right: 0,
+                                    top: 0,
+                                    child: Container(
+                                      padding: EdgeInsets.all(2),
+                                      decoration: BoxDecoration(
+                                        color: Colors.red,
+                                        borderRadius: BorderRadius.circular(10),
                                       ),
-                                      textAlign: TextAlign.center,
+                                      constraints: BoxConstraints(
+                                        minWidth: 16,
+                                        minHeight: 16,
+                                      ),
+                                      child: Text(
+                                        '$unread',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
                                     ),
-                                  ),
-                                ),
+                                  );
+                                },
+                              ),
                             ],
                           ),
                           label: Text('Notifications'),
@@ -546,11 +547,9 @@ class _TaskPageState extends State<TaskPage> {
                             await Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) =>
-                                    NotificationsPage(username: username),
+                                builder: (_) => NotificationsPage(username: username),
                               ),
                             );
-                            _fetchUnreadNotifications(); // Refresh count after returning
                           },
                         ),
                       ),
@@ -571,25 +570,6 @@ class _TaskPageState extends State<TaskPage> {
                           label: Text('Refresh'),
                           onPressed: _loadTasks,
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      const SizedBox(height: 8),
-                      ElevatedButton.icon(
-                        icon: Icon(Icons.sticky_note_2),
-                        label: Text('Noticeboard'),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => NoticeboardPage(
-                                user: user,
-                                flatRef: flatDoc,
-                                userRef: userRef,
-                                onLogout: widget.onLogout,
-                              ),
-                            ),
-                          );
-                        },
                       ),
                       const SizedBox(height: 8),
                       Divider(),

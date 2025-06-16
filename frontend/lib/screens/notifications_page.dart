@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -11,11 +13,23 @@ class NotificationsPage extends StatefulWidget {
 
 class _NotificationsPageState extends State<NotificationsPage> {
   late Future<List<QueryDocumentSnapshot>> _nudgesFuture;
+  Timer? _refreshTimer;
 
   @override
   void initState() {
     super.initState();
     _nudgesFuture = _fetchNudges();
+    _refreshTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+    setState(() {
+      _nudgesFuture = _fetchNudges();
+    });
+  });
+  }
+
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    super.dispose();
   }
 
   Future<List<QueryDocumentSnapshot>> _fetchNudges() async {
@@ -69,26 +83,46 @@ class _NotificationsPageState extends State<NotificationsPage> {
               final nudge = nudges[index];
               final data = nudge.data() as Map<String, dynamic>;
               final date = (data['timestamp'] as Timestamp).toDate();
-              final taskId = data['taskId'] as String;
-              return FutureBuilder<String>(
-                future: _getTaskDescription(taskId),
-                builder: (context, taskSnap) {
-                  final description = taskSnap.data ?? 'a task';
-                  return ListTile(
-                    leading: const Icon(
-                      Icons.notifications_active,
-                      color: Colors.teal,
-                    ),
-                    title: Text('You were nudged for: $description'),
-                    subtitle: Text('${date.toLocal()}'),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.close, color: Colors.red),
-                      tooltip: 'Delete',
-                      onPressed: () => _deleteNudge(nudge.id),
-                    ),
-                  );
-                },
-              );
+              final type = data['type'] ?? 'nudge';
+
+              if (type == 'freq_change') {
+                // Frequency change notification
+                return ListTile(
+                  leading: const Icon(
+                    Icons.sticky_note_2, // Notice/announcement icon
+                    color: Colors.orange,
+                  ),
+                  title: Text(data['message'] ?? 'Frequency of a task was changed.'),
+                  subtitle: Text('${date.toLocal()}'),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.close, color: Colors.red),
+                    tooltip: 'Delete',
+                    onPressed: () => _deleteNudge(nudge.id),
+                  ),
+                );
+              } else {
+                // Regular nudge notification
+                final taskId = data['taskId'] as String;
+                return FutureBuilder<String>(
+                  future: _getTaskDescription(taskId),
+                  builder: (context, taskSnap) {
+                    final description = taskSnap.data ?? 'a task';
+                    return ListTile(
+                      leading: const Icon(
+                        Icons.notifications_active,
+                        color: Colors.teal,
+                      ),
+                      title: Text('You were nudged for: $description'),
+                      subtitle: Text('${date.toLocal()}'),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.close, color: Colors.red),
+                        tooltip: 'Delete',
+                        onPressed: () => _deleteNudge(nudge.id),
+                      ),
+                    );
+                  },
+                );
+              }
             },
           );
         },

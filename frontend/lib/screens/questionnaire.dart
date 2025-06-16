@@ -455,7 +455,10 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
     if (flatmateDocs.length < 2) {
       throw Exception('Not enough flatmates to assign tasks.');
     }
-    final flatmateRefs = flatmateDocs.map((doc) => doc.reference).toList();
+    final flatmateRefs = flatmateDocs
+        .where((doc) => doc.data().containsKey('role') ? doc['role'] != 'guest' : true)
+        .map((doc) => doc.reference)
+        .toList();
 
     // fetch existing flat's chore preferences
     final flatSnapshot = await flatRef.get();

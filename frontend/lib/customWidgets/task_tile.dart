@@ -300,6 +300,8 @@ class _TaskTileState extends State<TaskTile> {
   }
 
   Widget buildRepeatTile(BuildContext context) {
+    final dueDate = getDueDate(task);
+    final isOverdue = dueDate != null && dueDate.isBefore(DateTime.now());
     return FutureBuilder(
       future: getNameFromDocRef(task.assignedTo),
       builder: (context, snapshot) {
@@ -332,6 +334,17 @@ class _TaskTileState extends State<TaskTile> {
                 SizedBox(height: 10),
 
                 Text("Frequency: ${formatDisplayFrequency(task.frequency)}"),
+                Padding(
+                  padding: const EdgeInsets.only(top: 4.0),
+                  child: Text(
+                    "Due: ${DateFormat('yyyy-MM-dd').format(dueDate!)}",
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: isOverdue ? Colors.red : Colors.grey[700],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
                 if (task.lastDoneOn != null && task.lastDoneBy != null)
                   FutureBuilder<String>(
                     future: getNameFromDocRef(task.lastDoneBy),
@@ -363,6 +376,8 @@ class _TaskTileState extends State<TaskTile> {
   }
 
   void _showDetailsPopup(BuildContext context) {
+    final dueDate = getDueDate(task);
+    final isOverdue = dueDate != null && dueDate.isBefore(DateTime.now());
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -395,6 +410,18 @@ class _TaskTileState extends State<TaskTile> {
                   Text("High priority!!", style: TextStyle(color: Colors.red)),
               ] else ...[
                 Text("Frequency: ${formatDisplayFrequency(task.frequency)}"),
+                if (dueDate != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4.0),
+                  child: Text(
+                    "Due: ${DateFormat('yyyy-MM-dd').format(dueDate)}",
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: isOverdue ? Colors.red : Colors.grey[700],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
                 if (task.lastDoneOn != null && task.lastDoneBy != null)
                   FutureBuilder<String>(
                     future: getNameFromDocRef(task.lastDoneBy),
@@ -524,8 +551,10 @@ class _TaskTileState extends State<TaskTile> {
   }
 
   @override
-
 Widget build(BuildContext context) {
+  final dueDate = getDueDate(task);
+  final isOverdue = dueDate != null && dueDate.isBefore(DateTime.now());
+
   return AnimatedSize(
     duration: Duration(milliseconds: 300),
     curve: Curves.easeInOut,
@@ -538,14 +567,31 @@ Widget build(BuildContext context) {
               children: [
                 ListTile(
                   leading: Icon(getChoreIcon(task.description)),
-                  title: Text(
-                    task.description,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      decoration: task.isOneOff && task.done!
-                          ? TextDecoration.lineThrough
-                          : null,
-                    ),
+                  title: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        task.description,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          decoration: task.isOneOff && task.done!
+                              ? TextDecoration.lineThrough
+                              : null,
+                        ),
+                      ),
+                      if (dueDate != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2.0),
+                          child: Text(
+                            "Due: ${DateFormat('yyyy-MM-dd').format(dueDate)}",
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: isOverdue ? Colors.red : Colors.grey[700],
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -582,15 +628,15 @@ Widget build(BuildContext context) {
                 if (_showSuccess)
                   Positioned.fill(
                     child: Container(
-                      color: Colors.white.withAlpha(204), // Optional overlay color
+                      color: Colors.white.withAlpha(204),
                       alignment: Alignment.center,
-                      child: ClipRect( // Clips the animation to its bounding box
+                      child: ClipRect(
                         child: Align(
-                          alignment: Alignment.center, // Centers the animation
+                          alignment: Alignment.center,
                           child: Lottie.asset(
                             'assets/animations/success2.json',
                             repeat: false,
-                            fit: BoxFit.contain, // Ensures the animation fits within its bounds
+                            fit: BoxFit.contain,
                           ),
                         ),
                       ),
@@ -641,4 +687,12 @@ Future<List<DocumentReference>> fetchAllUserRefs(DocumentReference flat) async {
     allUsers = querySnap.docs.map((doc) => doc.reference).toList();
   }
   return allUsers;
+}
+
+DateTime? getDueDate(Task task) {
+  if (task.isOneOff) return null;
+  DateTime lastDone = task.lastDoneOn != null
+      ? DateFormat('yyyy-MM-dd').parse(task.lastDoneOn!)
+      : DateFormat('yyyy-MM-dd').parse(task.setDate);
+  return lastDone.add(Duration(days: task.frequency));
 }

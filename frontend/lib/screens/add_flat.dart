@@ -49,6 +49,11 @@ class _AddFlatPageState extends State<AddFlatPage> {
     return !snapshot.exists;
   }
 
+  bool isUsernameCharsValid(String username) {
+    final usernameRegExp = RegExp(r'^[a-zA-Z0-9_.]+$');
+    return usernameRegExp.hasMatch(username);
+  }
+
   Future<void> _submitFlat() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -78,6 +83,13 @@ class _AddFlatPageState extends State<AddFlatPage> {
     }
 
     for (var user in usernames) {
+      if (!isUsernameCharsValid(user)){
+        setState(() {
+          error = 'Username "$user" contains invalid characters.';
+          isSubmitting = false;
+        });
+        return;
+      }
       if (!await _isUsernameUnique(user)) {
         setState(() {
           error = 'Username "$user" already exists in Firebase.';

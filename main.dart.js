@@ -97938,7 +97938,7 @@ case 2:s=p.d
 s.toString
 q=new A.GE(s,p.ga0f(),o)
 break
-default:q=o}return new A.DD(q,"Task Manager",A.yr(o,o,new A.w3(A.ra(o,o,o,o,o,o,o,o,o,B.eH,o,o,o,o,o,o,o,o,o,o)),B.he,new A.yg(A.aqy(o,o,o,o,o,o,o,o,o,B.cJ,o,o,o,o,o,o,o,o,o,o)),B.Yb,o),o)}}
+default:q=o}return new A.DD(q,"Homely",A.yr(o,o,new A.w3(A.ra(o,o,o,o,o,o,o,o,o,B.eH,o,o,o,o,o,o,o,o,o,o)),B.he,new A.yg(A.aqy(o,o,o,o,o,o,o,o,o,B.cJ,o,o,o,o,o,o,o,o,o,o)),B.Yb,o),o)}}
 A.az6.prototype={
 $0(){var s=this,r=s.a,q=s.b
 r.d=q

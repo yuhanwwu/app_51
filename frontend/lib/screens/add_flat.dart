@@ -50,17 +50,20 @@ class _AddFlatPageState extends State<AddFlatPage> {
   }
 
   Future<String> _getUniqueFlatName(String baseName) async {
-  String candidate = baseName;
-  int counter = 1;
-  final flats = await FirebaseFirestore.instance.collection('Flat').get();
-  final existingNames = flats.docs.map((doc) => doc['name'] as String).toSet();
-
-  while (existingNames.contains(candidate)) {
-    candidate = '$baseName$counter';
-    counter++;
+    String candidate = baseName;
+    int counter = 1;
+    while (true) {
+      final query = await FirebaseFirestore.instance
+          .collection('Flat')
+          .where('name', isEqualTo: candidate)
+          .get();
+      if (query.docs.isEmpty) {
+        return candidate;
+      }
+      candidate = '$baseName$counter';
+      counter++;
+    }
   }
-  return candidate;
-}
 
 
   bool isUsernameCharsValid(String username) {
@@ -76,7 +79,7 @@ class _AddFlatPageState extends State<AddFlatPage> {
       error = '';
     });
 
-    final flatName = _getUniqueFlatName(sanitizeFlatName(_flatNameController.text.trim()));
+    final flatName = await _getUniqueFlatName(sanitizeFlatName(_flatNameController.text.trim()));
     final flatmates = flatmatesControllers.map((controllers) {
       return {
         'username': controllers['username']!.text.trim(),

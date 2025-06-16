@@ -266,6 +266,18 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     SizedBox(height: 20),
+                    Padding(
+                      padding: EdgeInsets.only(top: 12.0),
+                      child: Text(
+                        'If you are a guest, get your guest login from a member of the flat.',
+                        style: TextStyle(
+                          color: Colors.teal,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
                   ],
                 ),
               ),

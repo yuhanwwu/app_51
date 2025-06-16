@@ -19,6 +19,7 @@ import '../constants/colors.dart';
 import '../main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
+import 'package:share_plus/share_plus.dart';
 
 class TaskPage extends StatefulWidget {
   final FlatUser user;
@@ -451,6 +452,51 @@ class _TaskPageState extends State<TaskPage> {
     );
   }
 
+// ...existing code...
+
+void _showGuestLoginDialog() {
+  final guestUsername = '${flat.name}_guest';
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Guest Username:'),
+      content: Row(
+        children: [
+          Expanded(
+            child: SelectableText(
+              guestUsername,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.copy),
+            tooltip: 'Copy to clipboard',
+            onPressed: () async {
+              await Clipboard.setData(ClipboardData(text: guestUsername));
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Guest username copied!')),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.share),
+            tooltip: 'Share',
+            onPressed: () {
+              Share.share('Check out our Homely at https://yuhanwwu.github.io/app_51 using the guest username:\n\n$guestUsername');
+            },
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Close'),
+        ),
+      ],
+    ),
+  );
+}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -621,6 +667,15 @@ class _TaskPageState extends State<TaskPage> {
                           icon: Icon(Icons.refresh),
                           label: Text('Refresh'),
                           onPressed: _loadTasks,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      FractionallySizedBox(
+                        widthFactor: 1,
+                        child: ElevatedButton.icon(
+                          icon: Icon(Icons.person_search),
+                          label: Text('Get Guest Login Details'),
+                          onPressed: _showGuestLoginDialog,
                         ),
                       ),
                       const SizedBox(height: 8),

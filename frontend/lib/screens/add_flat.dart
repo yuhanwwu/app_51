@@ -49,6 +49,20 @@ class _AddFlatPageState extends State<AddFlatPage> {
     return !snapshot.exists;
   }
 
+  Future<String> _getUniqueFlatName(String baseName) async {
+  String candidate = baseName;
+  int counter = 1;
+  final flats = await FirebaseFirestore.instance.collection('Flat').get();
+  final existingNames = flats.docs.map((doc) => doc['name'] as String).toSet();
+
+  while (existingNames.contains(candidate)) {
+    candidate = '$baseName$counter';
+    counter++;
+  }
+  return candidate;
+}
+
+
   bool isUsernameCharsValid(String username) {
     final usernameRegExp = RegExp(r'^[a-zA-Z0-9_.]+$');
     return usernameRegExp.hasMatch(username);
@@ -62,7 +76,7 @@ class _AddFlatPageState extends State<AddFlatPage> {
       error = '';
     });
 
-    final flatName = _flatNameController.text.trim();
+    final flatName = _getUniqueFlatName(sanitizeFlatName(_flatNameController.text.trim()));
     final flatmates = flatmatesControllers.map((controllers) {
       return {
         'username': controllers['username']!.text.trim(),
@@ -150,12 +164,6 @@ class _AddFlatPageState extends State<AddFlatPage> {
     });
     html.window.location.reload();
     widget.onLogin(user);
-    // Navigator.pushReplacement(
-    //   context,
-    //   MaterialPageRoute(
-    //     builder: (context) => LoginPage(onLogin: widget.onLogin),
-    //   ),
-    // );
   }
 
   @override
@@ -256,6 +264,11 @@ class _AddFlatPageState extends State<AddFlatPage> {
         ),
       ),
     );
+  }
+
+  String sanitizeFlatName(String input) {
+    // Keep only letters, numbers, underscores, and hyphens
+    return input.replaceAll(RegExp(r'[^a-zA-Z0-9_-]'), '');
   }
 
   @override

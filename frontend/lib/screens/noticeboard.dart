@@ -514,6 +514,15 @@ class _AddNoteSheetState extends State<_AddNoteSheet> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (_isAddingGif)
+            const Padding(
+              padding: EdgeInsets.only(bottom: 8.0),
+              child: Text(
+                "Users are responsible for respecting rights of any media they upload",
+                style: TextStyle(fontSize: 13, color: Colors.grey),
+                textAlign: TextAlign.center,
+              ),
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

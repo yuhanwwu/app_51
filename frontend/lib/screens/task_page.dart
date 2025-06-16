@@ -452,9 +452,49 @@ class _TaskPageState extends State<TaskPage> {
     );
   }
 
-// ...existing code...
+void _showCreditsPopup(BuildContext context) {
+  final overlay = Overlay.of(context);
+  final overlayEntry = OverlayEntry(
+    builder: (context) => Positioned(
+      bottom: 24,
+      right: 24,
+      child: Material(
+        color: Colors.transparent,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.95),
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 8,
+                offset: Offset(2, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: const [
+              Text(
+                "Credits",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              SizedBox(height: 4),
+              Text("• Sound effect: zapsplat.com", style: TextStyle(fontSize: 13)),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
 
-void _showGuestLoginDialog() {
+  overlay.insert(overlayEntry);
+  Future.delayed(const Duration(seconds: 4), () => overlayEntry.remove());
+}
+
+  void _showGuestLoginDialog() {
   final guestUsername = '${flat.name}_guest';
   showDialog(
     context: context,
@@ -502,6 +542,13 @@ void _showGuestLoginDialog() {
     return Scaffold(
       appBar: AppBar(
         title: Text('Welcome, $name'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.info_outline),
+            tooltip: 'Credits',
+            onPressed: () => _showCreditsPopup(context),
+          ),
+        ],
       ),
 
       body: Row(

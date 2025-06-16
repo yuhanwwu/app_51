@@ -1,18 +1,10 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:frontend/screens/edit_task.dart';
-import 'package:http/http.dart';
 import '../../models/task.dart';
 import '../../models/user.dart';
-import '../../models/flat.dart';
-import '../screens/task_page.dart';
-import 'package:flutter/material.dart';
 // import 'models/task.dart'; // your Task class
-import 'package:intl/intl.dart';
-import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 

@@ -5,11 +5,8 @@ import 'package:frontend/customWidgets/task_tile.dart';
 import 'package:frontend/main.dart';
 import 'package:frontend/models/task.dart';
 import 'package:frontend/models/user.dart';
-import 'package:frontend/screens/task_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../customWidgets/routine_board.dart';
 import '../models/sticky_note.dart';
-import 'task_page.dart';
 import 'package:intl/intl.dart';
 
 class NoticeboardPage extends StatefulWidget {

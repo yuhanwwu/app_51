@@ -1,10 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:frontend/screens/flat_tasks.dart';
-import 'package:frontend/screens/login.dart';
 import 'package:intl/intl.dart';
-import 'package:frontend/screens/notifications_page.dart';
 import '../models/task.dart';
 import '../models/user.dart';
 import '../models/flat.dart';

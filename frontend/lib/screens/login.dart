@@ -169,7 +169,7 @@ class _LoginPageState extends State<LoginPage> {
                       textAlign: TextAlign.center,
                     ),
                     SizedBox(height: 40),
-                    Container(
+                    SizedBox(
                       width: 0.5,
                       child: FractionallySizedBox(
                         widthFactor: 1,

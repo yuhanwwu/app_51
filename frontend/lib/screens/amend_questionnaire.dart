@@ -12,7 +12,7 @@ class AmendQuestionnaireScreen extends StatefulWidget {
 
 class _AmendQuestionnaireScreenState extends State<AmendQuestionnaireScreen> {
   late Map<String, TextEditingController> controllers;
-  int _helpButtonPressCount = 0;
+  final int _helpButtonPressCount = 0;
 
   String getChoreDescription(String key) {
     switch (key.trim()) {

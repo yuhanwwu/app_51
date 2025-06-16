@@ -24,8 +24,7 @@ import 'dart:async';
 class TaskPage extends StatefulWidget {
   final FlatUser user;
   final VoidCallback onLogout;
-  const TaskPage({Key? key, required this.user, required this.onLogout})
-    : super(key: key);
+  const TaskPage({super.key, required this.user, required this.onLogout});
 
   @override
   State<TaskPage> createState() => _TaskPageState();
@@ -43,7 +42,7 @@ class _TaskPageState extends State<TaskPage> {
   late Future<List<Task>> _allFlatTasks;
   late Future<List<Task>> _userTasks; // All tasks assigned to the user
   late Future<List<Task>> _unclaimedTasks;
-  int _helpButtonPressCount = 0; // Add this field to your _TaskPageState
+  final int _helpButtonPressCount = 0; // Add this field to your _TaskPageState
   int _unreadNotifications = 0;
   final GlobalKey sidebarKey = GlobalKey();
   final GlobalKey moreMenuKey = GlobalKey();

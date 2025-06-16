@@ -39,12 +39,53 @@ Future<void> adjustTaskFrequencyIfNeeded(DocumentReference flatRef, String taskT
 
 
     if (currentFreq > 1) {
-      await flatRef.update({taskType: currentFreq - 1});
+      final newFreq = currentFreq - 1;
+      await flatRef.update({taskType: newFreq});
+
+      for (var doc in nudgesQuery.docs) {
+        await doc.reference.update({'counted': true});
+      }
+
+      final usersQuery = await FirebaseFirestore.instance
+          .collection('Users')
+          .where('flat', isEqualTo: flatRef)
+          .get();
+
+      for (var userDoc in usersQuery.docs) {
+        await FirebaseFirestore.instance.collection('Nudges').add({
+          'userId': userDoc.id, 
+          'flatRef': flatRef,
+          'taskType': taskType,
+          'oldFreq': currentFreq,
+          'newFreq': newFreq,
+          'timestamp': Timestamp.now(),
+          'message':
+              'The frequency of "${getChoreDescription(taskType)}" was changed from $currentFreq to $newFreq due to nudging.',
+          'read': false,
+          'type': 'freq_change'
+        });
+      }
     }
 
-    for (var doc in nudgesQuery.docs) {
-      await doc.reference.update({'counted': true});
     }
+  }
+
+  String getChoreDescription(String key) {
+    switch (key.trim()) {
+      case 'bathroom':
+        return 'Cleaning the bathroom';
+      case 'dishes':
+        return 'Doing the dishes';
+      case 'kitchen':
+        return 'Cleaning the kitchen';
+      case 'laundry':
+        return 'Doing laundry';
+      case 'recycling':
+        return 'Taking out recycling';
+      case 'rubbish':
+        return 'Taking out the rubbish';
+      default:
+        return key; // Fallback for any other chore
     }
   }
 
@@ -98,6 +139,7 @@ Future<void> adjustTaskFrequencyIfNeeded(DocumentReference flatRef, String taskT
                                 'timestamp': Timestamp.now(),
                                 'read': false,
                                 'counted': false, 
+                                'type': 'nudge', 
                               });
 
                           await adjustTaskFrequencyIfNeeded(user.flat, getTaskTypeFromDesc(e.description));

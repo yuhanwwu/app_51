@@ -109,7 +109,7 @@ class _AddFlatPageState extends State<AddFlatPage> {
       }
       if (!await _isUsernameUnique(user)) {
         setState(() {
-          error = 'Username "$user" already exists in Firebase.';
+          error = 'Username "$user" already exists.';
           isSubmitting = false;
         });
         return;

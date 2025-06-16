@@ -108,25 +108,14 @@ class _LoginPageState extends State<LoginPage> {
           error = 'Failed to load user.';
         });
         return null;
-      }
-    }
-
-    try {
-      final userCredential = await FirebaseAuth.instance.signInAnonymously();
-      final uid = userCredential.user!.uid;
-
-      await docRef.set({'uid': uid, 'createdAt': FieldValue.serverTimestamp()});
-
-      final newUserSnap = await docRef.get();
-      setState(() => _isLoading = false);
-      return FlatUser.fromFirestore(newUserSnap);
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-        error = 'Could not create user.';
-      });
-      return null;
-    }
+      } 
+    } else {
+    setState(() {
+      _isLoading = false;
+      error = 'Username not found.';
+    });
+    return null;
+  }
   }
 
   @override

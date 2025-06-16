@@ -1,3 +1,5 @@
+// import 'dart:nativewrappers/_internal/vm/lib/ffi_patch.dart';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -178,19 +180,19 @@ class _NoticeboardPageState extends State<NoticeboardPage> {
                     color: Colors.transparent,
                     child: SizedBox(
                       width: 600,
-                      child: RoutineBoardWidget(flatRef: widget.flatRef),
+                      child: RoutineBoardWidget(flatRef: widget.flatRef, userRef: widget.userRef,),
                     ),
                   ),
                   childWhenDragging: Opacity(
                     opacity: 0.5,
                     child: SizedBox(
                       width: 600,
-                      child: RoutineBoardWidget(flatRef: widget.flatRef),
+                      child: RoutineBoardWidget(flatRef: widget.flatRef, userRef: widget.userRef,),
                     ),
                   ),
                   child: SizedBox(
                     width: 600,
-                    child: RoutineBoardWidget(flatRef: widget.flatRef),
+                    child: RoutineBoardWidget(flatRef: widget.flatRef, userRef: widget.userRef,),
                   ),
                   onDragEnd: (details) {
                     _updateRoutineBoardPosition(details.offset);
@@ -704,7 +706,8 @@ class _AddNoteSheetState extends State<_AddNoteSheet> {
 
 class RoutineBoardWidget extends StatelessWidget {
   final DocumentReference flatRef;
-  const RoutineBoardWidget({super.key, required this.flatRef});
+  final DocumentReference userRef;
+  const RoutineBoardWidget({super.key, required this.flatRef, required this.userRef});
 
   Future<Map<String, List<Task>>> _fetchRoutineTasks() async {
     final now = DateTime.now();
@@ -816,7 +819,14 @@ class RoutineBoardWidget extends StatelessWidget {
                                 padding: const EdgeInsets.symmetric(vertical: 2.0),
                                 child: Text(
                                   t.description,
-                                  style: TextStyle(fontSize: 12),
+                                  style: TextStyle(fontSize: 12,
+                                  fontWeight: t.assignedTo?.id == userRef.id
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                  color: t.assignedTo?.id == userRef.id 
+                                        ? Colors.teal[800]
+                                        : const Color.fromARGB(255, 152, 152, 152),
+                                  ),
                                   textAlign: TextAlign.center,
                                 ),
                               )),

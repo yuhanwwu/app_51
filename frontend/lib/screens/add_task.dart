@@ -148,16 +148,35 @@ class _TaskInputScreenState extends State<TaskInputScreen> {
                     return null;
                   },
                 ),
+                const SizedBox(height: 16),
               if (!_isOneOff)
-                SwitchListTile(
-                  title: const Text('Personal Task'),
-                  subtitle: const Text('If off, this is a flat/shared task'),
-                  value: _isPersonal,
-                  onChanged: (val) {
-                    setState(() {
-                      _isPersonal = val;
-                    });
-                  },
+                Container(
+                  child: Row(
+                    mainAxisAlignment:
+                        MainAxisAlignment.center, // horizontal centering
+                    crossAxisAlignment:
+                        CrossAxisAlignment.center, // vertical centering
+                    children: [
+                      Expanded(flex: 1, child: Text("Flat Task", textAlign: TextAlign.right)),
+                      Expanded(
+                        flex: 1,
+                        child: Center(
+                          child: Transform.scale(
+                            scale: 1,
+                            child: Switch(
+                              value: _isPersonal,
+                              onChanged: (val) {
+                                setState(() {
+                                  _isPersonal = val;
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(flex: 1, child: Text("Personal Task", textAlign: TextAlign.left),),
+                    ],
+                  ),
                 ),
 
               const SizedBox(height: 24),

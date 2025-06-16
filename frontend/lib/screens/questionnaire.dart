@@ -91,7 +91,7 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
   @override
   void initState() {
     super.initState();
-    _showTutorialIfFirstTime();
+    // _showTutorialIfFirstTime();
   }
 
   Future<void> _showTutorialIfFirstTime() async {
@@ -176,13 +176,6 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
         title: const Text('Set Up Your Routine'),
         backgroundColor: Colors.teal[400],
         elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.help_outline),
-            tooltip: 'Show Tutorial',
-            onPressed: _showTutorialDialog,
-          ),
-        ],
       ),
       body: Container(
         color: Colors.teal[50],
@@ -196,6 +189,16 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: Colors.teal,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                "Choose the option that best matches your personal cleaning style. "
+                "The average of everyone's responses determines a fair routine for everyone.",
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black87,
                 ),
                 textAlign: TextAlign.center,
               ),

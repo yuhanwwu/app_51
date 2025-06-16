@@ -104,7 +104,68 @@ Future<void> adjustTaskFrequencyIfNeeded(DocumentReference flatRef, String taskT
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("${user.name}'s Tasks")),
+      appBar: AppBar(title: Text("${user.name}'s Tasks"),
+            actions: [
+              IconButton(
+                icon: Icon(Icons.help_outline),
+                tooltip: 'Help',
+                onPressed: () {
+                  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text(
+        'Nudging and Dynamic Task Frequency',
+        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        textAlign: TextAlign.center,
+      ),
+      content: SizedBox(
+        width: 800,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Text(
+                "• Here you can see your flatmate's tasks, and nudge them to complete them by tapping the bell icon.",
+                style: TextStyle(fontSize: 18),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Text(
+                "• If enough nudges are sent for a chore, its frequency will automatically increase for the flat.",
+                style: TextStyle(fontSize: 18),
+              ),
+            ),
+            // Padding(
+            //   padding: const EdgeInsets.symmetric(vertical: 8.0),
+            //   child: Text(
+            //     "• You can only nudge repeat tasks, not one-off tasks.",
+            //     style: TextStyle(fontSize: 18),
+            //   ),
+            // ),
+            const SizedBox(height: 16),
+            Text(
+              "Tap the help icon anytime for this guide.",
+              style: TextStyle(fontSize: 16, color: Colors.teal),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Got it!', style: TextStyle(fontSize: 18)),
+        ),
+      ],
+    ),
+  );
+                },
+              ),
+            ],
+          ),
+      
       body: FutureBuilder<List<Task>>(
         future: fetchUserTasks(allFlatTasks),
         builder: (context, snapshot) {

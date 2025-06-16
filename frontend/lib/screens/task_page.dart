@@ -251,29 +251,81 @@ class _TaskPageState extends State<TaskPage> {
       ),
       builder: (context) => FractionallySizedBox(
         heightFactor: 0.8,
-        child: FutureBuilder<List<Task>>(
-          future: _unclaimedTasks,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              return Center(child: Text("Error: ${snapshot.error}"));
-            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return Center(child: Text("No unclaimed tasks left!"));
-            } else {
-              final unclaimedTasks = snapshot.data!;
-              return ListView(
-                children: unclaimedTasks.map((task) {
-                  return TaskTile(
-                    task: task,
-                    user: user,
-                    userRef: userRef,
-                    onDone: _loadTasks,
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text('Unclaimed Tasks'),
+            actions: [
+              IconButton(
+                icon: Icon(Icons.help_outline),
+                tooltip: 'Help',
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text(
+                        'Unclaimed Tasks',
+                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center,
+                      ),
+                      content: SizedBox(
+                        width: 500,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: const [
+                            Padding(
+                              padding: EdgeInsets.symmetric(vertical: 8.0),
+                              child: Text(
+                                "• These are one-off tasks that haven't been claimed by anyone yet.",
+                                style: TextStyle(fontSize: 18),
+                              ),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.symmetric(vertical: 8.0),
+                              child: Text(
+                                "• Tap 'Claim' to take responsibility for a task.",
+                                style: TextStyle(fontSize: 18),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: const Text('Got it!', style: TextStyle(fontSize: 18)),
+                        ),
+                      ],
+                    ),
                   );
-                }).toList(),
-              );
-            }
-          },
+                },
+              ),
+            ],
+          ),
+          body: FutureBuilder<List<Task>>(
+            future: _unclaimedTasks,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return Center(child: Text("Error: ${snapshot.error}"));
+              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return Center(child: Text("No unclaimed tasks left!"));
+              } else {
+                final unclaimedTasks = snapshot.data!;
+                return ListView(
+                  children: unclaimedTasks.map((task) {
+                    return TaskTile(
+                      task: task,
+                      user: user,
+                      userRef: userRef,
+                      onDone: _loadTasks,
+                    );
+                  }).toList(),
+                );
+              }
+            },
+          ),
         ),
       ),
     );
@@ -473,7 +525,7 @@ class _TaskPageState extends State<TaskPage> {
                         widthFactor: 1,
                         child: ElevatedButton.icon(
                           icon: Icon(Icons.people),
-                          label: Text('Nudge Flatmates\' Tasks'),
+                          label: Text('Nudge Flatmates'),
                           onPressed: _showFlatmatesModal,
                         ),
                       ),

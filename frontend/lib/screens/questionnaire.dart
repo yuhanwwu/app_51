@@ -454,7 +454,9 @@ class _QuestionnairePageState extends State<QuestionnairePage> {
         .collection('Users')
         .where('flat', isEqualTo: flatRef)
         .get();
-    final flatmateDocs = flatmatesQuery.docs;
+    final flatmateDocs = flatmatesQuery.docs
+    .where((doc) => doc.data().containsKey('role') ? doc['role'] != 'guest' : true)
+    .toList();
     if (flatmateDocs.length < 2) {
       throw Exception('Not enough flatmates to assign tasks.');
     }

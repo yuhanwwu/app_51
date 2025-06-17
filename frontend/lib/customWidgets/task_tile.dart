@@ -684,7 +684,11 @@ Future<List<DocumentReference>> fetchAllUserRefs(DocumentReference flat) async {
       .orderBy('name');
   final querySnap = await queryRef.get();
   if (querySnap.docs.isNotEmpty) {
-    allUsers = querySnap.docs.map((doc) => doc.reference).toList();
+    allUsers = querySnap.docs
+        .where((doc) =>
+            (doc.data().containsKey('role') ? doc['role'] != 'guest' : true)) // Exclude if role is guest
+        .map((doc) => doc.reference)
+        .toList();
   }
   return allUsers;
 }
